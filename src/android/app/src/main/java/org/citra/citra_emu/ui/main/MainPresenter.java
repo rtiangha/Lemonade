@@ -25,7 +25,7 @@ public final class MainPresenter {
     public void onCreate() {
         String versionName = BuildConfig.VERSION_NAME;
         mView.setVersionString(versionName);
-        refeshGameList();
+        refreshGameList();
     }
 
     public void launchFileListActivity(int request) {
@@ -74,7 +74,7 @@ public final class MainPresenter {
         mDirToAdd = dir;
     }
 
-    public void refeshGameList() {
+    public void refreshGameList() {
         GameDatabase databaseHelper = CitraApplication.databaseHelper;
         databaseHelper.scanLibrary(databaseHelper.getWritableDatabase());
         mView.refresh();

@@ -140,6 +140,26 @@ use_disk_shader_cache =
 # factor for the 3DS resolution
 resolution_factor =
 
+# Show On-Screen Display messages, FPS, VPS and Speed.
+# 0: Off (default), 1: On
+show_fps =
+
+# Enable limit usage for CPU, improve perfomance a little on some games
+# 0: Off (default), 1: On
+cpu_usage_limit =
+
+# Enable custom textures
+# 0: Off (default), 1: On
+custom_textures =
+
+# Preload custom textures, not recommended
+# 0: Off (default), 1: On
+preload_custom_textures =
+
+# Dump game textures
+# 0: Off (default), 1: On
+dump_textures =
+
 # Whether to enable V-Sync (caps the framerate at 60FPS) or not.
 # 0 (default): Off, 1: On
 vsync_enabled =

@@ -130,7 +130,7 @@ public final class MainActivity extends AppCompatActivity implements MainView {
 
     @Override
     public void setVersionString(String version) {
-        mToolbar.setSubtitle(version);
+        mToolbar.setSubtitle("Gamer64_ytb");
     }
 
     @Override
@@ -196,7 +196,7 @@ public final class MainActivity extends AppCompatActivity implements MainView {
                     // If the user picked a file, as opposed to just backing out.
                     if (resultCode == MainActivity.RESULT_OK) {
                         NativeLibrary.InstallCIAS(FileBrowserHelper.getSelectedFiles(result));
-                        mPresenter.refeshGameList();
+                        mPresenter.refreshGameList();
                     }
                     break;
         }

@@ -20,6 +20,7 @@ public class Settings {
     public static final String SECTION_CAMERA = "Camera";
     public static final String SECTION_CONTROLS = "Controls";
     public static final String SECTION_RENDERER = "Renderer";
+    public static final String SECTION_CUSTOM_TEXTURES = "CustomTextures";
     public static final String SECTION_LAYOUT = "Layout";
     public static final String SECTION_AUDIO = "Audio";
     public static final String SECTION_DEBUG = "Debug";

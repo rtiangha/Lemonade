@@ -563,6 +563,46 @@ void Java_org_citra_citra_1emu_NativeLibrary_SetUserSetting(JNIEnv* env,
     env->ReleaseStringUTFChars(j_value, value.data());
 }
 
+JNIEXPORT jintArray JNICALL Java_org_citra_citra_1emu_NativeLibrary_getRunningSettings(JNIEnv* env, jclass clazz) {
+    int i = 0;
+    int settings[5];
+
+    // get settings
+    settings[i++] = Settings::values.core_ticks_hack > 0;
+    settings[i++] = Settings::values.show_fps;
+    settings[i++] = Settings::values.filter_mode;
+    settings[i++] = Settings::values.enable_audio_stretching;
+    settings[i++] = Settings::values.frame_limit / 2;
+
+    jintArray array = env->NewIntArray(i);
+    env->SetIntArrayRegion(array, 0, i, settings);
+    return array;
+}
+
+JNIEXPORT void JNICALL Java_org_citra_citra_1emu_NativeLibrary_setRunningSettings(JNIEnv* env, jclass clazz,
+                                                                           jintArray array) {
+    int i = 0;
+    jint* settings = env->GetIntArrayElements(array, nullptr);
+
+    // FMV Hack
+    Settings::SetFMVHack(settings[i++] > 0);
+
+    // Show FPS
+    Settings::values.show_fps = settings[i++] > 0;
+
+    // Linear Filter
+    Settings::values.filter_mode = settings[i++] > 0;
+
+    // Audio Streching
+    Settings::values.enable_audio_stretching = settings[i++] > 0;
+
+    // Frame Limit
+    Settings::values.frame_limit = settings[i++] * 2;
+
+    env->ReleaseIntArrayElements(array, settings, 0);
+}
+
+
 void Java_org_citra_citra_1emu_NativeLibrary_InitGameIni(JNIEnv* env, [[maybe_unused]] jclass clazz,
                                                          jstring j_game_id) {
     std::string_view game_id = env->GetStringUTFChars(j_game_id, 0);

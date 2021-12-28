@@ -113,6 +113,9 @@ public final class SettingsFragmentPresenter {
             case Settings.SECTION_CORE:
                 addGeneralSettings(sl);
                 break;
+            case Settings.SECTION_CUSTOM_TEXTURES:
+                addCustomTexturesSettings(sl);
+                break;
             case Settings.SECTION_SYSTEM:
                 addSystemSettings(sl);
                 break;
@@ -177,10 +180,13 @@ public final class SettingsFragmentPresenter {
         mView.getActivity().setTitle(R.string.preferences_general);
 
         SettingSection rendererSection = mSettings.getSection(Settings.SECTION_RENDERER);
+        SettingSection coreSection = mSettings.getSection(Settings.SECTION_CORE);
         Setting frameLimitEnable = rendererSection.getSetting(SettingsFile.KEY_FRAME_LIMIT_ENABLED);
+        Setting cpuClockSpeed = coreSection.getSetting(SettingsFile.KEY_CPU_CLOCK_SPEED);
         Setting frameLimitValue = rendererSection.getSetting(SettingsFile.KEY_FRAME_LIMIT);
 
         sl.add(new CheckBoxSetting(SettingsFile.KEY_FRAME_LIMIT_ENABLED, Settings.SECTION_RENDERER, R.string.frame_limit_enable, R.string.frame_limit_enable_description, true, frameLimitEnable));
+        sl.add(new SliderSetting(SettingsFile.KEY_CPU_CLOCK_SPEED, Settings.SECTION_CORE, R.string.cpu_clock_speed, 0, 0, 400, "%", 100, cpuClockSpeed));
         sl.add(new SliderSetting(SettingsFile.KEY_FRAME_LIMIT, Settings.SECTION_RENDERER, R.string.frame_limit_slider, R.string.frame_limit_slider_description, 1, 200, "%", 100, frameLimitValue));
     }
 
@@ -352,6 +358,8 @@ public final class SettingsFragmentPresenter {
 
         SettingSection rendererSection = mSettings.getSection(Settings.SECTION_RENDERER);
         Setting resolutionFactor = rendererSection.getSetting(SettingsFile.KEY_RESOLUTION_FACTOR);
+        Setting showFps = rendererSection.getSetting(SettingsFile.KEY_SHOW_FPS);
+        Setting cpuUsageLimit = rendererSection.getSetting(SettingsFile.KEY_CPU_USAGE_LIMIT);
         Setting filterMode = rendererSection.getSetting(SettingsFile.KEY_FILTER_MODE);
         Setting useAsynchronousGpuEmulation = rendererSection.getSetting(SettingsFile.KEY_USE_ASYNCHRONOUS_GPU_EMULATION);
         Setting shadersAccurateMul = rendererSection.getSetting(SettingsFile.KEY_SHADERS_ACCURATE_MUL);
@@ -366,6 +374,9 @@ public final class SettingsFragmentPresenter {
 
         sl.add(new HeaderSetting(null, null, R.string.renderer, 0));
         sl.add(new SliderSetting(SettingsFile.KEY_RESOLUTION_FACTOR, Settings.SECTION_RENDERER, R.string.internal_resolution, R.string.internal_resolution_description, 1, 4, "x", 1, resolutionFactor));
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_SHOW_FPS, Settings.SECTION_RENDERER, R.string.emulation_show_fps, 0, false, showFps));
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_CPU_USAGE_LIMIT, Settings.SECTION_RENDERER, R.string.cpu_usage_limit, R.string.cpu_usage_limit_description, false, cpuUsageLimit));
+        sl.add(new SubmenuSetting(null, null, R.string.setting_custom_textures_title, 0, Settings.SECTION_CUSTOM_TEXTURES));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_FILTER_MODE, Settings.SECTION_RENDERER, R.string.linear_filtering, R.string.linear_filtering_description, true, filterMode));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_USE_ASYNCHRONOUS_GPU_EMULATION, Settings.SECTION_RENDERER, R.string.asynchronous_gpu, R.string.asynchronous_gpu_description, true, useAsynchronousGpuEmulation));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_SHADERS_ACCURATE_MUL, Settings.SECTION_RENDERER, R.string.shaders_accurate_mul, R.string.shaders_accurate_mul_description, false, shadersAccurateMul));
@@ -379,6 +390,19 @@ public final class SettingsFragmentPresenter {
         sl.add(new SliderSetting(SettingsFile.KEY_CARDBOARD_SCREEN_SIZE, Settings.SECTION_LAYOUT, R.string.cardboard_screen_size, R.string.cardboard_screen_size_description, 30, 100, "%", 85, cardboardScreenSize));
         sl.add(new SliderSetting(SettingsFile.KEY_CARDBOARD_X_SHIFT, Settings.SECTION_LAYOUT, R.string.cardboard_x_shift, R.string.cardboard_x_shift_description, -100, 100, "%", 0, cardboardXShift));
         sl.add(new SliderSetting(SettingsFile.KEY_CARDBOARD_Y_SHIFT, Settings.SECTION_LAYOUT, R.string.cardboard_y_shift, R.string.cardboard_y_shift_description, -100, 100, "%", 0, cardboardYShift));
+    }
+
+    private void addCustomTexturesSettings(ArrayList<SettingsItem> sl) {
+        mView.getActivity().setTitle(R.string.setting_custom_textures_title);
+
+        SettingSection rendererSection = mSettings.getSection(Settings.SECTION_RENDERER);
+        Setting customTextures = rendererSection.getSetting(SettingsFile.KEY_CUSTOM_TEXTURES);
+        Setting preloadTextures = rendererSection.getSetting(SettingsFile.KEY_PRELOAD_TEXTURES);
+        Setting dumpTextures = rendererSection.getSetting(SettingsFile.KEY_DUMP_TEXTURES);
+
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_CUSTOM_TEXTURES, Settings.SECTION_RENDERER, R.string.setting_custom_textures, 0, false, customTextures));
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_PRELOAD_TEXTURES, Settings.SECTION_RENDERER, R.string.setting_preload_textures, R.string.setting_preload_textures_description, false, preloadTextures));
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_DUMP_TEXTURES, Settings.SECTION_RENDERER, R.string.setting_dump_textures, 0, false, dumpTextures));
     }
 
     private void addAudioSettings(ArrayList<SettingsItem> sl) {

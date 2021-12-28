@@ -5,6 +5,7 @@
 #include <cstring>
 #include <dynarmic/A32/a32.h>
 #include <dynarmic/A32/context.h>
+#include <core/settings.h>
 #include "common/assert.h"
 #include "common/microprofile.h"
 #include "core/arm/dynarmic/arm_dynarmic.h"
@@ -137,6 +138,7 @@ public:
     }
 
     void AddTicks(std::uint64_t ticks) override {
+        ticks = std::max(ticks, static_cast<std::uint64_t>(Settings::values.core_ticks_hack));
         parent.GetTimer().AddTicks(ticks);
     }
     std::uint64_t GetTicksRemaining() override {

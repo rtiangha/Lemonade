@@ -265,6 +265,8 @@ private:
 
     bool is_amd;
 
+    bool is_mali_gpu;
+
     OpenGLState state;
     GLuint default_texture;
 

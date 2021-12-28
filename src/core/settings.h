@@ -193,6 +193,7 @@ struct Values {
     bool shaders_accurate_mul;
     bool use_shader_jit;
     u16 resolution_factor;
+    bool show_fps;
     bool use_frame_limit_alternate;
     u16 frame_limit;
     u16 frame_limit_alternate;
@@ -241,6 +242,9 @@ struct Values {
     GpuTimingMode gpu_timing_mode_flush_and_invalidate{GpuTimingMode::Synch};
     GpuTimingMode gpu_timing_mode_invalidate{GpuTimingMode::Synch};
 
+    u32 core_ticks_hack;
+    bool core_downcount_hack;
+
     // Audio
     bool enable_dsp_lle;
     bool enable_dsp_lle_multithread;
@@ -288,6 +292,8 @@ static constexpr int REGION_VALUE_AUTO_SELECT = -1;
 
 void Apply();
 void LogSettings();
+
+void SetFMVHack(bool enable);
 
 // Input profiles
 void LoadProfile(int index);

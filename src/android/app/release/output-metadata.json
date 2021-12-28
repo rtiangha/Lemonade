@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "org.gamerytb.citra_emu",
+  "variantName": "processReleaseResources",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "versionCode": 18903729,
+      "versionName": "6f6f9a091",
+      "outputFile": "app-release.apk"
+    }
+  ]
+}
