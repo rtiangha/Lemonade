@@ -21,7 +21,7 @@ import org.citra.citra_emu.features.settings.model.StringSetting;
 import org.citra.citra_emu.features.settings.model.view.CheckBoxSetting;
 import org.citra.citra_emu.features.settings.model.view.DateTimeSetting;
 import org.citra.citra_emu.features.settings.model.view.InputBindingSetting;
-import org.citra.citra_emu.features.settings.model.view.PremiumSingleChoiceSetting;
+import org.citra.citra_emu.features.settings.model.view.ThemeSingleChoiceSetting;
 import org.citra.citra_emu.features.settings.model.view.SettingsItem;
 import org.citra.citra_emu.features.settings.model.view.SingleChoiceSetting;
 import org.citra.citra_emu.features.settings.model.view.SliderSetting;
@@ -31,12 +31,10 @@ import org.citra.citra_emu.features.settings.ui.viewholder.CheckBoxSettingViewHo
 import org.citra.citra_emu.features.settings.ui.viewholder.DateTimeViewHolder;
 import org.citra.citra_emu.features.settings.ui.viewholder.HeaderViewHolder;
 import org.citra.citra_emu.features.settings.ui.viewholder.InputBindingSettingViewHolder;
-import org.citra.citra_emu.features.settings.ui.viewholder.PremiumViewHolder;
 import org.citra.citra_emu.features.settings.ui.viewholder.SettingViewHolder;
 import org.citra.citra_emu.features.settings.ui.viewholder.SingleChoiceViewHolder;
 import org.citra.citra_emu.features.settings.ui.viewholder.SliderViewHolder;
 import org.citra.citra_emu.features.settings.ui.viewholder.SubmenuViewHolder;
-import org.citra.citra_emu.ui.main.MainActivity;
 import org.citra.citra_emu.utils.Log;
 
 import java.util.ArrayList;
@@ -95,10 +93,6 @@ public final class SettingsAdapter extends RecyclerView.Adapter<SettingViewHolde
                 view = inflater.inflate(R.layout.list_item_setting, parent, false);
                 return new DateTimeViewHolder(view, this);
 
-            case SettingsItem.TYPE_PREMIUM:
-                view = inflater.inflate(R.layout.premium_item_setting, parent, false);
-                return new PremiumViewHolder(view, this, mView);
-
             default:
                 Log.error("[SettingsAdapter] Invalid view type: " + viewType);
                 return null;
@@ -144,7 +138,7 @@ public final class SettingsAdapter extends RecyclerView.Adapter<SettingViewHolde
         mView.onSettingChanged();
     }
 
-    public void onSingleChoiceClick(PremiumSingleChoiceSetting item) {
+    public void onSingleChoiceClick(ThemeSingleChoiceSetting item) {
         mClickedItem = item;
 
         int value = getSelectionForSingleChoiceValue(item);
@@ -170,32 +164,6 @@ public final class SettingsAdapter extends RecyclerView.Adapter<SettingViewHolde
         mDialog = builder.show();
     }
 
-    public void onSingleChoiceClick(SingleChoiceSetting item, int position) {
-        mClickedPosition = position;
-
-        if (!item.isPremium() || MainActivity.isPremiumActive()) {
-            // Setting is either not Premium, or the user has Premium
-            onSingleChoiceClick(item);
-            return;
-        }
-
-        // User needs Premium, invoke the billing flow
-        MainActivity.invokePremiumBilling(() -> onSingleChoiceClick(item));
-    }
-
-    public void onSingleChoiceClick(PremiumSingleChoiceSetting item, int position) {
-        mClickedPosition = position;
-
-        if (!item.isPremium() || MainActivity.isPremiumActive()) {
-            // Setting is either not Premium, or the user has Premium
-            onSingleChoiceClick(item);
-            return;
-        }
-
-        // User needs Premium, invoke the billing flow
-        MainActivity.invokePremiumBilling(() -> onSingleChoiceClick(item));
-    }
-
     public void onStringSingleChoiceClick(StringSingleChoiceSetting item) {
         mClickedItem = item;
 
@@ -205,19 +173,6 @@ public final class SettingsAdapter extends RecyclerView.Adapter<SettingViewHolde
         builder.setSingleChoiceItems(item.getChoicesId(), item.getSelectValueIndex(), this);
 
         mDialog = builder.show();
-    }
-
-    public void onStringSingleChoiceClick(StringSingleChoiceSetting item, int position) {
-        mClickedPosition = position;
-
-        if (!item.isPremium() || MainActivity.isPremiumActive()) {
-            // Setting is either not Premium, or the user has Premium
-            onStringSingleChoiceClick(item);
-            return;
-        }
-
-        // User needs Premium, invoke the billing flow
-        MainActivity.invokePremiumBilling(() -> onStringSingleChoiceClick(item));
     }
 
     DialogInterface.OnClickListener defaultCancelListener = (dialog, which) -> closeDialog();
@@ -357,8 +312,8 @@ public final class SettingsAdapter extends RecyclerView.Adapter<SettingViewHolde
             }
 
             closeDialog();
-        } else if (mClickedItem instanceof PremiumSingleChoiceSetting) {
-            PremiumSingleChoiceSetting scSetting = (PremiumSingleChoiceSetting) mClickedItem;
+        } else if (mClickedItem instanceof ThemeSingleChoiceSetting) {
+            ThemeSingleChoiceSetting scSetting = (ThemeSingleChoiceSetting) mClickedItem;
             scSetting.setSelectedValue(getValueForSingleChoiceSelection(scSetting, which));
             closeDialog();
         } else if (mClickedItem instanceof StringSingleChoiceSetting) {
@@ -436,7 +391,7 @@ public final class SettingsAdapter extends RecyclerView.Adapter<SettingViewHolde
         }
     }
 
-    private int getValueForSingleChoiceSelection(PremiumSingleChoiceSetting item, int which) {
+    private int getValueForSingleChoiceSelection(ThemeSingleChoiceSetting item, int which) {
         int valuesId = item.getValuesId();
 
         if (valuesId > 0) {
@@ -466,7 +421,7 @@ public final class SettingsAdapter extends RecyclerView.Adapter<SettingViewHolde
         return -1;
     }
 
-    private int getSelectionForSingleChoiceValue(PremiumSingleChoiceSetting item) {
+    private int getSelectionForSingleChoiceValue(ThemeSingleChoiceSetting item) {
         int value = item.getSelectedValue();
         int valuesId = item.getValuesId();
 

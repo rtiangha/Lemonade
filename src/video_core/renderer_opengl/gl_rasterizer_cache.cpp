@@ -1830,6 +1830,9 @@ void RasterizerCacheOpenGL::InvalidateRegion(PAddr addr, u32 size, const Surface
             // If cpu is invalidating this region we want to remove it
             // to (likely) mark the memory pages as uncached
             if (region_owner == nullptr && size <= 8) {
+                if (Settings::values.skip_cpu_write) {
+                    continue;
+                }
                 FlushRegion(cached_surface->addr, cached_surface->size, cached_surface);
                 remove_surfaces.emplace(cached_surface);
                 continue;

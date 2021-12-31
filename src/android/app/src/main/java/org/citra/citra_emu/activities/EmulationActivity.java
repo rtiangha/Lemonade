@@ -30,6 +30,7 @@ import androidx.fragment.app.FragmentActivity;
 import org.citra.citra_emu.CitraApplication;
 import org.citra.citra_emu.NativeLibrary;
 import org.citra.citra_emu.R;
+import org.citra.citra_emu.dialogs.RunningSettingDialog;
 import org.citra.citra_emu.features.settings.model.view.InputBindingSetting;
 import org.citra.citra_emu.features.settings.ui.SettingsActivity;
 import org.citra.citra_emu.features.settings.utils.SettingsFile;
@@ -58,20 +59,22 @@ public final class EmulationActivity extends AppCompatActivity {
     public static final int MENU_ACTION_EDIT_CONTROLS_PLACEMENT = 0;
     public static final int MENU_ACTION_TOGGLE_CONTROLS = 1;
     public static final int MENU_ACTION_ADJUST_SCALE = 2;
-    public static final int MENU_ACTION_EXIT = 3;
-    public static final int MENU_ACTION_SHOW_FPS = 4;
-    public static final int MENU_ACTION_SCREEN_LAYOUT_LANDSCAPE = 5;
-    public static final int MENU_ACTION_SCREEN_LAYOUT_PORTRAIT = 6;
-    public static final int MENU_ACTION_SCREEN_LAYOUT_SINGLE = 7;
-    public static final int MENU_ACTION_SCREEN_LAYOUT_SIDEBYSIDE = 8;
-    public static final int MENU_ACTION_SWAP_SCREENS = 9;
-    public static final int MENU_ACTION_RESET_OVERLAY = 10;
-    public static final int MENU_ACTION_SHOW_OVERLAY = 11;
-    public static final int MENU_ACTION_OPEN_SETTINGS = 12;
-    public static final int MENU_ACTION_LOAD_AMIIBO = 13;
-    public static final int MENU_ACTION_REMOVE_AMIIBO = 14;
-    public static final int MENU_ACTION_JOYSTICK_REL_CENTER = 15;
-    public static final int MENU_ACTION_DPAD_SLIDE_ENABLE = 16;
+    public static final int MENU_ACTION_ADJUST_OPACITY = 3;
+    public static final int MENU_ACTION_RUNNING_SETTING = 4;
+    public static final int MENU_ACTION_EXIT = 5;
+    public static final int MENU_ACTION_SHOW_FPS = 6;
+    public static final int MENU_ACTION_SCREEN_LAYOUT_LANDSCAPE = 7;
+    public static final int MENU_ACTION_SCREEN_LAYOUT_PORTRAIT = 8;
+    public static final int MENU_ACTION_SCREEN_LAYOUT_SINGLE = 9;
+    public static final int MENU_ACTION_SCREEN_LAYOUT_SIDEBYSIDE = 10;
+    public static final int MENU_ACTION_SWAP_SCREENS = 11;
+    public static final int MENU_ACTION_RESET_OVERLAY = 12;
+    public static final int MENU_ACTION_SHOW_OVERLAY = 13;
+    public static final int MENU_ACTION_OPEN_SETTINGS = 14;
+    public static final int MENU_ACTION_LOAD_AMIIBO = 15;
+    public static final int MENU_ACTION_REMOVE_AMIIBO = 16;
+    public static final int MENU_ACTION_JOYSTICK_REL_CENTER = 17;
+    public static final int MENU_ACTION_DPAD_SLIDE_ENABLE = 18;
 
     public static final int REQUEST_SELECT_AMIIBO = 2;
     private static final int EMULATION_RUNNING_NOTIFICATION = 0x1000;
@@ -84,6 +87,10 @@ public final class EmulationActivity extends AppCompatActivity {
                 EmulationActivity.MENU_ACTION_TOGGLE_CONTROLS);
         buttonsActionsMap
                 .append(R.id.menu_emulation_adjust_scale, EmulationActivity.MENU_ACTION_ADJUST_SCALE);
+        buttonsActionsMap
+                .append(R.id.menu_emulation_running_setting, EmulationActivity.MENU_ACTION_RUNNING_SETTING);
+        buttonsActionsMap
+                .append(R.id.menu_emulation_adjust_opacity, EmulationActivity.MENU_ACTION_ADJUST_OPACITY);
         buttonsActionsMap.append(R.id.menu_emulation_show_fps,
                 EmulationActivity.MENU_ACTION_SHOW_FPS);
         buttonsActionsMap.append(R.id.menu_screen_layout_landscape,
@@ -387,6 +394,17 @@ public final class EmulationActivity extends AppCompatActivity {
                 adjustScale();
                 break;
 
+            // Adjust the opacity of the overlay controls.
+            case MENU_ACTION_ADJUST_OPACITY:
+                adjustOpacity();
+                break;
+
+            // In-game settings dialog
+            case MENU_ACTION_RUNNING_SETTING:
+                RunningSettingDialog dialog = RunningSettingDialog.newInstance();
+                dialog.show(getSupportFragmentManager(), "RunningSettingDialog");
+                break;
+
             // Toggle the visibility of the Performance stats TextView
             case MENU_ACTION_SHOW_FPS: {
                 final boolean isEnabled = !EmulationMenuSettings.getShowFps();
@@ -661,6 +679,59 @@ public final class EmulationActivity extends AppCompatActivity {
                 })
                 .create()
                 .show();
+    }
+
+    private void adjustOpacity() {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View view = inflater.inflate(R.layout.dialog_seekbar, null);
+
+        final SeekBar seekbar = view.findViewById(R.id.seekbar);
+        final TextView value = view.findViewById(R.id.text_value);
+        final TextView units = view.findViewById(R.id.text_units);
+
+        seekbar.setMax(100);
+        seekbar.setMin(3);
+        seekbar.setProgress(mPreferences.getInt("controlOpacity", 100));
+        seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                value.setText(String.valueOf(progress));
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                setControlOpacity(seekbar.getProgress());
+            }
+        });
+
+        value.setText(String.valueOf(seekbar.getProgress()));
+        units.setText("%");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.emulation_control_opacity);
+        builder.setView(view);
+        final int previousProgress = seekbar.getProgress();
+        builder.setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> {
+            setControlOpacity(previousProgress);
+        });
+        builder.setPositiveButton(android.R.string.ok, (dialogInterface, i) ->
+        {
+            setControlOpacity(seekbar.getProgress());
+        });
+        builder.setNeutralButton(R.string.slider_default, (dialogInterface, i) -> {
+            setControlOpacity(100);
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void setControlOpacity(int opacity) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putInt("controlOpacity", opacity);
+        editor.apply();
+        mEmulationFragment.refreshInputOverlay();
     }
 
     @Override

@@ -5,6 +5,8 @@ import android.os.SystemClock;
 import org.citra.citra_emu.BuildConfig;
 import org.citra.citra_emu.CitraApplication;
 import org.citra.citra_emu.R;
+import org.citra.citra_emu.dialogs.CreditsDialog;
+import org.citra.citra_emu.dialogs.RunningSettingDialog;
 import org.citra.citra_emu.features.settings.model.Settings;
 import org.citra.citra_emu.features.settings.utils.SettingsFile;
 import org.citra.citra_emu.model.GameDatabase;
@@ -25,7 +27,7 @@ public final class MainPresenter {
     public void onCreate() {
         String versionName = BuildConfig.VERSION_NAME;
         mView.setVersionString(versionName);
-        refeshGameList();
+        refreshGameList();
     }
 
     public void launchFileListActivity(int request) {
@@ -54,8 +56,8 @@ public final class MainPresenter {
                 launchFileListActivity(REQUEST_INSTALL_CIA);
                 return true;
 
-            case R.id.button_premium:
-                mView.launchSettingsActivity(Settings.SECTION_PREMIUM);
+            case R.id.button_credits:
+                mView.openCreditsDialog();
                 return true;
         }
 
@@ -74,7 +76,7 @@ public final class MainPresenter {
         mDirToAdd = dir;
     }
 
-    public void refeshGameList() {
+    public void refreshGameList() {
         GameDatabase databaseHelper = CitraApplication.databaseHelper;
         databaseHelper.scanLibrary(databaseHelper.getWritableDatabase());
         mView.refresh();

@@ -56,6 +56,8 @@ void LoadOverrides(u64 program_id) {
     case 0x0004000000089D00:
         // This game has very sensitive timings with asynchronous GPU
         Settings::values.gpu_timing_mode_submit_list = Settings::GpuTimingMode::Synch;
+        // This game has a big perfomance improvement with accurate multiplication
+        Settings::values.shaders_accurate_mul = true;
         break;
 
         // USA / Mario & Luigi: Superstar Saga + Bowsers Minions
@@ -74,6 +76,24 @@ void LoadOverrides(u64 program_id) {
     case 0x00040000001D1500:
         // This game requires accurate multiplication to render properly
         Settings::values.shaders_accurate_mul = true;
+        break;
+
+        // USA / Resident Evil: Revelations 3D
+    case 0x0004000000060200:
+        // EUR / Resident Evil: Revelations 3D
+    case 0x000400000005EE00:
+        // USA / Resident Evil: The Mercenaries 3D
+    case 0x0004000000035900:
+        // EUR / Resident Evil: The Mercenaries 3D
+    case 0x0004000000038B00:
+        // JAP / Super Street Fighter IV: 3D Edition
+    case 0x0004000000030500:
+        // USA / Super Street Fighter IV: 3D Edition
+    case 0x0004000000032D00:
+        // EUR / Super Street Fighter IV: 3D Edition
+    case 0x0004000000033C00:
+        // This game requires FMV hack beacuse runs very slow on cinematics/UIs
+        Settings::SetFMVHack(true);
         break;
     }
 }

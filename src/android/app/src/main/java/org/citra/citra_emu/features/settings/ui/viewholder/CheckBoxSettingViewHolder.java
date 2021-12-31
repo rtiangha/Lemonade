@@ -2,6 +2,7 @@ package org.citra.citra_emu.features.settings.ui.viewholder;
 
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import org.citra.citra_emu.R;
@@ -15,7 +16,7 @@ public final class CheckBoxSettingViewHolder extends SettingViewHolder {
     private TextView mTextSettingName;
     private TextView mTextSettingDescription;
 
-    private CheckBox mCheckbox;
+    private Switch mSwitch;
 
     public CheckBoxSettingViewHolder(View itemView, SettingsAdapter adapter) {
         super(itemView, adapter);
@@ -25,7 +26,7 @@ public final class CheckBoxSettingViewHolder extends SettingViewHolder {
     protected void findViews(View root) {
         mTextSettingName = root.findViewById(R.id.text_setting_name);
         mTextSettingDescription = root.findViewById(R.id.text_setting_description);
-        mCheckbox = root.findViewById(R.id.checkbox);
+        mSwitch = root.findViewById(R.id.checkbox);
     }
 
     @Override
@@ -42,13 +43,13 @@ public final class CheckBoxSettingViewHolder extends SettingViewHolder {
             mTextSettingDescription.setVisibility(View.GONE);
         }
 
-        mCheckbox.setChecked(mItem.isChecked());
+        mSwitch.setChecked(mItem.isChecked());
     }
 
     @Override
     public void onClick(View clicked) {
-        mCheckbox.toggle();
+        mSwitch.toggle();
 
-        getAdapter().onBooleanClick(mItem, getAdapterPosition(), mCheckbox.isChecked());
+        getAdapter().onBooleanClick(mItem, getAdapterPosition(), mSwitch.isChecked());
     }
 }

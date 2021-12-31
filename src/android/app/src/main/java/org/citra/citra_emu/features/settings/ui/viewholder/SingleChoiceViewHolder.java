@@ -5,7 +5,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import org.citra.citra_emu.R;
-import org.citra.citra_emu.features.settings.model.view.PremiumSingleChoiceSetting;
+import org.citra.citra_emu.features.settings.model.view.ThemeSingleChoiceSetting;
 import org.citra.citra_emu.features.settings.model.view.SettingsItem;
 import org.citra.citra_emu.features.settings.model.view.SingleChoiceSetting;
 import org.citra.citra_emu.features.settings.model.view.StringSingleChoiceSetting;
@@ -46,8 +46,8 @@ public final class SingleChoiceViewHolder extends SettingViewHolder {
                     mTextSettingDescription.setText(choices[i]);
                 }
             }
-        } else if (item instanceof PremiumSingleChoiceSetting) {
-            PremiumSingleChoiceSetting setting = (PremiumSingleChoiceSetting) item;
+        } else if (item instanceof ThemeSingleChoiceSetting) {
+            ThemeSingleChoiceSetting setting = (ThemeSingleChoiceSetting) item;
             int selected = setting.getSelectedValue();
             Resources resMgr = mTextSettingDescription.getContext().getResources();
             String[] choices = resMgr.getStringArray(setting.getChoicesId());
@@ -66,11 +66,11 @@ public final class SingleChoiceViewHolder extends SettingViewHolder {
     public void onClick(View clicked) {
         int position = getAdapterPosition();
         if (mItem instanceof SingleChoiceSetting) {
-            getAdapter().onSingleChoiceClick((SingleChoiceSetting) mItem, position);
-        } else if (mItem instanceof PremiumSingleChoiceSetting) {
-            getAdapter().onSingleChoiceClick((PremiumSingleChoiceSetting) mItem, position);
+            getAdapter().onSingleChoiceClick((SingleChoiceSetting) mItem);
+        } else if (mItem instanceof ThemeSingleChoiceSetting) {
+            getAdapter().onSingleChoiceClick((ThemeSingleChoiceSetting) mItem);
         } else if (mItem instanceof StringSingleChoiceSetting) {
-            getAdapter().onStringSingleChoiceClick((StringSingleChoiceSetting) mItem, position);
+            getAdapter().onStringSingleChoiceClick((StringSingleChoiceSetting) mItem);
         }
     }
 }

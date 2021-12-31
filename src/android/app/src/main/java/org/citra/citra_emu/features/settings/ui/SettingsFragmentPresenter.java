@@ -17,18 +17,20 @@ import org.citra.citra_emu.features.settings.model.view.CheckBoxSetting;
 import org.citra.citra_emu.features.settings.model.view.DateTimeSetting;
 import org.citra.citra_emu.features.settings.model.view.HeaderSetting;
 import org.citra.citra_emu.features.settings.model.view.InputBindingSetting;
-import org.citra.citra_emu.features.settings.model.view.PremiumHeader;
-import org.citra.citra_emu.features.settings.model.view.PremiumSingleChoiceSetting;
 import org.citra.citra_emu.features.settings.model.view.SettingsItem;
 import org.citra.citra_emu.features.settings.model.view.SingleChoiceSetting;
 import org.citra.citra_emu.features.settings.model.view.SliderSetting;
 import org.citra.citra_emu.features.settings.model.view.StringSingleChoiceSetting;
 import org.citra.citra_emu.features.settings.model.view.SubmenuSetting;
+import org.citra.citra_emu.features.settings.model.view.ThemeSingleChoiceSetting;
 import org.citra.citra_emu.features.settings.utils.SettingsFile;
+import org.citra.citra_emu.utils.DirectoryInitialization;
 import org.citra.citra_emu.utils.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public final class SettingsFragmentPresenter {
@@ -38,6 +40,7 @@ public final class SettingsFragmentPresenter {
     private String mGameID;
 
     private Settings mSettings;
+    private SettingsActivity mActivity;
     private ArrayList<SettingsItem> mSettingsList;
 
     public SettingsFragmentPresenter(SettingsFragmentView view) {
@@ -107,11 +110,14 @@ public final class SettingsFragmentPresenter {
             case SettingsFile.FILE_NAME_CONFIG:
                 addConfigSettings(sl);
                 break;
-            case Settings.SECTION_PREMIUM:
-                addPremiumSettings(sl);
+            case Settings.SECTION_INTERFACE:
+                addInterfaceSettings(sl);
                 break;
             case Settings.SECTION_CORE:
                 addGeneralSettings(sl);
+                break;
+            case Settings.SECTION_CUSTOM_TEXTURES:
+                addCustomTexturesSettings(sl);
                 break;
             case Settings.SECTION_SYSTEM:
                 addSystemSettings(sl);
@@ -143,44 +149,45 @@ public final class SettingsFragmentPresenter {
     private void addConfigSettings(ArrayList<SettingsItem> sl) {
         mView.getActivity().setTitle(R.string.preferences_settings);
 
-        sl.add(new SubmenuSetting(null, null, R.string.preferences_premium, 0, Settings.SECTION_PREMIUM));
         sl.add(new SubmenuSetting(null, null, R.string.preferences_general, 0, Settings.SECTION_CORE));
         sl.add(new SubmenuSetting(null, null, R.string.preferences_system, 0, Settings.SECTION_SYSTEM));
         sl.add(new SubmenuSetting(null, null, R.string.preferences_camera, 0, Settings.SECTION_CAMERA));
+        sl.add(new SubmenuSetting(null, null, R.string.preferences_interface, 0, Settings.SECTION_INTERFACE));
         sl.add(new SubmenuSetting(null, null, R.string.preferences_controls, 0, Settings.SECTION_CONTROLS));
         sl.add(new SubmenuSetting(null, null, R.string.preferences_graphics, 0, Settings.SECTION_RENDERER));
         sl.add(new SubmenuSetting(null, null, R.string.preferences_audio, 0, Settings.SECTION_AUDIO));
         sl.add(new SubmenuSetting(null, null, R.string.preferences_debug, 0, Settings.SECTION_DEBUG));
     }
 
-    private void addPremiumSettings(ArrayList<SettingsItem> sl) {
-        mView.getActivity().setTitle(R.string.preferences_premium);
+    private void addInterfaceSettings(ArrayList<SettingsItem> sl) {
+        mView.getActivity().setTitle(R.string.preferences_interface);
 
-        SettingSection premiumSection = mSettings.getSection(Settings.SECTION_PREMIUM);
-        Setting design = premiumSection.getSetting(SettingsFile.KEY_DESIGN);
-
-        sl.add(new PremiumHeader());
+        SettingSection interfaceSection = mSettings.getSection(Settings.SECTION_INTERFACE);
+        Setting design = interfaceSection.getSetting(SettingsFile.KEY_DESIGN);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            sl.add(new PremiumSingleChoiceSetting(SettingsFile.KEY_DESIGN, Settings.SECTION_PREMIUM, R.string.design, 0, R.array.designNames, R.array.designValues, 0, design, mView));
+            sl.add(new ThemeSingleChoiceSetting(SettingsFile.KEY_DESIGN, Settings.SECTION_INTERFACE, R.string.design, 0, R.array.designNames, R.array.designValues, 0, design, mView));
         } else {
             // Pre-Android 10 does not support System Default
-            sl.add(new PremiumSingleChoiceSetting(SettingsFile.KEY_DESIGN, Settings.SECTION_PREMIUM, R.string.design, 0, R.array.designNamesOld, R.array.designValuesOld, 0, design, mView));
+            sl.add(new ThemeSingleChoiceSetting(SettingsFile.KEY_DESIGN, Settings.SECTION_INTERFACE, R.string.design, 0, R.array.designNamesOld, R.array.designValuesOld, 0, design, mView));
         }
 
         String[] textureFilterNames = NativeLibrary.GetTextureFilterNames();
-        Setting textureFilterName = premiumSection.getSetting(SettingsFile.KEY_TEXTURE_FILTER_NAME);
-        sl.add(new StringSingleChoiceSetting(SettingsFile.KEY_TEXTURE_FILTER_NAME, Settings.SECTION_PREMIUM, R.string.texture_filter_name, R.string.texture_filter_description, textureFilterNames, textureFilterNames, "none", textureFilterName));
+        Setting textureFilterName = interfaceSection.getSetting(SettingsFile.KEY_TEXTURE_FILTER_NAME);
+        sl.add(new StringSingleChoiceSetting(SettingsFile.KEY_TEXTURE_FILTER_NAME, Settings.SECTION_INTERFACE, R.string.texture_filter_name, R.string.texture_filter_description, textureFilterNames, textureFilterNames, "none", textureFilterName));
     }
 
     private void addGeneralSettings(ArrayList<SettingsItem> sl) {
         mView.getActivity().setTitle(R.string.preferences_general);
 
         SettingSection rendererSection = mSettings.getSection(Settings.SECTION_RENDERER);
+        SettingSection coreSection = mSettings.getSection(Settings.SECTION_CORE);
         Setting frameLimitEnable = rendererSection.getSetting(SettingsFile.KEY_FRAME_LIMIT_ENABLED);
+        Setting cpuClockSpeed = coreSection.getSetting(SettingsFile.KEY_CPU_CLOCK_SPEED);
         Setting frameLimitValue = rendererSection.getSetting(SettingsFile.KEY_FRAME_LIMIT);
 
         sl.add(new CheckBoxSetting(SettingsFile.KEY_FRAME_LIMIT_ENABLED, Settings.SECTION_RENDERER, R.string.frame_limit_enable, R.string.frame_limit_enable_description, true, frameLimitEnable));
+        sl.add(new SliderSetting(SettingsFile.KEY_CPU_CLOCK_SPEED, Settings.SECTION_CORE, R.string.cpu_clock_speed, 0, 0, 400, "%", 100, cpuClockSpeed));
         sl.add(new SliderSetting(SettingsFile.KEY_FRAME_LIMIT, Settings.SECTION_RENDERER, R.string.frame_limit_slider, R.string.frame_limit_slider_description, 1, 200, "%", 100, frameLimitValue));
     }
 
@@ -351,10 +358,16 @@ public final class SettingsFragmentPresenter {
         mView.getActivity().setTitle(R.string.preferences_graphics);
 
         SettingSection rendererSection = mSettings.getSection(Settings.SECTION_RENDERER);
+        SettingSection systemSection = mSettings.getSection(Settings.SECTION_SYSTEM);
+
+        Setting new3ds = systemSection.getSetting(SettingsFile.KEY_IS_NEW_3DS);
         Setting resolutionFactor = rendererSection.getSetting(SettingsFile.KEY_RESOLUTION_FACTOR);
+        Setting showFps = rendererSection.getSetting(SettingsFile.KEY_SHOW_FPS);
+        Setting cpuUsageLimit = rendererSection.getSetting(SettingsFile.KEY_CPU_USAGE_LIMIT);
         Setting filterMode = rendererSection.getSetting(SettingsFile.KEY_FILTER_MODE);
         Setting useAsynchronousGpuEmulation = rendererSection.getSetting(SettingsFile.KEY_USE_ASYNCHRONOUS_GPU_EMULATION);
         Setting shadersAccurateMul = rendererSection.getSetting(SettingsFile.KEY_SHADERS_ACCURATE_MUL);
+        // Setting shader = rendererSection.getSetting(SettingsFile.KEY_PP_SHADER_NAME);
         Setting render3dMode = rendererSection.getSetting(SettingsFile.KEY_RENDER_3D);
         Setting factor3d = rendererSection.getSetting(SettingsFile.KEY_FACTOR_3D);
         Setting useDiskShaderCache = rendererSection.getSetting(SettingsFile.KEY_USE_DISK_SHADER_CACHE);
@@ -365,10 +378,21 @@ public final class SettingsFragmentPresenter {
         Setting cardboardYShift = layoutSection.getSetting(SettingsFile.KEY_CARDBOARD_Y_SHIFT);
 
         sl.add(new HeaderSetting(null, null, R.string.renderer, 0));
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_IS_NEW_3DS, Settings.SECTION_SYSTEM, R.string.setting_is_new_3ds, R.string.setting_is_new_3ds_desc, false, new3ds));
         sl.add(new SliderSetting(SettingsFile.KEY_RESOLUTION_FACTOR, Settings.SECTION_RENDERER, R.string.internal_resolution, R.string.internal_resolution_description, 1, 4, "x", 1, resolutionFactor));
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_SHOW_FPS, Settings.SECTION_RENDERER, R.string.emulation_show_fps, 0, false, showFps));
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_CPU_USAGE_LIMIT, Settings.SECTION_RENDERER, R.string.cpu_usage_limit, R.string.cpu_usage_limit_description, false, cpuUsageLimit));
+        sl.add(new SubmenuSetting(null, null, R.string.setting_custom_textures_title, 0, Settings.SECTION_CUSTOM_TEXTURES));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_FILTER_MODE, Settings.SECTION_RENDERER, R.string.linear_filtering, R.string.linear_filtering_description, true, filterMode));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_USE_ASYNCHRONOUS_GPU_EMULATION, Settings.SECTION_RENDERER, R.string.asynchronous_gpu, R.string.asynchronous_gpu_description, true, useAsynchronousGpuEmulation));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_SHADERS_ACCURATE_MUL, Settings.SECTION_RENDERER, R.string.shaders_accurate_mul, R.string.shaders_accurate_mul_description, false, shadersAccurateMul));
+
+        // post process shaders
+        // TODO: for some with that opening graphics tab a crash happens, I'll try fix it in the future (dev life)
+        // String[] stringValues = getShaderValues();
+        // String[] stringEntries = getSettingEntries(stringValues);
+        // sl.add(new StringSingleChoiceSetting(SettingsFile.KEY_PP_SHADER_NAME, Settings.SECTION_RENDERER, R.string.post_processing_shader, 0, stringValues, stringValues, "", shader));
+
         sl.add(new CheckBoxSetting(SettingsFile.KEY_USE_DISK_SHADER_CACHE, Settings.SECTION_RENDERER, R.string.use_disk_shader_cache, R.string.use_disk_shader_cache_description, true, useDiskShaderCache));
 
         sl.add(new HeaderSetting(null, null, R.string.stereoscopy, 0));
@@ -379,6 +403,19 @@ public final class SettingsFragmentPresenter {
         sl.add(new SliderSetting(SettingsFile.KEY_CARDBOARD_SCREEN_SIZE, Settings.SECTION_LAYOUT, R.string.cardboard_screen_size, R.string.cardboard_screen_size_description, 30, 100, "%", 85, cardboardScreenSize));
         sl.add(new SliderSetting(SettingsFile.KEY_CARDBOARD_X_SHIFT, Settings.SECTION_LAYOUT, R.string.cardboard_x_shift, R.string.cardboard_x_shift_description, -100, 100, "%", 0, cardboardXShift));
         sl.add(new SliderSetting(SettingsFile.KEY_CARDBOARD_Y_SHIFT, Settings.SECTION_LAYOUT, R.string.cardboard_y_shift, R.string.cardboard_y_shift_description, -100, 100, "%", 0, cardboardYShift));
+    }
+
+    private void addCustomTexturesSettings(ArrayList<SettingsItem> sl) {
+        mView.getActivity().setTitle(R.string.setting_custom_textures_title);
+
+        SettingSection rendererSection = mSettings.getSection(Settings.SECTION_RENDERER);
+        Setting customTextures = rendererSection.getSetting(SettingsFile.KEY_CUSTOM_TEXTURES);
+        Setting preloadTextures = rendererSection.getSetting(SettingsFile.KEY_PRELOAD_TEXTURES);
+        Setting dumpTextures = rendererSection.getSetting(SettingsFile.KEY_DUMP_TEXTURES);
+
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_CUSTOM_TEXTURES, Settings.SECTION_RENDERER, R.string.setting_custom_textures, 0, false, customTextures));
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_PRELOAD_TEXTURES, Settings.SECTION_RENDERER, R.string.setting_preload_textures, R.string.setting_preload_textures_description, false, preloadTextures));
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_DUMP_TEXTURES, Settings.SECTION_RENDERER, R.string.setting_dump_textures, 0, false, dumpTextures));
     }
 
     private void addAudioSettings(ArrayList<SettingsItem> sl) {
@@ -408,4 +445,56 @@ public final class SettingsFragmentPresenter {
         sl.add(new CheckBoxSetting(SettingsFile.KEY_HW_SHADER, Settings.SECTION_RENDERER, R.string.hw_shaders, R.string.hw_shaders_description, true, hardwareShader, true, mView));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_USE_VSYNC, Settings.SECTION_RENDERER, R.string.vsync, R.string.vsync_description, true, vsyncEnable));
     }
+
+    /*private String capitalize(String text) {
+        if (text.contains("_")) {
+            text = text.replace("_", " ");
+        }
+
+        if (text.length() > 1 && text.contains(" ")) {
+            String[] ss = text.split(" ");
+            text = capitalize(ss[0]);
+            for (int i = 1; i < ss.length; ++i) {
+                text += " " + capitalize(ss[i]);
+            }
+            return text;
+        }
+
+        return text.substring(0, 1).toUpperCase() + text.substring(1);
+    }
+
+    private String[] getSettingEntries(String[] values) {
+        String[] entries = new String[values.length];
+        for (int i = 0; i < values.length; ++i) {
+            if (values[i].isEmpty()) {
+                entries[i] = mActivity.getString(R.string.slider_default);
+            } else {
+                entries[i] = capitalize(values[i]);
+            }
+        }
+        return entries;
+    }
+
+    private String[] getShaderValues() {
+        String path = DirectoryInitialization.getShadersDirectory();
+        List<String> values = getFileList(path, ".glsl");
+        values.add(0, "");
+        return values.toArray(new String[0]);
+    }
+
+    private List<String> getFileList(String path, String ext) {
+        List<String> values = new ArrayList<>();
+        File file = new File(path);
+        File[] files = file.listFiles();
+        if (files != null) {
+            for (int i = 0; i < files.length; ++i) {
+                String name = files[i].getName();
+                int extensionIndex = name.indexOf(ext);
+                if (extensionIndex > 0) {
+                    values.add(name.substring(0, extensionIndex));
+                }
+            }
+        }
+        return values;
+    }*/
 }

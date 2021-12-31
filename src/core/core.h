@@ -295,6 +295,9 @@ public:
         return registered_swkbd;
     }
 
+    ///
+    void SetCpuUsageLimit(bool enabled);
+
     /// Image interface
 
     void RegisterImageInterface(std::shared_ptr<Frontend::ImageInterface> image_interface);

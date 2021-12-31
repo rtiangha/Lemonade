@@ -41,11 +41,20 @@ public final class SettingsFile {
 
     public static final String KEY_HW_RENDERER = "use_hw_renderer";
     public static final String KEY_HW_SHADER = "use_hw_shader";
+    public static final String KEY_CPU_CLOCK_SPEED = "cpu_clock_percentage";
     public static final String KEY_SHADERS_ACCURATE_MUL = "shaders_accurate_mul";
     public static final String KEY_USE_SHADER_JIT = "use_shader_jit";
     public static final String KEY_USE_DISK_SHADER_CACHE = "use_disk_shader_cache";
     public static final String KEY_USE_VSYNC = "use_vsync_new";
     public static final String KEY_RESOLUTION_FACTOR = "resolution_factor";
+    public static final String KEY_SHOW_FPS = "show_fps";
+    public static final String KEY_CPU_USAGE_LIMIT = "cpu_usage_limit";
+
+    // custom textures
+    public static final String KEY_CUSTOM_TEXTURES = "custom_textures";
+    public static final String KEY_PRELOAD_TEXTURES = "preload_textures";
+    public static final String KEY_DUMP_TEXTURES = "dump_textures";
+
     public static final String KEY_FRAME_LIMIT_ENABLED = "use_frame_limit";
     public static final String KEY_FRAME_LIMIT = "frame_limit";
     public static final String KEY_BACKGROUND_RED = "bg_red";
@@ -53,7 +62,7 @@ public final class SettingsFile {
     public static final String KEY_BACKGROUND_GREEN = "bg_green";
     public static final String KEY_RENDER_3D = "render_3d";
     public static final String KEY_FACTOR_3D = "factor_3d";
-    public static final String KEY_PP_SHADER_NAME = "pp_shader_name";
+    // public static final String KEY_PP_SHADER_NAME = "pp_shader_name";
     public static final String KEY_FILTER_MODE = "filter_mode";
     public static final String KEY_TEXTURE_FILTER_NAME = "texture_filter_name";
     public static final String KEY_USE_ASYNCHRONOUS_GPU_EMULATION = "use_asynchronous_gpu_emulation";

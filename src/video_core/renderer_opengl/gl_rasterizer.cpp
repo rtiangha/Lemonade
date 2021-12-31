@@ -25,6 +25,7 @@
 #include "video_core/renderer_opengl/gl_vars.h"
 #include "video_core/renderer_opengl/pica_to_gl.h"
 #include "video_core/renderer_opengl/renderer_opengl.h"
+#include "video_core/renderer_opengl/on_screen_display.h"
 #include "video_core/video_core.h"
 
 namespace OpenGL {
@@ -39,6 +40,11 @@ MICROPROFILE_DEFINE(OpenGL_Drawing, "OpenGL", "Drawing", MP_RGB(128, 128, 192));
 MICROPROFILE_DEFINE(OpenGL_Blits, "OpenGL", "Blits", MP_RGB(100, 100, 255));
 MICROPROFILE_DEFINE(OpenGL_CacheManagement, "OpenGL", "Cache Mgmt", MP_RGB(100, 255, 100));
 
+static bool IsVendorMali() {
+    std::string gpu_vendor{reinterpret_cast<char const*>(glGetString(GL_VENDOR))};
+    return gpu_vendor.find("ARM") != std::string::npos;
+}
+
 static bool IsVendorAmd() {
     const std::string_view gpu_vendor{reinterpret_cast<char const*>(glGetString(GL_VENDOR))};
     return gpu_vendor == "ATI Technologies Inc." || gpu_vendor == "Advanced Micro Devices, Inc.";
@@ -49,11 +55,12 @@ static bool IsVendorIntel() {
 }
 
 RasterizerOpenGL::RasterizerOpenGL(Frontend::EmuWindow& emu_window)
-    : is_amd(IsVendorAmd()), vertex_buffer(GL_ARRAY_BUFFER, VERTEX_BUFFER_SIZE, is_amd),
-      uniform_buffer(GL_UNIFORM_BUFFER, UNIFORM_BUFFER_SIZE, false),
-      index_buffer(GL_ELEMENT_ARRAY_BUFFER, INDEX_BUFFER_SIZE, false),
-      texture_buffer(GL_TEXTURE_BUFFER, TEXTURE_BUFFER_SIZE, false),
-      texture_lf_buffer(GL_TEXTURE_BUFFER, TEXTURE_BUFFER_SIZE, false) {
+    : is_mali_gpu(IsVendorMali()), shader_dirty(true),
+      vertex_buffer(GL_ARRAY_BUFFER, is_mali_gpu ? 362312 : VERTEX_BUFFER_SIZE, false),
+      uniform_buffer(GL_UNIFORM_BUFFER, is_mali_gpu ? 22312 : UNIFORM_BUFFER_SIZE, false),
+      index_buffer(GL_ELEMENT_ARRAY_BUFFER, is_mali_gpu ? 425312 : INDEX_BUFFER_SIZE, false),
+      texture_buffer(GL_TEXTURE_BUFFER, is_mali_gpu ? 11264 : TEXTURE_BUFFER_SIZE, false),
+      texture_lf_buffer(GL_TEXTURE_BUFFER, is_mali_gpu ? 525312 : TEXTURE_BUFFER_SIZE, false) {
 
     allow_shadow = GLES || (GLAD_GL_ARB_shader_image_load_store && GLAD_GL_ARB_shader_image_size &&
                             GLAD_GL_ARB_framebuffer_no_attachments);
@@ -608,9 +615,14 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
                                        0);
             }
         } else {
-            // clear both depth and stencil attachment
-            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D,
-                                   0, 0);
+            if (is_mali_gpu) {
+                state.depth.test_enabled = false;
+                state.depth.write_mask = GL_FALSE;
+            } else {
+                // clear both depth and stencil attachment
+                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                                       GL_TEXTURE_2D, 0, 0);
+            }
         }
     }
 

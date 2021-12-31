@@ -8,7 +8,7 @@ import org.citra.citra_emu.R;
 import org.citra.citra_emu.features.settings.model.Setting;
 import org.citra.citra_emu.features.settings.ui.SettingsFragmentView;
 
-public final class PremiumSingleChoiceSetting extends SettingsItem {
+public final class ThemeSingleChoiceSetting extends SettingsItem {
     private int mDefaultValue;
 
     private int mChoicesId;
@@ -17,7 +17,7 @@ public final class PremiumSingleChoiceSetting extends SettingsItem {
 
     private static SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(CitraApplication.getAppContext());
 
-    public PremiumSingleChoiceSetting(String key, String section, int titleId, int descriptionId,
+    public ThemeSingleChoiceSetting(String key, String section, int titleId, int descriptionId,
                                       int choicesId, int valuesId, int defaultValue, Setting setting, SettingsFragmentView view) {
         super(key, section, setting, titleId, descriptionId);
         mValuesId = valuesId;

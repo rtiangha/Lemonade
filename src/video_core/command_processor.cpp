@@ -314,11 +314,9 @@ static void WritePicaReg(u32 id, u32 value, u32 mask) {
 
         bool is_indexed = (id == PICA_REG_INDEX(pipeline.trigger_draw_indexed));
 
-        if (accelerate_draw &&
-            VideoCore::g_renderer->Rasterizer()->AccelerateDrawBatch(is_indexed)) {
-            if (g_debug_context) {
-                g_debug_context->OnEvent(DebugContext::Event::FinishedPrimitiveBatch, nullptr);
-            }
+        if (accelerate_draw && VideoCore::g_renderer->Rasterizer()->AccelerateDrawBatch(is_indexed)) {
+            break;
+        } else if (Settings::values.skip_slow_draw) {
             break;
         }
 

@@ -22,4 +22,6 @@ public interface MainView {
     void launchSettingsActivity(String menuTag);
 
     void launchFileListActivity(int request);
+
+    void openCreditsDialog();
 }

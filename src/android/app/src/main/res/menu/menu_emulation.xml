@@ -4,6 +4,14 @@
     tools:context="org.citra.citra_emu.activities.EmulationActivity">
 
     <item
+        android:id="@+id/menu_emulation_running_setting"
+        android:icon="@drawable/ic_settings_core"
+        android:title="@string/preferences_settings"
+        app:showAsAction="ifRoom">
+
+    </item>
+
+    <item
         android:id="@+id/menu_emulation_save_state"
         android:title="@string/emulation_save_state">
         <menu/>
@@ -30,6 +38,10 @@
             <item
                 android:id="@+id/menu_emulation_adjust_scale"
                 android:title="@string/emulation_control_scale" />
+
+            <item
+                android:id="@+id/menu_emulation_adjust_opacity"
+                android:title="@string/emulation_control_opacity" />
 
             <group android:checkableBehavior="all">
                 <item

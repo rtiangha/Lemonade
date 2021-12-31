@@ -108,9 +108,9 @@ void Config::ReadValues() {
     Settings::values.cpu_clock_percentage =
         static_cast<int>(sdl2_config->GetInteger("Core", "cpu_clock_percentage", 100));
 
-    // Premium
+    // Interface
     Settings::values.texture_filter_name =
-        sdl2_config->GetString("Premium", "texture_filter_name", "none");
+        sdl2_config->GetString("Interface", "texture_filter_name", "none");
 
     // Renderer
     Settings::values.use_gles = sdl2_config->GetBoolean("Renderer", "use_gles", true);
@@ -123,6 +123,14 @@ void Config::ReadValues() {
     Settings::values.use_shader_jit = sdl2_config->GetBoolean("Renderer", "use_shader_jit", true);
     Settings::values.resolution_factor =
         static_cast<u16>(sdl2_config->GetInteger("Renderer", "resolution_factor", 1));
+    Settings::values.show_fps = sdl2_config->GetBoolean("Renderer", "show_fps", false);
+    Settings::values.core_downcount_hack = sdl2_config->GetBoolean("Renderer", "cpu_usage_limit", false);
+
+    // custom textures
+    Settings::values.custom_textures = sdl2_config->GetBoolean("Renderer", "custom_textures", false);
+    Settings::values.preload_textures = sdl2_config->GetBoolean("Renderer", "preload_textures", false);
+    Settings::values.dump_textures = sdl2_config->GetBoolean("Renderer", "dump_textures", false);
+
     Settings::values.use_disk_shader_cache =
         sdl2_config->GetBoolean("Renderer", "use_disk_shader_cache", true);
     Settings::values.use_vsync_new = sdl2_config->GetBoolean("Renderer", "use_vsync_new", true);

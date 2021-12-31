@@ -384,10 +384,14 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window, u32 system_mo
                 std::make_shared<ARM_DynCom>(this, *memory, USER32MODE, i, timing->GetTimer(i)));
         }
     }
+
     running_core = cpu_cores[0].get();
 
     kernel->SetCPUs(cpu_cores);
     kernel->SetRunningCPU(cpu_cores[0].get());
+    if (Settings::values.core_downcount_hack) {
+        SetCpuUsageLimit(true);
+    }
 
     if (Settings::values.enable_dsp_lle) {
         dsp_core = std::make_unique<AudioCore::DspLle>(*memory,
@@ -515,6 +519,19 @@ void System::RegisterSoftwareKeyboard(std::shared_ptr<Frontend::SoftwareKeyboard
 
 void System::RegisterImageInterface(std::shared_ptr<Frontend::ImageInterface> image_interface) {
     registered_image_interface = std::move(image_interface);
+}
+
+void System::SetCpuUsageLimit(bool enabled) {
+    if (enabled) {
+        u32 hacks[4] = {1, 4, 2, 2};
+        for (u32 i = 0; i < 4; ++i) {
+            timing->GetTimer(i)->SetDowncountHack(hacks[i]);
+        }
+    } else {
+        for (u32 i = 0; i < 4; ++i) {
+                timing->GetTimer(i)->SetDowncountHack(0);
+        }
+    }
 }
 
 void System::Shutdown(bool is_deserializing) {

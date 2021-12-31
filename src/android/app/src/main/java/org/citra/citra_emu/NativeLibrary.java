@@ -203,6 +203,10 @@ public final class NativeLibrary {
      */
     public static native boolean IsRunning();
 
+    public static native int[] getRunningSettings();
+
+    public static native void setRunningSettings(int[] settings);
+
     /**
      * Returns the performance stats for the current game
      **/

@@ -5,6 +5,9 @@
     <string name="app_notification_channel_description">Notificaciones del Emulador Citra 3DS</string>
     <string name="app_notification_running">Citra está ejecutándose</string>
 
+    <string name="setting_is_new_3ds">Modo New 3DS</string>
+    <string name="setting_is_new_3ds_desc">La New 3DS tiene una memoria y un procesador diferentes, y algunos juegos sólo pueden iniciarse en la New 3DS.</string>
+
     <!-- Input related strings -->
     <string name="controller_circlepad">Pad Circular</string>
     <string name="controller_c">Palanca C</string>
@@ -52,6 +55,7 @@
     <string name="image_flip">Imagen volteada</string>
 
     <!-- Graphics settings strings -->
+    <string name="renderer">Renderizador</string>
     <string name="vsync">Activar Sincronización Vertical</string>
     <string name="vsync_description">Sincroniza los cuadros por segundo del juego con la tasa de refresco de tu dispositivo.</string>
     <string name="linear_filtering">Activar filtro linear</string>
@@ -64,10 +68,12 @@
     <string name="hw_shaders_description">Usa el hardware para emular los sombreadores de 3DS. Cuando se active, el rendimiento mejorará notablemente.</string>
     <string name="shaders_accurate_mul">Activar multiplicación precisa de sombreado</string>
     <string name="shaders_accurate_mul_description">Usa multiplicaciones más precisas en los sombreados de hardware, que podrían arreglar ciertos bugs gráficos. Cuando se active, el rendimiento se reducirá.</string>
+    <string name="post_processing_shader">Efecto de Post-Procesado</string>
     <string name="asynchronous_gpu">Activar Emulación Asíncrona de la GPU</string>
     <string name="asynchronous_gpu_description">Usa un hilo separado para emular la GPU de manera asíncrona. Cuando se active, el rendimiento mejorará.</string>
     <string name="frame_limit_enable">Activar límite de velocidad</string>
     <string name="frame_limit_enable_description">Cuando se active, la velocidad de emulación estará limitada a un porcentaje determinado de la velocidad normal.</string>
+    <string name="cpu_clock_speed">Velocidad de reloj de CPU emulada</string>
     <string name="frame_limit_slider">Limitar porcentaje de velocidad</string>
     <string name="frame_limit_slider_description">Especifica el valor al que se limita la velocidad de emulación. Con el valor por defecto del 100%, la emulación se limitará a la velocidad normal. Los valores altos o altos incrementarán o reducirán el límite de velocidad.</string>
     <string name="internal_resolution">Resolución interna</string>
@@ -75,12 +81,8 @@
     <string name="performance_warning">¡Desactivar esta opción reducirá la velocidad de emulación! Para obtener la mejor experiencia, se recomienda que se mantenga activada.</string>
     <string name="debug_warning">Aviso: Modificar estas configuraciones reducirán la velocidad de emulación.</string>
 
-    <!-- Premium strings -->
-    <string name="premium_text">Premium</string>
-    <string name="premium_settings_upsell">¡Actualízate al Premium y apoya a Citra!</string>
-    <string name="premium_settings_upsell_description">Con el Premium, ¡apoyarás a los desarrolladores para seguir mejorando Citra, y ganarás acceso a características exclusivas!</string>
-    <string name="premium_settings_welcome">Bienvenid@ al Premium.</string>
-    <string name="premium_settings_welcome_description">¡Gracias por tu apoyo!</string>
+    <!-- Interface strings -->
+    <string name="interface_text">Interfaz</string>
 
     <!-- Audio settings strings -->
     <string name="audio_stretch">Activar extensión de audio</string>
@@ -92,17 +94,18 @@
     <string name="ini_saved">Configuración guardada</string>
     <string name="gameid_saved">Configuración guardada para %1$s</string>
     <string name="error_saving">Error guardando %1$s.ini: %2$s</string>
+    <string name="loading">Cargando...</string>
 
     <!-- Game Grid Screen-->
     <string name="grid_menu_core_settings">Configuración</string>
 
     <!-- Add Directory Screen-->
     <string name="select_game_folder">Seleccionar Directorio de Juego</string>
-    <string name="add_directory_title">Añadir Carpeta a la Librería de Juegos</string>
+    <string name="install_cia_title">Instalar CIA</string>
 
     <!-- Preferences Screen -->
     <string name="preferences_settings">Configuración</string>
-    <string name="preferences_premium">Premium</string>
+    <string name="preferences_interface">Interfaz</string>
     <string name="preferences_general">General</string>
     <string name="preferences_system">Sistema</string>
     <string name="preferences_camera">Cámara</string>
@@ -122,6 +125,7 @@
     <string name="emulation_done">Hecho</string>
     <string name="emulation_toggle_controls">Activar Controles</string>
     <string name="emulation_control_scale">Ajustar Escala</string>
+    <string name="emulation_control_opacity">Ajustar Opacidad</string>
     <string name="emulation_open_settings">Abrir Configuración</string>
     <string name="emulation_switch_screen_layout">Estilo de Pantalla Apaisada</string>
     <string name="emulation_screen_layout_landscape">Por defecto</string>
@@ -164,4 +168,15 @@
     <string name="camera_select_image">Seleccionar Imagen</string>
     <string name="camera">Cámara</string>
     <string name="camera_permission_needed">Citra necesita permiso para acceder a tu cámara para emular las cámaras de la 3DS.\n\nO también puedes poner la \"Fuente de la imagen\" en \"Imagen normal\" en la Configuración de la Cámara.</string>
+
+    <!-- Disk shader cache -->
+    <string name="preparing_shaders">Preparando sombreadores</string>
+    <string name="building_shaders">Compilando sombreadores</string>
+
+    <!-- Créditos -->
+    <string name="credits_title">Créditos</string>
+
+    <!-- Ajustes in-game -->
+    <string name="setting_skip_slow_draw">Omitir dibujo lento</string>
+    <string name="setting_skip_cpu_write">Omitir acceso a la CPU</string>
 </resources>

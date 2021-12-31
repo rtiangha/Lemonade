@@ -15,11 +15,11 @@ import androidx.appcompat.widget.Toolbar;
 import org.citra.citra_emu.NativeLibrary;
 import org.citra.citra_emu.R;
 import org.citra.citra_emu.activities.EmulationActivity;
+import org.citra.citra_emu.dialogs.CreditsDialog;
 import org.citra.citra_emu.features.settings.ui.SettingsActivity;
 import org.citra.citra_emu.model.GameProvider;
 import org.citra.citra_emu.ui.platform.PlatformGamesFragment;
 import org.citra.citra_emu.utils.AddDirectoryHelper;
-import org.citra.citra_emu.utils.BillingManager;
 import org.citra.citra_emu.utils.DirectoryInitialization;
 import org.citra.citra_emu.utils.FileBrowserHelper;
 import org.citra.citra_emu.utils.PermissionsHandler;
@@ -40,11 +40,6 @@ public final class MainActivity extends AppCompatActivity implements MainView {
     private PlatformGamesFragment mPlatformGamesFragment;
 
     private MainPresenter mPresenter = new MainPresenter(this);
-
-    // Singleton to manage user billing state
-    private static BillingManager mBillingManager;
-
-    private static MenuItem mPremiumButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +66,6 @@ public final class MainActivity extends AppCompatActivity implements MainView {
             mPlatformGamesFragment = (PlatformGamesFragment) getSupportFragmentManager().getFragment(savedInstanceState, "mPlatformGamesFragment");
         }
         PicassoUtils.init();
-
-        // Setup billing manager, so we can globally query for Premium status
-        mBillingManager = new BillingManager(this);
 
         // Dismiss previous notifications (should not happen unless a crash occurred)
         EmulationActivity.tryDismissRunningNotification(this);
@@ -108,20 +100,8 @@ public final class MainActivity extends AppCompatActivity implements MainView {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_game_grid, menu);
-        mPremiumButton = menu.findItem(R.id.button_premium);
-
-        if (mBillingManager.isPremiumCached()) {
-            // User had premium in a previous session, hide upsell option
-            setPremiumButtonVisible(false);
-        }
 
         return true;
-    }
-
-    static public void setPremiumButtonVisible(boolean isVisible) {
-        if (mPremiumButton != null) {
-            mPremiumButton.setVisible(isVisible);
-        }
     }
 
     /**
@@ -130,7 +110,7 @@ public final class MainActivity extends AppCompatActivity implements MainView {
 
     @Override
     public void setVersionString(String version) {
-        mToolbar.setSubtitle(version);
+        mToolbar.setSubtitle("Gamer64_ytb");
     }
 
     @Override
@@ -172,6 +152,11 @@ public final class MainActivity extends AppCompatActivity implements MainView {
         }
     }
 
+    public void openCreditsDialog() {
+        CreditsDialog dialogCredits = CreditsDialog.newInstance();
+        dialogCredits.show(getSupportFragmentManager(), "CreditsDialog");
+    }
+
     /**
      * @param requestCode An int describing whether the Activity that is returning did so successfully.
      * @param resultCode  An int describing what Activity is giving us this callback.
@@ -196,7 +181,7 @@ public final class MainActivity extends AppCompatActivity implements MainView {
                     // If the user picked a file, as opposed to just backing out.
                     if (resultCode == MainActivity.RESULT_OK) {
                         NativeLibrary.InstallCIAS(FileBrowserHelper.getSelectedFiles(result));
-                        mPresenter.refeshGameList();
+                        mPresenter.refreshGameList();
                     }
                     break;
         }
@@ -249,21 +234,5 @@ public final class MainActivity extends AppCompatActivity implements MainView {
     protected void onDestroy() {
         EmulationActivity.tryDismissRunningNotification(this);
         super.onDestroy();
-    }
-
-    /**
-     * @return true if Premium subscription is currently active
-     */
-    public static boolean isPremiumActive() {
-        return mBillingManager.isPremiumActive();
-    }
-
-    /**
-     * Invokes the billing flow for Premium
-     *
-     * @param callback Optional callback, called once, on completion of billing
-     */
-    public static void invokePremiumBilling(Runnable callback) {
-        mBillingManager.invokePremiumBilling(callback);
     }
 }

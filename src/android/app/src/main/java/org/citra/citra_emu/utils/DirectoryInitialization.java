@@ -102,6 +102,10 @@ public final class DirectoryInitialization {
         return false;
     }
 
+    public static String getShadersDirectory() {
+        return getUserDirectory() + File.separator + "shaders";
+    }
+
     private static void initializeInternalStorage(Context context) {
         File sysDirectory = new File(context.getFilesDir(), "Sys");
 
