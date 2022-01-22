@@ -8,6 +8,7 @@ package org.citra.citra_emu;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -108,6 +109,10 @@ public final class NativeLibrary {
      * @return true if the pointer is within the touchscreen
      */
     public static native boolean onTouchEvent(float x_axis, float y_axis, boolean pressed);
+
+    public static Context getEmulationContext() {
+        return EmulationActivity.get();
+    }
 
     /**
      * Handles touch movement.

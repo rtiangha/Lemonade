@@ -40,7 +40,7 @@
         android:layout_height="350dp"
         android:textStyle="bold"
         android:text=
-        "---------------------------------------------------------------"
+        "--------------------------------------------------------------"
         android:textColor="@color/header_text"
         android:gravity="center"/>
 
@@ -58,7 +58,7 @@
         android:layout_height="450dp"
         android:textStyle="bold"
         android:text=
-            "---------------------------------------------------------------"
+            "--------------------------------------------------------------"
         android:textColor="@color/header_text"
         android:gravity="center"/>
 
@@ -76,7 +76,7 @@
         android:layout_height="550dp"
         android:textStyle="bold"
         android:text=
-            "---------------------------------------------------------------"
+            "--------------------------------------------------------------"
         android:textColor="@color/header_text"
         android:gravity="center"/>
 

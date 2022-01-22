@@ -565,16 +565,19 @@ void Java_org_citra_citra_1emu_NativeLibrary_SetUserSetting(JNIEnv* env,
 
 JNIEXPORT jintArray JNICALL Java_org_citra_citra_1emu_NativeLibrary_getRunningSettings(JNIEnv* env, jclass clazz) {
     int i = 0;
-    int settings[8];
+    int settings[12];
 
     // get settings
     settings[i++] = Settings::values.core_ticks_hack > 0;
     settings[i++] = Settings::values.show_fps;
-    settings[i++] = Settings::values.filter_mode;
+    settings[i++] = std::min(std::max(Settings::values.resolution_factor - 1, 0), 3);
     settings[i++] = Settings::values.skip_slow_draw;
     settings[i++] = Settings::values.skip_cpu_write;
+    settings[i++] = Settings::values.skip_texture_copy;
+    settings[i++] = Settings::values.skip_format_reinterpretation;
+    settings[i++] = Settings::values.use_linear_filter;
+    settings[i++] = Settings::values.texture_load_hack;
     settings[i++] = Settings::values.shaders_accurate_mul;
-    settings[i++] = Settings::values.enable_audio_stretching;
     settings[i++] = Settings::values.frame_limit / 2;
 
     jintArray array = env->NewIntArray(i);
@@ -593,8 +596,8 @@ JNIEXPORT void JNICALL Java_org_citra_citra_1emu_NativeLibrary_setRunningSetting
     // Show FPS
     Settings::values.show_fps = settings[i++] > 0;
 
-    // Linear Filter
-    Settings::values.filter_mode = settings[i++] > 0;
+    // Scale Factor
+    Settings::values.resolution_factor = settings[i++] + 1;
 
     // Skip Slow Draw
     Settings::values.skip_slow_draw = settings[i++] > 0;
@@ -602,11 +605,20 @@ JNIEXPORT void JNICALL Java_org_citra_citra_1emu_NativeLibrary_setRunningSetting
     // Skip CPU Write
     Settings::values.skip_cpu_write = settings[i++] > 0;
 
+    // Skip Texture Copy
+    Settings::values.skip_texture_copy = settings[i++] > 0;
+
+    // Skip Format Reinterpretation
+    Settings::values.skip_format_reinterpretation = settings[i++] > 0;
+
+    // Use Linear Filter
+    Settings::values.use_linear_filter = settings[i++] > 0;
+
+    // Texture Load Hack
+    Settings::values.texture_load_hack = settings[i++] > 0;
+
     // Accurate Mul
     Settings::values.shaders_accurate_mul = settings[i++] > 0;
-
-    // Audio Streching
-    Settings::values.enable_audio_stretching = settings[i++] > 0;
 
     // Frame Limit
     Settings::values.frame_limit = settings[i++] * 2;

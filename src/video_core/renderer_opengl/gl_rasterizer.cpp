@@ -45,22 +45,22 @@ static bool IsVendorMali() {
     return gpu_vendor.find("ARM") != std::string::npos;
 }
 
-static bool IsVendorAmd() {
+/*static bool IsVendorAmd() {
     const std::string_view gpu_vendor{reinterpret_cast<char const*>(glGetString(GL_VENDOR))};
     return gpu_vendor == "ATI Technologies Inc." || gpu_vendor == "Advanced Micro Devices, Inc.";
 }
 static bool IsVendorIntel() {
     std::string gpu_vendor{reinterpret_cast<char const*>(glGetString(GL_VENDOR))};
     return gpu_vendor == "Intel Inc.";
-}
+}*/
 
 RasterizerOpenGL::RasterizerOpenGL(Frontend::EmuWindow& emu_window)
     : is_mali_gpu(IsVendorMali()), shader_dirty(true),
-      vertex_buffer(GL_ARRAY_BUFFER, is_mali_gpu ? 362312 : VERTEX_BUFFER_SIZE, false),
+      vertex_buffer(GL_ARRAY_BUFFER, is_mali_gpu ? 36231 : VERTEX_BUFFER_SIZE, false),
       uniform_buffer(GL_UNIFORM_BUFFER, is_mali_gpu ? 22312 : UNIFORM_BUFFER_SIZE, false),
-      index_buffer(GL_ELEMENT_ARRAY_BUFFER, is_mali_gpu ? 425312 : INDEX_BUFFER_SIZE, false),
+      index_buffer(GL_ELEMENT_ARRAY_BUFFER, is_mali_gpu ? 45312 : INDEX_BUFFER_SIZE, false),
       texture_buffer(GL_TEXTURE_BUFFER, is_mali_gpu ? 11264 : TEXTURE_BUFFER_SIZE, false),
-      texture_lf_buffer(GL_TEXTURE_BUFFER, is_mali_gpu ? 525312 : TEXTURE_BUFFER_SIZE, false) {
+      texture_lf_buffer(GL_TEXTURE_BUFFER, is_mali_gpu ? 52512 : TEXTURE_BUFFER_SIZE, false) {
 
     allow_shadow = GLES || (GLAD_GL_ARB_shader_image_load_store && GLAD_GL_ARB_shader_image_size &&
                             GLAD_GL_ARB_framebuffer_no_attachments);
@@ -83,7 +83,7 @@ RasterizerOpenGL::RasterizerOpenGL(Frontend::EmuWindow& emu_window)
     glBindTexture(GL_TEXTURE_2D, default_texture);
     // For some reason alpha 0 wraps around to 1.0, so use 1/255 instead
     u8 framebuffer_data[4] = {0, 0, 0, 1};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer_data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer_data);
 
     // Create sampler objects
     for (std::size_t i = 0; i < texture_samplers.size(); ++i) {
@@ -914,7 +914,7 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
                                               draw_rect.right / res_scale,
                                               draw_rect.bottom / res_scale};
 
-    if (color_surface != nullptr && write_color_fb) {
+    if (color_surface != nullptr) {
         auto interval = color_surface->GetSubRectInterval(draw_rect_unscaled);
         res_cache.InvalidateRegion(boost::icl::first(interval), boost::icl::length(interval),
                                    color_surface);
@@ -1546,7 +1546,7 @@ bool RasterizerOpenGL::AccelerateTextureCopy(const GPU::Regs::DisplayTransferCon
     Surface src_surface;
     std::tie(src_surface, src_rect) = res_cache.GetTexCopySurface(src_params);
     if (src_surface == nullptr) {
-        return false;
+        return Settings::values.skip_texture_copy;
     }
 
     if (output_gap != 0 &&
@@ -1648,31 +1648,34 @@ void RasterizerOpenGL::SamplerInfo::Create() {
     glSamplerParameterf(sampler.handle, GL_TEXTURE_MIN_LOD, static_cast<float>(lod_min));
 }
 
-void RasterizerOpenGL::SamplerInfo::SyncWithConfig(
-    const Pica::TexturingRegs::TextureConfig& config) {
-
+void RasterizerOpenGL::SamplerInfo::SyncWithConfig(const TextureConfig& config) {
     GLuint s = sampler.handle;
 
-    if (mag_filter != config.mag_filter) {
-        mag_filter = config.mag_filter;
-        glSamplerParameteri(s, GL_TEXTURE_MAG_FILTER, PicaToGL::TextureMagFilterMode(mag_filter));
-    }
+    using TextureFilter = Pica::TexturingRegs::TextureConfig::TextureFilter;
+    bool use_linear_filter = Settings::values.use_linear_filter &&
+                             config.mag_filter == TextureFilter::Nearest;
 
     // TODO(wwylele): remove new_supress_mipmap_for_cube logic once mipmap for cube is implemented
     bool new_supress_mipmap_for_cube =
         config.type == Pica::TexturingRegs::TextureConfig::TextureCube;
-    if (min_filter != config.min_filter || mip_filter != config.mip_filter ||
-        supress_mipmap_for_cube != new_supress_mipmap_for_cube) {
-        min_filter = config.min_filter;
-        mip_filter = config.mip_filter;
-        supress_mipmap_for_cube = new_supress_mipmap_for_cube;
-        if (new_supress_mipmap_for_cube) {
-            // HACK: use mag filter converter for min filter because they are the same anyway
-            glSamplerParameteri(s, GL_TEXTURE_MIN_FILTER,
-                                PicaToGL::TextureMagFilterMode(min_filter));
-        } else {
-            glSamplerParameteri(s, GL_TEXTURE_MIN_FILTER,
-                                PicaToGL::TextureMinFilterMode(min_filter, mip_filter));
+    if (!use_linear_filter) {
+        if (mag_filter != config.mag_filter) {
+            mag_filter = config.mag_filter;
+            glSamplerParameteri(s, GL_TEXTURE_MAG_FILTER,
+                                PicaToGL::TextureMagFilterMode(mag_filter));
+        }
+
+        if (min_filter != config.min_filter || mip_filter != config.mip_filter) {
+            min_filter = config.min_filter;
+            mip_filter = config.mip_filter;
+            if (config.type == Pica::TexturingRegs::TextureConfig::TextureCube) {
+                // HACK: use mag filter converter for min filter because they are the same anyway
+                glSamplerParameteri(s, GL_TEXTURE_MIN_FILTER,
+                                    PicaToGL::TextureMagFilterMode(min_filter));
+            } else {
+                glSamplerParameteri(s, GL_TEXTURE_MIN_FILTER,
+                                    PicaToGL::TextureMinFilterMode(min_filter, mip_filter));
+            }
         }
     }
 

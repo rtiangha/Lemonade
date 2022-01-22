@@ -6,7 +6,9 @@
     <string name="app_notification_running">Citra está ejecutándose</string>
 
     <string name="setting_is_new_3ds">Modo New 3DS</string>
-    <string name="setting_is_new_3ds_desc">La New 3DS tiene una memoria y un procesador diferentes, y algunos juegos sólo pueden iniciarse en la New 3DS.</string>
+    <string name="setting_is_new_3ds_description">La New 3DS tiene una memoria y un procesador diferentes, y algunos juegos sólo pueden iniciarse en la New 3DS.</string>
+    <string name="setting_use_present_thread">Usar doble núcleo</string>
+    <string name="setting_use_present_thread_description">La mayoría de los juegos pueden mejorar el rendimiento mediante el uso de doble núcleo.</string>
 
     <!-- Input related strings -->
     <string name="controller_circlepad">Pad Circular</string>
@@ -62,6 +64,7 @@
     <string name="linear_filtering_description">Activa el filtro linear, que hace que los gráficos del juego se vean más suaves.</string>
     <string name="texture_filter_name">Filtro de Texturas</string>
     <string name="texture_filter_description">Mejora los gráficos visuales de los juegos al aplicar un filtro a las texturas. Los filtros soportados son Anime4K Ultrafast, Bicubic, ScaleForce, y xBRZ freescale.</string>
+    <string name="background_color">Color de Fondo</string>
     <string name="hw_renderer">Activar renderizador de hardware</string>
     <string name="hw_renderer_description">Usa el hardware para emular los gráficos de 3DS. Cuando se active, el rendimiento mejorará notablemente.</string>
     <string name="hw_shaders">Activar sombreador de hardware</string>
@@ -123,6 +126,7 @@
     <string name="emulation_configure_controls">Configurar Controles</string>
     <string name="emulation_edit_layout">Editar Estilo</string>
     <string name="emulation_done">Hecho</string>
+    <string name="emulation_rotate_screen">Rotar Pantalla</string>
     <string name="emulation_toggle_controls">Activar Controles</string>
     <string name="emulation_control_scale">Ajustar Escala</string>
     <string name="emulation_control_opacity">Ajustar Opacidad</string>
@@ -133,6 +137,7 @@
     <string name="emulation_screen_layout_single">Pantalla Única</string>
     <string name="emulation_screen_layout_sidebyside">Conjunta</string>
     <string name="emulation_swap_screens">Intercambiar Pantallas</string>
+    <string name="emulation_haptic_feedback">Vibrar al Tocar</string>
     <string name="emulation_touch_overlay_reset">Reiniciar Estilo</string>
     <string name="emulation_show_overlay">Mostrar Estilo</string>
     <string name="emulation_close_game">Cerrar Juego</string>
@@ -179,4 +184,13 @@
     <!-- Ajustes in-game -->
     <string name="setting_skip_slow_draw">Omitir dibujo lento</string>
     <string name="setting_skip_cpu_write">Omitir acceso a la CPU</string>
+    <string name="setting_skip_texture_copy">Omitir copia de textura</string>
+    <string name="setting_skip_format_reinterpretation">Omitir Reinterpretación De Formato</string>
+
+    <!-- Teclado -->
+    <string name="keyboard_please_input">Por favor ponga:</string>
+    <string name="input_text_max_length">Longitud máxima de entrada: %1$d.</string>
+
+    <!-- Menú de trucos/hacks -->
+    <string name="cheat_code">Código de Truco</string>
 </resources>

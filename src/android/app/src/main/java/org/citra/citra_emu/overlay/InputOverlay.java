@@ -16,10 +16,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
@@ -42,6 +45,10 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
     private final Set<InputOverlayDrawableButton> overlayButtons = new HashSet<>();
     private final Set<InputOverlayDrawableDpad> overlayDpads = new HashSet<>();
     private final Set<InputOverlayDrawableJoystick> overlayJoysticks = new HashSet<>();
+
+    public static final String PREF_HAPTIC_FEEDBACK = "UseHapticFeedback";
+
+    public static boolean sUseHapticFeedback = false;
 
     private boolean mIsInEditMode = false;
     private InputOverlayDrawableButton mButtonBeingConfigured;
@@ -66,6 +73,8 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
         if (!mPreferences.getBoolean("OverlayInit", false)) {
             defaultOverlay();
         }
+
+        sUseHapticFeedback = mPreferences.getBoolean(InputOverlay.PREF_HAPTIC_FEEDBACK, true);
 
         // Reset 3ds touchscreen pointer ID
         mTouchscreenPointerId = -1;
@@ -345,6 +354,8 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        boolean shouldVibrate = false;
+
         if (isInEditMode()) {
             return onTouchWhileEditing(event);
         }
@@ -386,6 +397,7 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
                     if (button.getBounds()
                             .contains((int) event.getX(pointerIndex), (int) event.getY(pointerIndex))) {
                         button.setPressedState(true);
+                        shouldVibrate = true;
                         button.setTrackId(event.getPointerId(pointerIndex));
                         NativeLibrary.onGamePadEvent(NativeLibrary.TouchScreenDevice, button.getId(),
                                 ButtonState.PRESSED);
@@ -446,6 +458,8 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
                         boolean down = false;
                         boolean left = false;
                         boolean right = false;
+                        int last_state = dpad.getState();
+
                         if (EmulationMenuSettings.getDpadSlideEnable() ||
                                 (event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN ||
                                 (event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_DOWN) {
@@ -504,6 +518,9 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
                             } else {
                                 dpad.setState(InputOverlayDrawableDpad.STATE_DEFAULT);
                             }
+
+                            shouldVibrate = shouldVibrate || (dpad.getState() != last_state
+                                    && dpad.getState() != InputOverlayDrawableDpad.STATE_DEFAULT);
                         }
                     }
                 }
@@ -519,9 +536,26 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
                     .onGamePadMoveEvent(NativeLibrary.TouchScreenDevice, axisID, axises[0], axises[1]);
         }
 
+        if (shouldVibrate) {
+            onPressedFeedback();
+        }
+
         invalidate();
 
         return true;
+    }
+
+    public void onPressedFeedback() {
+        if (sUseHapticFeedback) {
+            VibrationEffect effect = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
+                ((Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE)).vibrate(effect);
+            } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                ((Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE))
+                        .vibrate(VibrationEffect.EFFECT_CLICK);
+            }
+        }
     }
 
     public boolean onTouchWhileEditing(MotionEvent event) {

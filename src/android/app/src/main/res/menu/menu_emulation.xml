@@ -4,6 +4,12 @@
     tools:context="org.citra.citra_emu.activities.EmulationActivity">
 
     <item
+        android:id="@+id/menu_emulation_rotate_screen"
+        android:icon="@mipmap/ic_screen_rotation"
+        app:showAsAction="never"
+        android:title="@string/emulation_rotate_screen" />
+
+    <item
         android:id="@+id/menu_emulation_running_setting"
         android:icon="@drawable/ic_settings_core"
         android:title="@string/preferences_settings"

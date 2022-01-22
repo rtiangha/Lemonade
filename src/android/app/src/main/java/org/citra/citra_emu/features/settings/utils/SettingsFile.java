@@ -37,7 +37,7 @@ public final class SettingsFile {
 
     public static final String KEY_DESIGN = "design";
 
-    public static final String KEY_PREMIUM = "premium";
+    public static final String KEY_USE_PRESENT_THREAD = "use_present_thread";
 
     public static final String KEY_HW_RENDERER = "use_hw_renderer";
     public static final String KEY_HW_SHADER = "use_hw_shader";
@@ -49,6 +49,7 @@ public final class SettingsFile {
     public static final String KEY_RESOLUTION_FACTOR = "resolution_factor";
     public static final String KEY_SHOW_FPS = "show_fps";
     public static final String KEY_CPU_USAGE_LIMIT = "cpu_usage_limit";
+    public static final String KEY_TEXTURE_LOAD_HACK = "texture_load_hack";
 
     // custom textures
     public static final String KEY_CUSTOM_TEXTURES = "custom_textures";
@@ -63,7 +64,7 @@ public final class SettingsFile {
     public static final String KEY_RENDER_3D = "render_3d";
     public static final String KEY_FACTOR_3D = "factor_3d";
     // public static final String KEY_PP_SHADER_NAME = "pp_shader_name";
-    public static final String KEY_FILTER_MODE = "filter_mode";
+    // public static final String KEY_FILTER_MODE = "filter_mode";
     public static final String KEY_TEXTURE_FILTER_NAME = "texture_filter_name";
     public static final String KEY_USE_ASYNCHRONOUS_GPU_EMULATION = "use_asynchronous_gpu_emulation";
 

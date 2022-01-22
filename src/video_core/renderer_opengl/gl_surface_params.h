@@ -263,6 +263,7 @@ public:
     u16 res_scale = 1;
 
     bool is_tiled = false;
+    bool is_texture = false;
     PixelFormat pixel_format = PixelFormat::Invalid;
     SurfaceType type = SurfaceType::Invalid;
 };

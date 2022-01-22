@@ -198,7 +198,7 @@ public final class EmulationFragment extends Fragment implements SurfaceHolder.C
             {
                 final double[] perfStats = NativeLibrary.GetPerfStats();
                 if (perfStats[FPS] > 0) {
-                    mPerfStats.setText(String.format("FPS: %d Speed: %d%%", (int) (perfStats[FPS] + 0.5),
+                    mPerfStats.setText(String.format("CITRA ENHANCED | FPS: %d | Speed: %d%%", (int) (perfStats[FPS] + 0.5),
                             (int) (perfStats[SPEED] * 100.0 + 0.5)));
                 }
 

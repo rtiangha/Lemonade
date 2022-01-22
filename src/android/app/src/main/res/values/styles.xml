@@ -12,6 +12,9 @@
 
         <item name="titleTextColor">@color/citra_logo_text_color</item>
 
+        <!-- Disallow force dark mode, to fix UI issues on MIUI -->
+        <item name="android:forceDarkAllowed">false</item>
+
         <!-- Enable window content transitions -->
         <item name="android:windowContentTransitions">true</item>
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
@@ -25,6 +28,9 @@
         <item name="colorPrimary">@color/citra_orange</item>
         <item name="colorPrimaryDark">@color/citra_orange_dark</item>
         <item name="colorAccent">@color/citra_accent</item>
+
+        <!-- Disallow force dark mode, to fix UI issues on MIUI -->
+        <item name="android:forceDarkAllowed">false</item>
     </style>
 
     <!-- Inherit from the Base Citra Dialog Theme -->
@@ -35,6 +41,12 @@
         <item name="android:windowTranslucentNavigation">true</item>
 
         <item name="android:windowBackground">@android:color/black</item>
+
+        <!-- Display cutout mode -->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+
+        <!-- Disallow force dark mode, to fix UI issues on MIUI -->
+        <item name="android:forceDarkAllowed">false</item>
 
         <!-- Enable window content transitions -->
         <item name="android:windowContentTransitions">true</item>
@@ -48,6 +60,9 @@
         <item name="colorPrimaryDark">@color/citra_orange_dark</item>
         <item name="colorAccent">@color/citra_accent</item>
         <item name="android:windowBackground">@color/card_view_background</item>
+
+        <!-- Disallow force dark mode, to fix UI issues on MIUI -->
+        <item name="android:forceDarkAllowed">false</item>
 
         <!-- Need to set this also to style create folder dialog -->
         <item name="alertDialogTheme">@style/FilePickerAlertDialogTheme</item>

@@ -387,7 +387,12 @@ void RendererOpenGL::SwapBuffers() {
     RenderScreenshot();
 
     const auto& layout = render_window.GetFramebufferLayout();
-    RenderToMailbox(layout, render_window.mailbox, false);
+    if (Settings::values.use_present_thread) {
+        RenderToMailbox(layout, render_window.mailbox, false);
+    } else {
+        DrawScreens(layout, false);
+        render_window.PollEvents();
+    }
 
     if (frame_dumper.IsDumping()) {
         try {
@@ -668,24 +673,28 @@ void RendererOpenGL::InitOpenGLObjects() {
         screen_info.display_texture = screen_info.texture.resource.handle;
     }
 
-        // init
-        OSD::Initialize();
-        if (Settings::values.is_new_3ds) {
-            OSD::AddMessage("New 3DS Model", OSD::MessageType::New3DS, OSD::Duration::NORMAL,
-                            OSD::Color::YELLOW);
-        }
-        if (Settings::values.core_ticks_hack) {
-            OSD::AddMessage("FMV Hack", OSD::MessageType::FMVHack, OSD::Duration::NORMAL,
-                            OSD::Color::YELLOW);
-        }
-        if (!Settings::values.use_hw_shader) {
-            OSD::AddMessage("HW Shader Off", OSD::MessageType::HWShader, OSD::Duration::NORMAL,
-                            OSD::Color::YELLOW);
-        }
-        if (!Settings::values.use_cpu_jit) {
-            OSD::AddMessage("CPU JIT Off", OSD::MessageType::CPUJit, OSD::Duration::NORMAL,
-                            OSD::Color::YELLOW);
-        }
+    // init
+    OSD::Initialize();
+    if (Settings::values.is_new_3ds) {
+        OSD::AddMessage("New 3DS Model", OSD::MessageType::New3DS, OSD::Duration::NORMAL,
+                        OSD::Color::YELLOW);
+    }
+    if (Settings::values.core_ticks_hack) {
+        OSD::AddMessage("FMV Hack", OSD::MessageType::FMVHack, OSD::Duration::NORMAL,
+                        OSD::Color::YELLOW);
+    }
+    if (Settings::values.texture_load_hack) {
+        OSD::AddMessage("Texture Load Hack", OSD::MessageType::TexLoadHack, OSD::Duration::NORMAL,
+                        OSD::Color::YELLOW);
+    }
+    if (!Settings::values.use_hw_shader) {
+        OSD::AddMessage("HW Shader Off", OSD::MessageType::HWShader, OSD::Duration::NORMAL,
+                        OSD::Color::YELLOW);
+    }
+    if (!Settings::values.use_cpu_jit) {
+        OSD::AddMessage("CPU JIT Off", OSD::MessageType::CPUJit, OSD::Duration::NORMAL,
+                        OSD::Color::YELLOW);
+    }
 
     state.texture_units[0].texture_2d = 0;
     state.Apply();

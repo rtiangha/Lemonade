@@ -67,12 +67,12 @@ public class EmulationMenuSettings {
     }
 
     public static boolean getShowOverlay() {
-        return mPreferences.getBoolean("EmulationMenuSettings_ShowOverylay", true);
+        return mPreferences.getBoolean("EmulationMenuSettings_ShowOverlay", true);
     }
 
     public static void setShowOverlay(boolean value) {
         final SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putBoolean("EmulationMenuSettings_ShowOverylay", value);
+        editor.putBoolean("EmulationMenuSettings_ShowOverlay", value);
         editor.apply();
     }
 }

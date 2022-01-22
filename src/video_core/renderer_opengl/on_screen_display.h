@@ -23,6 +23,7 @@ namespace OSD {
         CPUJit,
         New3DS,
         FMVHack,
+        TexLoadHack,
     };
 
     namespace Color {

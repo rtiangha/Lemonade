@@ -154,6 +154,34 @@
         <item>2</item>
     </integer-array>
 
+    <string-array name="customTicksNames">
+        <item>10000</item>
+        <item>15000</item>
+        <item>20000</item>
+        <item>25000</item>
+        <item>30000</item>
+        <item>35000</item>
+        <item>40000</item>
+        <item>45000</item>
+        <item>50000</item>
+        <item>55000</item>
+        <item>60000</item>
+    </string-array>
+
+    <integer-array name="customTicksValues">
+        <item>10000</item>
+        <item>15000</item>
+        <item>20000</item>
+        <item>25000</item>
+        <item>30000</item>
+        <item>35000</item>
+        <item>40000</item>
+        <item>45000</item>
+        <item>50000</item>
+        <item>55000</item>
+        <item>60000</item>
+    </integer-array>
+
     <string-array name="render3dModes">
         <item>Off</item>
         <item>Side by Side</item>

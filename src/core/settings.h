@@ -248,6 +248,13 @@ struct Values {
     bool core_downcount_hack;
     bool skip_slow_draw;
     bool skip_cpu_write;
+    bool skip_texture_copy;
+    bool use_linear_filter;
+    bool texture_load_hack;
+    bool use_present_thread;
+
+    // Citra Valentin ports
+    bool skip_format_reinterpretation;
 
     // Audio
     bool enable_dsp_lle;

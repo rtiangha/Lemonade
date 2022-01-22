@@ -66,6 +66,8 @@ static constexpr std::array<FormatTuple, 5> fb_format_tuples_oes = {{
     {GL_RGBA4, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4},   // RGBA4
 }};
 
+static bool g_texture_load_hack;
+
 const FormatTuple& GetFormatTuple(PixelFormat pixel_format) {
     const SurfaceType type = SurfaceParams::GetFormatType(pixel_format);
     if (type == SurfaceType::Color) {
@@ -385,7 +387,7 @@ static bool FillSurface(const Surface& surface, const u8* fill_data,
         glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0,
                                0);
 
-        Pica::Texture::TextureInfo tex_info{};
+        Pica::Texture::TextureInfo tex_info;
         tex_info.format = static_cast<Pica::TexturingRegs::TextureFormat>(surface->pixel_format);
         Common::Vec4<u8> color = Pica::Texture::LookupTexture(fill_data, 0, 0, tex_info);
 
@@ -1032,6 +1034,8 @@ static Surface FindMatch(const SurfaceCache& surface_cache, const SurfaceParams&
 }
 
 RasterizerCacheOpenGL::RasterizerCacheOpenGL() {
+    g_texture_load_hack = Settings::values.texture_load_hack;
+
     resolution_scale_factor = VideoCore::GetResolutionScaleFactor();
     texture_filterer = std::make_unique<TextureFilterer>(Settings::values.texture_filter_name,
                                                          resolution_scale_factor);
@@ -1213,8 +1217,25 @@ Surface RasterizerCacheOpenGL::GetTextureSurface(const Pica::Texture::TextureInf
     params.height = info.height;
     params.is_tiled = true;
     params.pixel_format = SurfaceParams::PixelFormatFromTextureFormat(info.format);
+    params.is_texture = g_texture_load_hack &&
+                        (params.addr < 0x181FFFFF || params.pixel_format > PixelFormat::RGBA4);
     params.res_scale = texture_filterer->IsNull() ? 1 : resolution_scale_factor;
     params.UpdateParams();
+
+    if (params.is_texture) {
+        // hack for texture load hack
+        // issues: 7th Dragon, Blazblue2, RuneFactory4, Legend of Legacy
+        if (params.addr == 0x180FD200) {
+            // Yokai Watch
+            params.is_texture = false;
+        } else if (params.addr == 0x180C6280) {
+            // Fire Emblem - IF
+            params.is_texture = false;
+        } else if (params.addr == 0x18113080) {
+            // Bravely Second
+            params.is_texture = false;
+        }
+    }
 
     u32 min_width = info.width >> max_level;
     u32 min_height = info.height >> max_level;
@@ -1476,6 +1497,11 @@ SurfaceSurfaceRect_Tuple RasterizerCacheOpenGL::GetFramebufferSurfaces(
         using_depth_fb = false;
     }
 
+    if (!using_depth_fb && g_texture_load_hack &&
+        color_params.addr > 0x18000000 && color_params.addr < 0x181FFFFF) {
+        color_params.is_texture = true;
+    }
+
     Common::Rectangle<u32> color_rect{};
     Surface color_surface = nullptr;
     if (using_color_fb)
@@ -1619,7 +1645,15 @@ void RasterizerCacheOpenGL::ValidateSurface(const Surface& surface, PAddr addr, 
             FindMatch<MatchFlags::Copy>(surface_cache, params, ScaleMatch::Ignore, interval);
         if (copy_surface != nullptr) {
             SurfaceInterval copy_interval = params.GetCopyableInterval(copy_surface);
-            CopySurface(copy_surface, surface, copy_interval);
+            if (copy_surface->type == SurfaceType::Fill && surface->is_texture && !surface->gl_buffer.empty()) {
+                // don't clear texture
+                if (surface->addr == 0x180A6280 || surface->addr == 0x18108D00) {
+                    // Fire Emblem - IF and Fire Emblem - ECHO
+                    CopySurface(copy_surface, surface, copy_interval);
+                }
+            } else {
+                CopySurface(copy_surface, surface, copy_interval);
+            }
             notify_validated(copy_interval);
             continue;
         }
@@ -1645,11 +1679,28 @@ void RasterizerCacheOpenGL::ValidateSurface(const Surface& surface, PAddr addr, 
             }
         }
 
+        if (Settings::values.skip_format_reinterpretation) {
+            bool retry = false;
+
+            for (const auto& pair : RangeFromInterval(dirty_regions, interval)) {
+                surface->invalid_regions.erase(pair.first & interval);
+                retry = true;
+            }
+
+            if (retry) {
+                continue;
+            }
+        }
+
         // Load data from 3DS memory
-        FlushRegion(params.addr, params.size);
-        surface->LoadGLBuffer(params.addr, params.end);
-        surface->UploadGLTexture(surface->GetSubRect(params), read_framebuffer.handle,
-                                 draw_framebuffer.handle);
+        if (surface->is_texture && !surface->gl_buffer.empty()) {
+            // skip
+        } else {
+            FlushRegion(params.addr, params.size);
+            surface->LoadGLBuffer(params.addr, params.end);
+            surface->UploadGLTexture(surface->GetSubRect(params), read_framebuffer.handle,
+                                     draw_framebuffer.handle);
+        }
         notify_validated(params.GetInterval());
     }
 }
@@ -1790,6 +1841,9 @@ void RasterizerCacheOpenGL::FlushRegion(PAddr addr, u32 size, Surface flush_surf
         // Sanity check, this surface is the last one that marked this region dirty
         ASSERT(surface->IsRegionValid(interval));
 
+        if (surface->is_texture && !surface->gl_buffer.empty()) {
+            // skip texture
+        }
         if (surface->type != SurfaceType::Fill) {
             SurfaceParams params = surface->FromInterval(interval);
             surface->DownloadGLTexture(surface->GetSubRect(params), read_framebuffer.handle,

@@ -3,7 +3,9 @@ package org.citra.citra_emu.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -46,6 +48,7 @@ import org.citra.citra_emu.utils.ForegroundService;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Retention;
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 
@@ -68,17 +71,20 @@ public final class EmulationActivity extends AppCompatActivity {
     public static final int MENU_ACTION_SCREEN_LAYOUT_SINGLE = 9;
     public static final int MENU_ACTION_SCREEN_LAYOUT_SIDEBYSIDE = 10;
     public static final int MENU_ACTION_SWAP_SCREENS = 11;
-    public static final int MENU_ACTION_RESET_OVERLAY = 12;
-    public static final int MENU_ACTION_SHOW_OVERLAY = 13;
-    public static final int MENU_ACTION_OPEN_SETTINGS = 14;
-    public static final int MENU_ACTION_LOAD_AMIIBO = 15;
-    public static final int MENU_ACTION_REMOVE_AMIIBO = 16;
-    public static final int MENU_ACTION_JOYSTICK_REL_CENTER = 17;
-    public static final int MENU_ACTION_DPAD_SLIDE_ENABLE = 18;
+    public static final int MENU_ACTION_ROTATE_SCREEN = 12;
+    public static final int MENU_ACTION_RESET_OVERLAY = 13;
+    public static final int MENU_ACTION_SHOW_OVERLAY = 14;
+    public static final int MENU_ACTION_OPEN_SETTINGS = 15;
+    public static final int MENU_ACTION_LOAD_AMIIBO = 16;
+    public static final int MENU_ACTION_REMOVE_AMIIBO = 17;
+    public static final int MENU_ACTION_JOYSTICK_REL_CENTER = 18;
+    public static final int MENU_ACTION_DPAD_SLIDE_ENABLE = 19;
 
     public static final int REQUEST_SELECT_AMIIBO = 2;
     private static final int EMULATION_RUNNING_NOTIFICATION = 0x1000;
     private static SparseIntArray buttonsActionsMap = new SparseIntArray();
+
+    private static WeakReference<EmulationActivity> sInstance = new WeakReference<>(null);
 
     static {
         buttonsActionsMap.append(R.id.menu_emulation_edit_layout,
@@ -103,6 +109,8 @@ public final class EmulationActivity extends AppCompatActivity {
                 EmulationActivity.MENU_ACTION_SCREEN_LAYOUT_SIDEBYSIDE);
         buttonsActionsMap.append(R.id.menu_emulation_swap_screens,
                 EmulationActivity.MENU_ACTION_SWAP_SCREENS);
+        buttonsActionsMap.append(R.id.menu_emulation_rotate_screen,
+                EmulationActivity.MENU_ACTION_ROTATE_SCREEN);
         buttonsActionsMap
                 .append(R.id.menu_emulation_reset_overlay, EmulationActivity.MENU_ACTION_RESET_OVERLAY);
         buttonsActionsMap
@@ -149,6 +157,7 @@ public final class EmulationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sInstance = new WeakReference<>(this);
 
         if (savedInstanceState == null) {
             // Get params we were passed
@@ -201,6 +210,10 @@ public final class EmulationActivity extends AppCompatActivity {
         // Override Citra core INI with the one set by our in game menu
         NativeLibrary.SwapScreens(EmulationMenuSettings.getSwapScreens(),
                 getWindowManager().getDefaultDisplay().getRotation());
+    }
+
+    public static EmulationActivity get() {
+        return sInstance.get();
     }
 
     @Override
@@ -407,9 +420,9 @@ public final class EmulationActivity extends AppCompatActivity {
 
             // Toggle the visibility of the Performance stats TextView
             case MENU_ACTION_SHOW_FPS: {
-                final boolean isEnabled = !EmulationMenuSettings.getShowFps();
-                EmulationMenuSettings.setShowFps(isEnabled);
-                item.setChecked(isEnabled);
+                final boolean isShowFpsEnabled = !EmulationMenuSettings.getShowFps();
+                EmulationMenuSettings.setShowFps(isShowFpsEnabled);
+                item.setChecked(isShowFpsEnabled);
 
                 mEmulationFragment.updateShowFpsOverlay();
                 break;
@@ -436,14 +449,19 @@ public final class EmulationActivity extends AppCompatActivity {
 
             // Swap the top and bottom screen locations
             case MENU_ACTION_SWAP_SCREENS: {
-                final boolean isEnabled = !EmulationMenuSettings.getSwapScreens();
-                EmulationMenuSettings.setSwapScreens(isEnabled);
-                item.setChecked(isEnabled);
+                final boolean isSwapScreensEnabled = !EmulationMenuSettings.getSwapScreens();
+                EmulationMenuSettings.setSwapScreens(isSwapScreensEnabled);
+                item.setChecked(isSwapScreensEnabled);
 
-                NativeLibrary.SwapScreens(isEnabled, getWindowManager().getDefaultDisplay()
+                NativeLibrary.SwapScreens(isSwapScreensEnabled, getWindowManager().getDefaultDisplay()
                         .getRotation());
                 break;
             }
+
+            // Rotate screen
+            case MENU_ACTION_ROTATE_SCREEN:
+                rotateScreen();
+                break;
 
             // Reset overlay placement
             case MENU_ACTION_RESET_OVERLAY:
@@ -452,9 +470,9 @@ public final class EmulationActivity extends AppCompatActivity {
 
             // Show or hide overlay
             case MENU_ACTION_SHOW_OVERLAY: {
-                final boolean isEnabled = !EmulationMenuSettings.getShowOverlay();
-                EmulationMenuSettings.setShowOverlay(isEnabled);
-                item.setChecked(isEnabled);
+                final boolean isShowOverlayEnabled = !EmulationMenuSettings.getShowOverlay();
+                EmulationMenuSettings.setShowOverlay(isShowOverlayEnabled);
+                item.setChecked(isShowOverlayEnabled);
 
                 mEmulationFragment.refreshInputOverlay();
                 break;
@@ -494,6 +512,14 @@ public final class EmulationActivity extends AppCompatActivity {
         return true;
     }
 
+    public void rotateScreen() {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+    }
+
     private void changeScreenOrientation(int layoutOption, MenuItem item) {
         item.setChecked(true);
         NativeLibrary.NotifyOrientationChange(layoutOption, getWindowManager().getDefaultDisplay()
@@ -501,7 +527,7 @@ public final class EmulationActivity extends AppCompatActivity {
         EmulationMenuSettings.setLandscapeScreenLayout(layoutOption);
     }
 
-    private void editControlsPlacement() {
+    public void editControlsPlacement() {
         if (mEmulationFragment.isConfiguringControls()) {
             mEmulationFragment.stopConfiguringControls();
         } else {
@@ -584,6 +610,10 @@ public final class EmulationActivity extends AppCompatActivity {
 
     private void RemoveAmiibo() {
         NativeLibrary.RemoveAmiibo();
+    }
+
+    public String getGameTitle() {
+        return mSelectedTitle;
     }
 
     private void toggleControls() {

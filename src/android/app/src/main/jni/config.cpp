@@ -114,6 +114,7 @@ void Config::ReadValues() {
 
     // Renderer
     Settings::values.use_gles = sdl2_config->GetBoolean("Renderer", "use_gles", true);
+    Settings::values.use_present_thread = sdl2_config->GetBoolean("Renderer", "use_present_thread", true);
     Settings::values.use_hw_renderer = sdl2_config->GetBoolean("Renderer", "use_hw_renderer", true);
     Settings::values.use_hw_shader = sdl2_config->GetBoolean("Renderer", "use_hw_shader", true);
     Settings::values.shaders_accurate_mul =
@@ -125,11 +126,13 @@ void Config::ReadValues() {
         static_cast<u16>(sdl2_config->GetInteger("Renderer", "resolution_factor", 1));
     Settings::values.show_fps = sdl2_config->GetBoolean("Renderer", "show_fps", false);
     Settings::values.core_downcount_hack = sdl2_config->GetBoolean("Renderer", "cpu_usage_limit", false);
+    Settings::values.texture_load_hack = sdl2_config->GetBoolean("Renderer", "texture_load_hack", false);
 
     // custom textures
     Settings::values.custom_textures = sdl2_config->GetBoolean("Renderer", "custom_textures", false);
     Settings::values.preload_textures = sdl2_config->GetBoolean("Renderer", "preload_textures", false);
-    Settings::values.dump_textures = sdl2_config->GetBoolean("Renderer", "dump_textures", false);
+    // dump textures don't works for now
+    // Settings::values.dump_textures = sdl2_config->GetBoolean("Renderer", "dump_textures", false);
 
     Settings::values.use_disk_shader_cache =
         sdl2_config->GetBoolean("Renderer", "use_disk_shader_cache", true);
