@@ -75,6 +75,9 @@
     <string name="performance_warning">Disabilitare questa impostazione riducerà significativamente le performance dell\'emulazione! Per un\'esperienza migliore, è consigliato lasciare questa impostazione abilitata.</string>
     <string name="debug_warning">Attenzione: Modificare queste impostazioni rallenterà l\'emulazione</string>
 
+    <!-- Interface strings -->
+    <string name="interface_text">Interfaccia</string>
+
     <!-- Premium strings -->
     <string name="premium_text">Premium</string>
     <string name="premium_settings_upsell">Passa a Premium e supporta Citra!</string>
@@ -102,6 +105,7 @@
 
     <!-- Preferences Screen -->
     <string name="preferences_settings">Impostazioni</string>
+    <string name="preferences_interface">Interfaccia</string>
     <string name="preferences_premium">Premium</string>
     <string name="preferences_general">Generale</string>
     <string name="preferences_system">Sistema</string>
@@ -164,4 +168,8 @@
     <string name="camera_select_image">Seleziona Immagine</string>
     <string name="camera">Fotocamera</string>
     <string name="camera_permission_needed">Citra ha bisogno dell\'accesso alla fotocamera per emulare quella del 3DS.\n\nIn alternativa, puoi impostare \"Immagine Sorgente\" su \"Immagine Fissa\" in Impostazioni Fotocamera.</string>
+
+    <!-- Microphone -->
+    <string name="microphone">Microfono</string>
+    <string name="microphone_permission_needed">Citra ha bisogno dell\'accesso al microfono per emulare quello del 3DS.\n\nIn alternativa, puoi cambiare \"Audio Input Device\" in Impostazioni Audio.</string>
 </resources>
