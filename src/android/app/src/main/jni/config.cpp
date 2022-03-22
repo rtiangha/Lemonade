@@ -115,6 +115,7 @@ void Config::ReadValues() {
     // Renderer
     Settings::values.use_gles = sdl2_config->GetBoolean("Renderer", "use_gles", true);
     Settings::values.use_present_thread = sdl2_config->GetBoolean("Renderer", "use_present_thread", true);
+    Settings::values.inaccurate_emulation = sdl2_config->GetBoolean("Renderer", "inaccurate_emulation", false);
     Settings::values.use_hw_renderer = sdl2_config->GetBoolean("Renderer", "use_hw_renderer", true);
     Settings::values.use_hw_shader = sdl2_config->GetBoolean("Renderer", "use_hw_shader", true);
     Settings::values.shaders_accurate_mul =

@@ -13,6 +13,7 @@ import android.os.Build;
 import org.citra.citra_emu.model.GameDatabase;
 import org.citra.citra_emu.utils.DirectoryInitialization;
 import org.citra.citra_emu.utils.PermissionsHandler;
+import org.citra.citra_emu.utils.VolleyUtil;
 
 public class CitraApplication extends Application {
     public static GameDatabase databaseHelper;
@@ -39,6 +40,7 @@ public class CitraApplication extends Application {
     public void onCreate() {
         super.onCreate();
         application = this;
+        VolleyUtil.init(getApplicationContext());
 
         if (PermissionsHandler.hasWriteAccess(getApplicationContext())) {
             DirectoryInitialization.start(getApplicationContext());

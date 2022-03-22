@@ -25,9 +25,15 @@
         android:icon="@drawable/ic_settings_core"
         android:title="@string/grid_menu_core_settings"
         app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/button_credits"
         android:title="@string/credits_title"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/button_updater"
+        android:title="@string/updater_title"
         app:showAsAction="never" />
 
 </menu>

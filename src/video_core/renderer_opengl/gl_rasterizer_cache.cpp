@@ -703,7 +703,7 @@ void CachedSurface::DumpTexture(GLuint target_tex, u64 tex_hash) {
         return;
     }
 
-    dump_path += fmt::format("tex1_{}x{}_{:016X}_{}.png", width, height, tex_hash, pixel_format);
+    dump_path += fmt::format("tex1_{}x{}_{:016X}_{}.png", width, height, tex_hash, (u32)pixel_format);
     if (!custom_tex_cache.IsTextureDumped(tex_hash) && !FileUtil::Exists(dump_path)) {
         custom_tex_cache.SetTextureDumped(tex_hash);
 
@@ -761,7 +761,7 @@ void CachedSurface::UploadGLTexture(Common::Rectangle<u32> rect, GLuint read_fb_
     // Load data from memory to the surface
     GLint x0 = static_cast<GLint>(rect.left);
     GLint y0 = static_cast<GLint>(rect.bottom);
-    std::size_t buffer_offset = (y0 * stride + x0) * GetGLBytesPerPixel(pixel_format);
+    std::size_t buffer_offset = (rect.bottom * stride + rect.left) * GetGLBytesPerPixel(pixel_format);
 
     const FormatTuple& tuple = GetFormatTuple(pixel_format);
     GLuint target_tex = texture.handle;

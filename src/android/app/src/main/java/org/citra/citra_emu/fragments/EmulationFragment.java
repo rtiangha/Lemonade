@@ -3,6 +3,8 @@ package org.citra.citra_emu.fragments;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -194,17 +196,25 @@ public final class EmulationFragment extends Fragment implements SurfaceHolder.C
             final int FRAMETIME = 2;
             final int SPEED = 3;
 
+            final int BLUE = -16776961;
+
             perfStatsUpdater = () ->
             {
                 final double[] perfStats = NativeLibrary.GetPerfStats();
                 if (perfStats[FPS] > 0) {
-                    mPerfStats.setText(String.format("CITRA ENHANCED | FPS: %d | Speed: %d%%", (int) (perfStats[FPS] + 0.5),
+                    mPerfStats.setText(String.format("CITRA ENHANCED | FPS: %d | SPD: %d%%", (int) (perfStats[FPS] + 0.5),
                             (int) (perfStats[SPEED] * 100.0 + 0.5)));
                 }
 
-                perfStatsUpdateHandler.postDelayed(perfStatsUpdater, 3000);
+                perfStatsUpdateHandler.postDelayed(perfStatsUpdater, 2000);
             };
             perfStatsUpdateHandler.post(perfStatsUpdater);
+
+            Typeface tf = Typeface.createFromAsset(activity.getAssets(), "fonts/bubble.ttf");
+
+            mPerfStats.setTypeface(tf);
+
+            mPerfStats.setShadowLayer(1.6f, 1.5f, 1.3f, Color.BLACK);
 
             mPerfStats.setVisibility(View.VISIBLE);
         } else {

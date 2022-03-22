@@ -31,6 +31,9 @@ public final class StartupHandler {
     }
 
     public static void HandleInit(FragmentActivity parent) {
+        // Ask the user if he wants to check for updates at startup if we haven't yet.
+        UpdaterUtils.checkUpdatesInit(parent);
+
         if (PermissionsHandler.isFirstBoot(parent)) {
             // Prompt user with standard first boot disclaimer
             new AlertDialog.Builder(parent)

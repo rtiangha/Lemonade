@@ -45,6 +45,8 @@
     <string name="cpu_jit_description">Uses the Just-in-Time (JIT) compiler for CPU emulation. When enabled, game performance will be significantly improved.</string>
     <string name="init_clock">System clock type</string>
     <string name="init_clock_description">Set the emulated 3DS clock to either reflect that of your device or start at a simulated date and time.</string>
+    <string name="inaccurate_emulation">Inaccurate emulation</string>
+    <string name="inaccurate_emulation_description">Can improve performance at the cost of crashes/glitches!</string>
 
     <!-- System settings strings -->
     <string name="init_time">System clock starting time override</string>
@@ -256,4 +258,30 @@
 
     <!-- Cheat Manager -->
     <string name="cheat_code">Cheat Code</string>
+
+    <!-- Updater Window -->
+    <string name="grid_menu_open_updater">Enhanced Updater</string>
+    <string name="updater_title">Updater</string>
+    <string name="updater_error">An error has occurred. Please check your internet connection.</string>
+    <string name="updater_uptodate">Up to date!</string>
+    <string name="updater_newavailable">New version available</string>
+    <string name="button_download">Download</string>
+    <string name="button_install">Install</string>
+    <string name="version_description_hide">%2$s version</string>
+    <string name="version_description">Version: %1$d</string>
+    <string name="installed_version">Installed version: %1$d</string>
+    <string name="button_view_changelog">View changelog</string>
+    <string name="changelog_section">Version# %1$d\nDate: %2$s\nChanges:\n%3$s\n\n</string>
+    <string name="error">Error</string>
+
+    <!-- Update available dialog -->
+    <string name="updates_alert">Update available</string>
+    <string name="updater_alert_body">A new version of Citra Enhanced is available, do you want to update?</string>
+    <string name="not_now">Not now</string>
+    <string name="skip_version">Skip this version</string>
+
+    <!-- Changelog Window -->
+    <string name="changelog_error">An error has occurred. Please check your internet connection.</string>
+    <string name="grid_menu_open_changelog">Changelog</string>
+    <string name="changelog_title">Changelog</string>
 </resources>

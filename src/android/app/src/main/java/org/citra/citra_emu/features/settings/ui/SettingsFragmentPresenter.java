@@ -443,64 +443,15 @@ public final class SettingsFragmentPresenter {
         Setting useCpuJit = coreSection.getSetting(SettingsFile.KEY_CPU_JIT);
         Setting hardwareRenderer = rendererSection.getSetting(SettingsFile.KEY_HW_RENDERER);
         Setting hardwareShader = rendererSection.getSetting(SettingsFile.KEY_HW_SHADER);
+        // Setting inaccurateEmulation = rendererSection.getSetting(SettingsFile.KEY_INACCURATE_EMULATION);
         Setting vsyncEnable = rendererSection.getSetting(SettingsFile.KEY_USE_VSYNC);
 
         sl.add(new HeaderSetting(null, null, R.string.debug_warning, 0));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_CPU_JIT, Settings.SECTION_CORE, R.string.cpu_jit, R.string.cpu_jit_description, true, useCpuJit, true, mView));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_HW_RENDERER, Settings.SECTION_RENDERER, R.string.hw_renderer, R.string.hw_renderer_description, true, hardwareRenderer, true, mView));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_HW_SHADER, Settings.SECTION_RENDERER, R.string.hw_shaders, R.string.hw_shaders_description, true, hardwareShader, true, mView));
+        // TODO (Gamer64): Useless for now.
+        // sl.add(new CheckBoxSetting(SettingsFile.KEY_INACCURATE_EMULATION, Settings.SECTION_RENDERER, R.string.inaccurate_emulation, R.string.inaccurate_emulation_description, false, inaccurateEmulation));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_USE_VSYNC, Settings.SECTION_RENDERER, R.string.vsync, R.string.vsync_description, true, vsyncEnable));
     }
-
-    /*private String capitalize(String text) {
-        if (text.contains("_")) {
-            text = text.replace("_", " ");
-        }
-
-        if (text.length() > 1 && text.contains(" ")) {
-            String[] ss = text.split(" ");
-            text = capitalize(ss[0]);
-            for (int i = 1; i < ss.length; ++i) {
-                text += " " + capitalize(ss[i]);
-            }
-            return text;
-        }
-
-        return text.substring(0, 1).toUpperCase() + text.substring(1);
-    }
-
-    private String[] getSettingEntries(String[] values) {
-        String[] entries = new String[values.length];
-        for (int i = 0; i < values.length; ++i) {
-            if (values[i].isEmpty()) {
-                entries[i] = mActivity.getString(R.string.slider_default);
-            } else {
-                entries[i] = capitalize(values[i]);
-            }
-        }
-        return entries;
-    }
-
-    private String[] getShaderValues() {
-        String path = DirectoryInitialization.getShadersDirectory();
-        List<String> values = getFileList(path, ".glsl");
-        values.add(0, "");
-        return values.toArray(new String[0]);
-    }
-
-    private List<String> getFileList(String path, String ext) {
-        List<String> values = new ArrayList<>();
-        File file = new File(path);
-        File[] files = file.listFiles();
-        if (files != null) {
-            for (int i = 0; i < files.length; ++i) {
-                String name = files[i].getName();
-                int extensionIndex = name.indexOf(ext);
-                if (extensionIndex > 0) {
-                    values.add(name.substring(0, extensionIndex));
-                }
-            }
-        }
-        return values;
-    }*/
 }

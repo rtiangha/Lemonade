@@ -1148,7 +1148,6 @@ void RendererOpenGL::DrawScreens(const Layout::FramebufferLayout& layout, bool f
                                        (float)bottom_screen.GetHeight());
             }
         }
-
         // draw on screen display
         OSD::DrawMessage(render_window, layout);
     }
@@ -1326,6 +1325,8 @@ VideoCore::ResultStatus RendererOpenGL::Init() {
 }
 
 /// Shutdown the renderer
-void RendererOpenGL::ShutDown() {}
+void RendererOpenGL::ShutDown() {
+    OSD::Shutdown();
+}
 
 } // namespace OpenGL

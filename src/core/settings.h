@@ -243,6 +243,9 @@ struct Values {
     GpuTimingMode gpu_timing_mode_flush_and_invalidate{GpuTimingMode::Synch};
     GpuTimingMode gpu_timing_mode_invalidate{GpuTimingMode::Synch};
 
+    // WIP feature
+    bool inaccurate_emulation;
+
     // MMJ ports
     u32 core_ticks_hack;
     bool core_downcount_hack;

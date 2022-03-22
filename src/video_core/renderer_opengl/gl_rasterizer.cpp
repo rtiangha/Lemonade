@@ -264,6 +264,9 @@ void RasterizerOpenGL::SyncEntireState() {
  * these issues, making this basic implementation actually more accurate to the hardware.
  */
 static bool AreQuaternionsOpposite(Common::Vec4<Pica::float24> qa, Common::Vec4<Pica::float24> qb) {
+    if (Settings::values.inaccurate_emulation) {
+        return true;
+    }
     Common::Vec4f a{qa.x.ToFloat32(), qa.y.ToFloat32(), qa.z.ToFloat32(), qa.w.ToFloat32()};
     Common::Vec4f b{qb.x.ToFloat32(), qb.y.ToFloat32(), qb.z.ToFloat32(), qb.w.ToFloat32()};
 
@@ -273,9 +276,13 @@ static bool AreQuaternionsOpposite(Common::Vec4<Pica::float24> qa, Common::Vec4<
 void RasterizerOpenGL::AddTriangle(const Pica::Shader::OutputVertex& v0,
                                    const Pica::Shader::OutputVertex& v1,
                                    const Pica::Shader::OutputVertex& v2) {
+    if (Settings::values.inaccurate_emulation) {
+        vertex_batch.emplace_back(v0, false);
+    } else {
     vertex_batch.emplace_back(v0, false);
     vertex_batch.emplace_back(v1, AreQuaternionsOpposite(v0.quat, v1.quat));
     vertex_batch.emplace_back(v2, AreQuaternionsOpposite(v0.quat, v2.quat));
+    }
 }
 
 static constexpr std::array<GLenum, 4> vs_attrib_types{

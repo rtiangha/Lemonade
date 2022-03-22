@@ -35,6 +35,8 @@ public final class SettingsFile {
 
     public static final String KEY_CPU_JIT = "use_cpu_jit";
 
+    public static final String KEY_INACCURATE_EMULATION = "inaccurate_emulation";
+
     public static final String KEY_DESIGN = "design";
 
     public static final String KEY_USE_PRESENT_THREAD = "use_present_thread";

@@ -13,6 +13,8 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/credits_title"
         app:srcCompat="@mipmap/ic_launcher_foreground"
+        tools:ignore="MissingConstraints" 
+        tools:layout_editor_absoluteX="126dp" 
         tools:layout_editor_absoluteY="0dp"/>
 
     <TextView
@@ -81,3 +83,4 @@
         android:gravity="center"/>
 
 </FrameLayout>
+

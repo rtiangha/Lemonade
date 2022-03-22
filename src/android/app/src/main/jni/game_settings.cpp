@@ -46,6 +46,18 @@ void LoadOverrides(u64 program_id) {
         Settings::values.gpu_timing_mode_flush_and_invalidate = Settings::GpuTimingMode::Skip;
         break;
 
+        // EUR / Mario Kart 7
+    case 0x000400000008B400:
+        // JAP / Mario Kart 7
+    case 0x0004000000030600:
+        // USA / Mario Kart 7
+    case 0x0004000000030800:
+        // EUR / Mario Kart 7 v1.1
+    case 0x0004000000030700:
+        // This game has a big performance improvement with skip texture copy
+        Settings::values.skip_texture_copy = true;
+        break;
+
         // JAP / Super Mario 3D Land
     case 0x0004000000054100:
         // USA / Super Mario 3D Land
@@ -56,7 +68,7 @@ void LoadOverrides(u64 program_id) {
     case 0x0004000000089D00:
         // This game has very sensitive timings with asynchronous GPU
         Settings::values.gpu_timing_mode_submit_list = Settings::GpuTimingMode::Synch;
-        // This game has a big perfomance improvement with accurate multiplication
+        // This game has a big performance improvement with accurate multiplication
         Settings::values.shaders_accurate_mul = true;
         break;
 

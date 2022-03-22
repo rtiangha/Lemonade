@@ -26,6 +26,7 @@ import org.citra.citra_emu.utils.PermissionsHandler;
 import org.citra.citra_emu.utils.PicassoUtils;
 import org.citra.citra_emu.utils.StartupHandler;
 import org.citra.citra_emu.utils.ThemeUtil;
+import org.citra.citra_emu.utils.UpdaterUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -150,6 +151,12 @@ public final class MainActivity extends AppCompatActivity implements MainView {
         } else {
             PermissionsHandler.checkWritePermission(this);
         }
+    }
+
+    @Override
+    public void openUpdaterDialog()
+    {
+        UpdaterUtils.openUpdaterWindow(this, null);
     }
 
     public void openCreditsDialog() {

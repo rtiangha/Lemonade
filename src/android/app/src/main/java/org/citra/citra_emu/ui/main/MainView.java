@@ -23,5 +23,7 @@ public interface MainView {
 
     void launchFileListActivity(int request);
 
+    void openUpdaterDialog();
+
     void openCreditsDialog();
 }
