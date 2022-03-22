@@ -98,6 +98,7 @@
     <string name="gameid_saved">Configuración guardada para %1$s</string>
     <string name="error_saving">Error guardando %1$s.ini: %2$s</string>
     <string name="loading">Cargando...</string>
+    <string name="current_directory">Directorio actual</string>
 
     <!-- Game Grid Screen-->
     <string name="grid_menu_core_settings">Configuración</string>

@@ -520,11 +520,10 @@ public class RunningSettingDialog extends DialogFragment {
                     isChanged = true;
                 }
             }
-            // apply settings changes
+            // apply settings changed
             if (isChanged) {
                 NativeLibrary.setRunningSettings(newSettings);
             }
         }
     }
-
 }

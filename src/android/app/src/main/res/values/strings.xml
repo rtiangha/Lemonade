@@ -127,6 +127,7 @@
     <string name="gameid_saved">Saved settings for %1$s</string>
     <string name="error_saving">Error saving %1$s.ini: %2$s</string>
     <string name="loading">Loading...</string>
+    <string name="current_directory">Current Directory</string>
 
     <!-- Game Grid Screen-->
     <string name="grid_menu_core_settings">Settings</string>
