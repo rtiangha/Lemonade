@@ -265,7 +265,7 @@ public final class MainActivity extends AppCompatActivity {
 
     private void refreshFragment() {
         if (this != null) {
-            refresh();
+            refreshUri();
         }
     }
 
