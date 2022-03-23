@@ -2,28 +2,30 @@ package org.citra.citra_emu.ui.main;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import org.citra.citra_emu.BuildConfig;
 import org.citra.citra_emu.CitraApplication;
 import org.citra.citra_emu.NativeLibrary;
 import org.citra.citra_emu.R;
 import org.citra.citra_emu.activities.EmulationActivity;
+import org.citra.citra_emu.adapters.GameAdapter;
 import org.citra.citra_emu.dialogs.CreditsDialog;
 import org.citra.citra_emu.features.settings.ui.SettingsActivity;
 import org.citra.citra_emu.features.settings.utils.SettingsFile;
 import org.citra.citra_emu.model.GameDatabase;
 import org.citra.citra_emu.model.GameProvider;
-import org.citra.citra_emu.ui.platform.PlatformGamesFragment;
 import org.citra.citra_emu.utils.AddDirectoryHelper;
 import org.citra.citra_emu.utils.DirectoryInitialization;
 import org.citra.citra_emu.utils.FileBrowserHelper;
@@ -36,21 +38,21 @@ import org.citra.citra_emu.utils.UpdaterUtils;
 import java.util.Arrays;
 import java.util.Collections;
 
-/**
- * The main Activity of the Lollipop style UI. Manages several PlatformGamesFragments, which
- * individually display a grid of available games for each Fragment, in a tabbed layout.
- */
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
 public final class MainActivity extends AppCompatActivity {
     private Toolbar mToolbar;
-    private int mFrameLayoutId;
-    private PlatformGamesFragment mPlatformGamesFragment;
+
+    // Game list
+    private GameAdapter mAdapter;
+    private RecyclerView mRecyclerView;
 
     public static final int REQUEST_ADD_DIRECTORY = 1;
     public static final int REQUEST_INSTALL_CIA = 2;
 
     // Library
     private String mDirToAdd;
-    private long mLastClickTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,22 +65,40 @@ public final class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(mToolbar);
 
-        mFrameLayoutId = R.id.games_platform_frame;
-        String versionName = BuildConfig.VERSION_NAME;
-        setVersionString(versionName);
         refreshGameList();
 
         if (savedInstanceState == null) {
             StartupHandler.HandleInit(this);
             if (PermissionsHandler.hasWriteAccess(this)) {
-                mPlatformGamesFragment = new PlatformGamesFragment();
-                getSupportFragmentManager().beginTransaction().add(mFrameLayoutId, mPlatformGamesFragment)
-                        .commit();
+                loadGames();
             }
-        } else {
-            mPlatformGamesFragment = (PlatformGamesFragment) getSupportFragmentManager().getFragment(savedInstanceState, "mPlatformGamesFragment");
         }
         PicassoUtils.init();
+
+        mToolbar.setOnMenuItemClickListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.menu_settings_core:
+                    launchSettingsActivity(SettingsFile.FILE_NAME_CONFIG);
+                    return true;
+
+                case R.id.button_add_directory:
+                    launchFileListActivity(REQUEST_ADD_DIRECTORY);
+                    return true;
+
+                case R.id.button_install_cia:
+                    launchFileListActivity(REQUEST_INSTALL_CIA);
+                    return true;
+
+                case R.id.button_updater:
+                    openUpdaterDialog();
+                    return true;
+
+                case R.id.button_credits:
+                    openCreditsDialog();
+                    return true;
+            }
+            return false;
+        });
 
         // Dismiss previous notifications (should not happen unless a crash occurred)
         EmulationActivity.tryDismissRunningNotification(this);
@@ -88,13 +108,7 @@ public final class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         if (PermissionsHandler.hasWriteAccess(this)) {
-            if (getSupportFragmentManager() == null) {
-                return;
-            }
-            if (outState == null) {
-                return;
-            }
-            getSupportFragmentManager().putFragment(outState, "mPlatformGamesFragment", mPlatformGamesFragment);
+            getSupportFragmentManager();
         }
     }
 
@@ -107,6 +121,23 @@ public final class MainActivity extends AppCompatActivity {
     // TODO: Replace with a ButterKnife injection.
     private void findViews() {
         mToolbar = findViewById(R.id.toolbar_main);
+        int columns = getResources().getInteger(R.integer.game_grid_columns);
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, columns);
+        mAdapter = new GameAdapter();
+        mRecyclerView = findViewById(R.id.grid_games);
+
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addItemDecoration(new GameAdapter.SpacesItemDecoration(ContextCompat.getDrawable(this, R.drawable.gamelist_divider), 1));
+
+        // Add swipe down to refresh gesture
+        final SwipeRefreshLayout pullToRefresh = findViewById(R.id.swipe_refresh_layout);
+        pullToRefresh.setOnRefreshListener(() -> {
+            GameDatabase databaseHelper = CitraApplication.databaseHelper;
+            databaseHelper.scanLibrary(databaseHelper.getWritableDatabase());
+            refresh();
+            pullToRefresh.setRefreshing(false);
+        });
     }
 
     @Override
@@ -117,43 +148,7 @@ public final class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public boolean handleOptionSelection(int itemId) {
-        // Double-click prevention, using threshold of 500 ms
-        if (SystemClock.elapsedRealtime() - mLastClickTime < 500) {
-            return false;
-        }
-        mLastClickTime = SystemClock.elapsedRealtime();
-
-        switch (itemId) {
-            case R.id.menu_settings_core:
-                launchSettingsActivity(SettingsFile.FILE_NAME_CONFIG);
-                return true;
-
-            case R.id.button_add_directory:
-                launchFileListActivity(REQUEST_ADD_DIRECTORY);
-                return true;
-
-            case R.id.button_install_cia:
-                launchFileListActivity(REQUEST_INSTALL_CIA);
-                return true;
-
-            case R.id.button_updater:
-                openUpdaterDialog();
-                return true;
-
-            case R.id.button_credits:
-                openCreditsDialog();
-                return true;
-        }
-
-        return false;
-    }
-
-    public void setVersionString(String version) {
-        mToolbar.setSubtitle("Gamer64_ytb");
-    }
-
-    public void refresh() {
+    public void refreshUri() {
         getContentResolver().insert(GameProvider.URI_REFRESH, null);
         refreshFragment();
     }
@@ -200,7 +195,7 @@ public final class MainActivity extends AppCompatActivity {
 
     public void addDirIfNeeded(AddDirectoryHelper helper) {
         if (mDirToAdd != null) {
-            helper.addDirectory(mDirToAdd, this::refresh);
+            helper.addDirectory(mDirToAdd, this::refreshUri);
 
             mDirToAdd = null;
         }
@@ -253,10 +248,6 @@ public final class MainActivity extends AppCompatActivity {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     DirectoryInitialization.start(this);
 
-                    mPlatformGamesFragment = new PlatformGamesFragment();
-                    getSupportFragmentManager().beginTransaction().add(mFrameLayoutId, mPlatformGamesFragment)
-                            .commit();
-
                     // Immediately prompt user to select a game directory on first boot
                     if (this != null) {
                         launchFileListActivity(REQUEST_ADD_DIRECTORY);
@@ -272,21 +263,29 @@ public final class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Called by the framework whenever any actionbar/toolbar icon is clicked.
-     *
-     * @param item The icon that was clicked on.
-     * @return True if the event was handled, false to bubble it up to the OS.
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return handleOptionSelection(item.getItemId());
+    private void refreshFragment() {
+        if (this != null) {
+            refresh();
+        }
     }
 
-    private void refreshFragment() {
-        if (mPlatformGamesFragment != null) {
-            mPlatformGamesFragment.refresh();
+    public void refresh() {
+        loadGames();
+    }
+
+    public void showGames(Cursor games) {
+        if (mAdapter != null) {
+            mAdapter.swapCursor(games);
         }
+    }
+
+    private void loadGames() {
+        GameDatabase databaseHelper = CitraApplication.databaseHelper;
+
+        databaseHelper.getGames()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::showGames);
     }
 
     @Override

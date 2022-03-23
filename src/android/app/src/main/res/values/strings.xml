@@ -261,21 +261,23 @@
     <string name="cheat_code">Cheat Code</string>
 
     <!-- Updater Window -->
-    <string name="grid_menu_open_updater">Enhanced Updater</string>
+    <string name="grid_menu_open_updater">Updater</string>
     <string name="updater_title">Updater</string>
     <string name="updater_error">An error has occurred. Please check your internet connection.</string>
     <string name="updater_uptodate">Up to date!</string>
     <string name="updater_newavailable">New version available</string>
     <string name="button_download">Download</string>
     <string name="button_install">Install</string>
-    <string name="version_description_hide">%2$s version</string>
-    <string name="version_description">Version: %1$d</string>
-    <string name="installed_version">Installed version: %1$d</string>
+    <string name="version_description">Latest: %1$s</string>
+    <string name="current_version">Current version: %1$s</string>
+    <string name="download_size">Size: %1$.2f MB</string>
     <string name="button_view_changelog">View changelog</string>
-    <string name="changelog_section">Version# %1$d\nDate: %2$s\nChanges:\n%3$s\n\n</string>
+    <string name="changelog_section">Version %1$s\nDate: %2$s\nChanges:\n%3$s\n\n</string>
     <string name="error">Error</string>
 
     <!-- Update available dialog -->
+    <string name="updater_check_startup">Check for updates at startup</string>
+    <string name="updater_check_startup_description">If allowed, Citra Enhanced will check for updates when opened. A pop-up will appear when a new version is available. An internet connection is required.</string>
     <string name="updates_alert">Update available</string>
     <string name="updater_alert_body">A new version of Citra Enhanced is available, do you want to update?</string>
     <string name="not_now">Not now</string>
