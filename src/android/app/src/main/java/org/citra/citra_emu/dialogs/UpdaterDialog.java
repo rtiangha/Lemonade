@@ -34,27 +34,24 @@ import org.citra.citra_emu.utils.LoadCallback;
 import org.citra.citra_emu.utils.UpdaterUtils;
 import org.citra.citra_emu.utils.VersionCode;
 
-public final class UpdaterDialog extends DialogFragment implements View.OnClickListener,
-        LoadCallback<UpdaterData>,
+public final class UpdaterDialog extends DialogFragment implements LoadCallback<UpdaterData>,
         DownloadCallback {
-    private static final String DATA = "data";
+    private static final String DATA = "updaterData";
 
-    private ViewGroup mViewGroup;
-    private Button mButton;
-    private ProgressBar mLoading;
-    private ProgressBar mProgressBar;
-    private Button mButtonChangelog;
-    private ProgressBar mLoadingChangelog;
-    private TextView mTextChangelog;
-    private View mChangelog;
-    private ImageView mArrow;
+    private View updaterBody, changelogBody;
+    private Button downloadButton, changelogButton;
+    private ProgressBar loadingBar, downloadProgressBar, changelogProgressBar;
+    private TextView updaterMessage, errorText, versionText, downloadSize, changelogText,
+            changelogErrorText;
+    private ImageView changelogArrow;
+
     private UpdaterData mData;
     private DownloadUtils mDownload;
 
     private Animation rotateDown;
     private Animation rotateUp;
 
-    private final int mBuildVersion = UpdaterUtils.getBuildVersion();
+    private final VersionCode mBuildVersion = UpdaterUtils.getBuildVersion();
     private boolean isChangelogOpen = false;
 
     public static UpdaterDialog newInstance(UpdaterData data) {
@@ -73,22 +70,29 @@ public final class UpdaterDialog extends DialogFragment implements View.OnClickL
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-        mViewGroup = (ViewGroup) getActivity().getLayoutInflater()
+        ViewGroup viewGroup = (ViewGroup) getActivity().getLayoutInflater()
                 .inflate(R.layout.dialog_updater, null);
 
-        TextView textInstalled = mViewGroup.findViewById(R.id.text_installed_version);
-        textInstalled.setText(getString(R.string.installed_version, mBuildVersion));
+        TextView textCurrent = viewGroup.findViewById(R.id.text_current_version);
+        textCurrent.setText(getString(R.string.current_version, mBuildVersion));
 
-        mLoading = mViewGroup.findViewById(R.id.updater_loading);
-        mButton = mViewGroup.findViewById(R.id.button_download);
-        mProgressBar = mViewGroup.findViewById(R.id.progressbar_download);
-        mButtonChangelog = mViewGroup.findViewById(R.id.button_view_changelog);
-        mTextChangelog = mViewGroup.findViewById(R.id.changelog_text);
-        mLoadingChangelog = mViewGroup.findViewById(R.id.changelog_loading);
-        mChangelog = mViewGroup.findViewById(R.id.changelog_body);
-        mArrow = mViewGroup.findViewById(R.id.changelog_arrow);
+        loadingBar = viewGroup.findViewById(R.id.updater_loading);
+        updaterBody = viewGroup.findViewById(R.id.updater_body);
+        updaterMessage = viewGroup.findViewById(R.id.text_updater_message);
+        errorText = viewGroup.findViewById(R.id.updater_error);
+        versionText = viewGroup.findViewById(R.id.text_version);
+        downloadButton = viewGroup.findViewById(R.id.button_download);
+        downloadSize = viewGroup.findViewById(R.id.text_download_size);
+        downloadProgressBar = viewGroup.findViewById(R.id.progressbar_download);
+        changelogButton = viewGroup.findViewById(R.id.button_view_changelog);
+        changelogProgressBar = viewGroup.findViewById(R.id.changelog_loading);
+        changelogText = viewGroup.findViewById(R.id.changelog_text);
+        changelogBody = viewGroup.findViewById(R.id.changelog_body);
+        changelogErrorText = viewGroup.findViewById(R.id.changelog_error);
+        changelogArrow = viewGroup.findViewById(R.id.changelog_arrow);
 
-        if (getArguments() != null) { // Assuming valid data is passed!
+        if (getArguments() != null) // Assuming valid data is passed!
+        {
             onLoad(getArguments().getParcelable(DATA));
         } else {
             UpdaterUtils.makeDataRequest(this);
@@ -98,7 +102,7 @@ public final class UpdaterDialog extends DialogFragment implements View.OnClickL
                 this, UpdaterUtils.getDownloadFolder(getContext()));
         initAnimations();
 
-        builder.setView(mViewGroup);
+        builder.setView(viewGroup);
         return builder.create();
     }
 
@@ -113,122 +117,116 @@ public final class UpdaterDialog extends DialogFragment implements View.OnClickL
     public void onLoad(UpdaterData data) {
         mData = data;
 
-        TextView textLatest = mViewGroup.findViewById(R.id.text_version);
-        textLatest.setText(getString(R.string.version_description, mData.getVersion()));
+        versionText.setText(getString(R.string.version_description, mData.version.toString()));
+        downloadSize.setText(getString(R.string.download_size, mData.size));
+        changelogButton.setOnClickListener(this::onChangelogClick);
 
-        mButton.setOnClickListener(this);
-        mButtonChangelog.setOnClickListener(this);
+        int result = mBuildVersion.compareTo(mData.version);
+        if (result >= 0) {
+            updaterMessage.setText(R.string.updater_uptodate);
+            updaterMessage.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+            downloadButton.setText(null);
+            downloadButton.setEnabled(false);
+        } else {
+            updaterMessage.setText(R.string.updater_newavailable);
+            updaterMessage.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
+            downloadButton.setOnClickListener(this::onDownloadClick);
+        }
 
-        setUpdaterMessage();
-
-        View updaterBody = mViewGroup.findViewById(R.id.updater_body);
-        mLoading.setVisibility(View.GONE);
+        loadingBar.setVisibility(View.GONE);
         updaterBody.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onLoadError() {
-        TextView textError = mViewGroup.findViewById(R.id.updater_error);
-        mLoading.setVisibility(View.GONE);
-        textError.setVisibility(View.VISIBLE);
+        loadingBar.setVisibility(View.GONE);
+        errorText.setVisibility(View.VISIBLE);
     }
 
-    @Override
-    public void onClick(View view) {
-        if (view == mButton) {
-            if (mDownload.isRunning()) {
-                mDownload.cancel();
-            } else {
-                String url = mData.getDownloadUrl();
-                mDownload.setUrl(url);
-                mDownload.start();
-            }
-        } else if (view == mButtonChangelog) {
-            handleChangelog();
+    public void onDownloadClick(View view) {
+        if (mDownload.isRunning()) {
+            mDownload.cancel();
+        } else {
+            mDownload.setUrl(mData.downloadUrl);
+            mDownload.start();
         }
     }
 
     @Override
     public void onDownloadStart() {
-        mProgressBar.setProgress(0);
-        mButton.setActivated(true);
-        mButton.setText(android.R.string.cancel);
+        downloadProgressBar.setProgress(0);
+        downloadButton.setActivated(true);
+        downloadButton.setText(android.R.string.cancel);
     }
 
     @Override
     public void onDownloadProgress(int progress) {
-        mProgressBar.setProgress(progress);
+        downloadProgressBar.setProgress(progress);
     }
 
     @Override
     public void onDownloadComplete(File downloadFile) {
-        mButton.setText(R.string.button_install);
+        downloadButton.setText(R.string.button_install);
         onDownloadStop();
 
-        Uri fileUri = FileProvider.getUriForFile(getContext(),
-                getContext().getApplicationContext().getPackageName() + ".filesprovider",
-                downloadFile);
+        try {
+            Uri fileUri = FileProvider.getUriForFile(getContext(),
+                    getContext().getApplicationContext().getPackageName() + ".filesprovider",
+                    downloadFile);
 
-        Intent promptInstall = new Intent(Intent.ACTION_VIEW);
-        promptInstall.setData(fileUri);
-        promptInstall.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivity(promptInstall);
+            Intent promptInstall = new Intent(Intent.ACTION_VIEW);
+            promptInstall.setData(fileUri);
+            promptInstall.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(promptInstall);
+        } catch (Exception e) {
+            Log.e(getClass().getSimpleName(), e.toString());
+            Toast.makeText(getContext(), "Installation failed", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     public void onDownloadCancelled() {
-        mButton.setText(R.string.button_download);
+        downloadButton.setText(R.string.button_download);
         onDownloadStop();
     }
 
     @Override
     public void onDownloadError() {
-        mButton.setText(R.string.error);
+        downloadButton.setText(R.string.error);
         onDownloadStop();
     }
 
     private void onDownloadStop() {
-        mButton.setActivated(false);
+        downloadButton.setActivated(false);
     }
 
-    private void setUpdaterMessage() {
-        TextView updaterMessage = mViewGroup.findViewById(R.id.text_updater_message);
-        if (mBuildVersion >= mData.getVersion()) {
-            updaterMessage.setText(R.string.updater_uptodate);
-            updaterMessage.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
-        } else {
-            updaterMessage.setText(R.string.updater_newavailable);
-            updaterMessage.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
-        }
-    }
-
-    private void handleChangelog() {
+    private void onChangelogClick(View view) {
         if (!isChangelogOpen) {
-            mLoadingChangelog.setVisibility(View.VISIBLE);
+            changelogProgressBar.setVisibility(View.VISIBLE);
 
             UpdaterUtils.makeChangelogRequest(getString(R.string.changelog_section),
                     new LoadCallback<String>() {
                         @Override
                         public void onLoad(String data) {
-                            new Handler().postDelayed(() -> mLoadingChangelog.setVisibility(View.GONE), 200);
-                            mTextChangelog.setText(data);
-                            mArrow.startAnimation(rotateDown);
-                            mChangelog.setVisibility(View.VISIBLE);
+                            changelogProgressBar.setVisibility(View.GONE);
+                            changelogText.setText(data);
+                            changelogArrow.startAnimation(rotateDown);
+                            changelogBody.setVisibility(View.VISIBLE);
                             isChangelogOpen = true;
                         }
 
                         @Override
                         public void onLoadError() {
-                            TextView textError = mViewGroup.findViewById(R.id.changelog_error);
-                            mLoadingChangelog.setVisibility(View.GONE);
-                            textError.setVisibility(View.VISIBLE);
-                            new Handler().postDelayed(() -> opacityOut(textError, View.INVISIBLE), 1500);
+                            changelogProgressBar.setVisibility(View.GONE);
+                            changelogErrorText.setVisibility(View.VISIBLE);
+                            new Handler()
+                                    .postDelayed(() -> opacityOut(changelogErrorText, View.INVISIBLE), 1750);
                         }
                     });
         } else {
             isChangelogOpen = false;
-            mArrow.startAnimation(rotateUp);
-            mChangelog.setVisibility(View.GONE);
+            changelogArrow.startAnimation(rotateUp);
+            changelogBody.setVisibility(View.GONE);
         }
     }
 
@@ -252,11 +250,9 @@ public final class UpdaterDialog extends DialogFragment implements View.OnClickL
     private void opacityOut(View view, int endVisibility) {
         view.animate()
                 .alpha(0.0f)
-                .setListener(new AnimatorListenerAdapter()
-                {
+                .setListener(new AnimatorListenerAdapter() {
                     @Override
-                    public void onAnimationEnd(Animator animation)
-                    {
+                    public void onAnimationEnd(Animator animation) {
                         view.setVisibility(endVisibility);
                         view.setAlpha(1.0f);
                         view.animate().setListener(null);

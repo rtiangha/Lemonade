@@ -35,9 +35,9 @@ public class VersionCode implements Parcelable {
             maj = Integer.parseInt(versionSplit[i++]);
             min = Integer.parseInt(versionSplit[i++]);
             pat = Integer.parseInt(versionSplit[i]);
-        }
-        catch (IndexOutOfBoundsException ignored) {}
-        catch (NumberFormatException e) {
+        } catch (IndexOutOfBoundsException ignored) {
+            // ignore
+        } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid version string");
         }
 
@@ -70,15 +70,15 @@ public class VersionCode implements Parcelable {
                         if (qualifier > operand.qualifier)
                             return GREATER;
                         else return LESSER;
-                    }
-                    else return EQUAL;
+                    } else return EQUAL;
                 }
             }
         }
     }
 
     public boolean equals(VersionCode operand) {
-        return major == operand.major && minor == operand.minor && patch == operand.patch && qualifier == operand.qualifier;
+        return major == operand.major && minor == operand.minor && patch == operand.patch &&
+                qualifier == operand.qualifier;
     }
 
     @NonNull

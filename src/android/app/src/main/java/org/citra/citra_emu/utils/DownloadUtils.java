@@ -24,12 +24,11 @@ public class DownloadUtils implements Runnable {
     /**
      * Initialize the DownloadUtils object.
      *
+     * @param handler  Handler that will handle download status callbacks.
+     * @param listener Listener of download status callbacks.
+     * @param path     The path to download the file to.
      * @see DownloadUtils#setUrl(String)
      * @see DownloadUtils#start()
-     *
-     * @param handler Handler that will handle download status callbacks.
-     * @param listener Listener of download status callbacks.
-     * @param path The path to download the file to.
      */
     public DownloadUtils(Handler handler, DownloadCallback listener, File path) {
         mHandler = handler;
@@ -40,10 +39,9 @@ public class DownloadUtils implements Runnable {
     /**
      * Alternate constructor, when no callbacks are needed (e.g. background task).
      *
+     * @param path The path to download the file to.
      * @see DownloadUtils#setUrl(String)
      * @see DownloadUtils#start()
-     *
-     * @param path The path to download the file to.
      */
     public DownloadUtils(File path) {
         mDownloadPath = path;
@@ -77,7 +75,7 @@ public class DownloadUtils implements Runnable {
             urlConnection.connect();
             if (mHandler != null) mHandler.post(() -> mListener.onDownloadStart());
 
-            String filename = "download.apk";
+            String filename = "download";
             String fieldContentDisp = urlConnection.getHeaderField("Content-Disposition");
             if (fieldContentDisp != null && fieldContentDisp.contains("filename=")) {
                 filename = fieldContentDisp.substring(fieldContentDisp.indexOf("filename=") + 9);
@@ -110,8 +108,7 @@ public class DownloadUtils implements Runnable {
             if (mHandler != null) {
                 if (mIsCancelled) {
                     mHandler.post(() -> mListener.onDownloadCancelled());
-                }
-                else mHandler.post(() -> mListener.onDownloadError());
+                } else mHandler.post(() -> mListener.onDownloadError());
             }
             deleteFile();
         }

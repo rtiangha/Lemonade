@@ -164,6 +164,9 @@ public final class SettingsFragmentPresenter {
 
         SettingSection interfaceSection = mSettings.getSection(Settings.SECTION_INTERFACE);
         Setting design = interfaceSection.getSetting(SettingsFile.KEY_DESIGN);
+        Setting checkUpdates = interfaceSection.getSetting(SettingsFile.KEY_UPDATER_CHECK_AT_STARTUP);
+
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_UPDATER_CHECK_AT_STARTUP, Settings.SECTION_INTERFACE, R.string.updater_check_startup, R.string.updater_check_startup_description, true, checkUpdates));
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             sl.add(new ThemeSingleChoiceSetting(SettingsFile.KEY_DESIGN, Settings.SECTION_INTERFACE, R.string.design, 0, R.array.designNames, R.array.designValues, 0, design, mView));
