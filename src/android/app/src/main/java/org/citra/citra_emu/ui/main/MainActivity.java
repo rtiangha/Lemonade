@@ -208,7 +208,7 @@ public final class MainActivity extends AppCompatActivity {
     public void refreshGameList() {
         GameDatabase databaseHelper = CitraApplication.databaseHelper;
         databaseHelper.scanLibrary(databaseHelper.getWritableDatabase());
-        refresh();
+        refreshUri();
     }
 
     /**
