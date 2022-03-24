@@ -46,9 +46,17 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
     private final Set<InputOverlayDrawableDpad> overlayDpads = new HashSet<>();
     private final Set<InputOverlayDrawableJoystick> overlayJoysticks = new HashSet<>();
 
-    public static final String PREF_HAPTIC_FEEDBACK = "UseHapticFeedback";
+    public static final String PREF_HAPTIC_FEEDBACK = "HapticFeedback";
+    public static final String PREF_JOYSTICK_RELATIVE = "JoystickRelative";
+    public static final String PREF_SHOW_OVERLAY = "ShowOverlay";
+    public static final String PREF_CONTROLLER_SCALE = "ControllerScale";
+    public static final String PREF_CONTROLLER_ALPHA = "ControllerAlpha";
 
     public static boolean sUseHapticFeedback = false;
+    public static boolean sJoystickRelative = true;
+    public static boolean sShowInputOverlay = true;
+    public static int sControllerScale = 50;
+    public static int sControllerAlpha = 100;
 
     private boolean mIsInEditMode = false;
     private InputOverlayDrawableButton mButtonBeingConfigured;
@@ -75,6 +83,10 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
         }
 
         sUseHapticFeedback = mPreferences.getBoolean(InputOverlay.PREF_HAPTIC_FEEDBACK, true);
+        sJoystickRelative = mPreferences.getBoolean(InputOverlay.PREF_JOYSTICK_RELATIVE, true);
+        sShowInputOverlay = mPreferences.getBoolean(InputOverlay.PREF_SHOW_OVERLAY, true);
+        sControllerScale = mPreferences.getInt(InputOverlay.PREF_CONTROLLER_SCALE, 50);
+        sControllerAlpha = mPreferences.getInt(InputOverlay.PREF_CONTROLLER_ALPHA, 100);
 
         // Reset 3ds touchscreen pointer ID
         mTouchscreenPointerId = -1;
@@ -170,10 +182,10 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
                 break;
         }
 
-        scale *= (sPrefs.getInt("controlScale", 50) + 50);
+        scale *= (sPrefs.getInt(PREF_CONTROLLER_SCALE, 50) + 50);
         scale /= 100;
 
-        int alpha = sPrefs.getInt("controlOpacity", 100) * 255 / 100;
+        int alpha = sPrefs.getInt(PREF_CONTROLLER_ALPHA, 100) * 255 / 100;
 
         // Initialize the InputOverlayDrawableButton.
         final Bitmap defaultStateBitmap =
@@ -238,10 +250,10 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
         // Decide scale based on button ID and user preference
         float scale = 0.22f;
 
-        scale *= (sPrefs.getInt("controlScale", 50) + 50);
+        scale *= (sPrefs.getInt(PREF_CONTROLLER_SCALE, 50) + 50);
         scale /= 100;
 
-        int alpha = sPrefs.getInt("controlOpacity", 100) * 255 / 100;
+        int alpha = sPrefs.getInt(PREF_CONTROLLER_ALPHA, 100) * 255 / 100;
 
         // Initialize the InputOverlayDrawableDpad.
         final Bitmap defaultStateBitmap =
@@ -295,7 +307,7 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
 
         // Decide scale based on user preference
         float scale = 0.275f;
-        scale *= (sPrefs.getInt("controlScale", 50) + 50);
+        scale *= (sPrefs.getInt(PREF_CONTROLLER_SCALE, 50) + 50);
         scale /= 100;
 
         // Initialize the InputOverlayDrawableJoystick.
@@ -321,7 +333,7 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
         Rect outerRect = new Rect(drawableX, drawableY, drawableX + (int) (outerSize / outerScale), drawableY + (int) (outerSize / outerScale));
         Rect innerRect = new Rect(0, 0, (int) (outerSize / outerScale), (int) (outerSize / outerScale));
 
-        int alpha = sPrefs.getInt("controlOpacity", 100) * 255 / 100;
+        int alpha = sPrefs.getInt(PREF_CONTROLLER_ALPHA, 100) * 255 / 100;
 
         // Send the drawableId to the joystick so it can be referenced when saving control position.
         final InputOverlayDrawableJoystick overlayDrawable

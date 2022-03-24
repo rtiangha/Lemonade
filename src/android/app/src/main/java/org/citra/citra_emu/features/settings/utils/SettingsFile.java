@@ -53,6 +53,7 @@ public final class SettingsFile {
     public static final String KEY_CPU_USAGE_LIMIT = "cpu_usage_limit";
     public static final String KEY_TEXTURE_LOAD_HACK = "texture_load_hack";
     public static final String KEY_UPDATER_CHECK_AT_STARTUP = "check_updates_at_startup";
+    public static final String KEY_EXPAND_TO_CUTOUT_AREA = "expand_to_cutout_area";
 
     // custom textures
     public static final String KEY_CUSTOM_TEXTURES = "custom_textures";

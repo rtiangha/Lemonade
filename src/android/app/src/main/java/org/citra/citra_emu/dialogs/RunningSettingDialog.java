@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -43,6 +43,7 @@ public class RunningSettingDialog extends DialogFragment {
     private SettingsAdapter mAdapter;
     private TextView mInfo;
     private Handler mHandler;
+    private DialogInterface.OnDismissListener mDismissListener;
 
     public static RunningSettingDialog newInstance() {
         return new RunningSettingDialog();
@@ -81,12 +82,18 @@ public class RunningSettingDialog extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        mAdapter.saveSettings();
+        if (mMenu == MENU_SETTINGS) {
+            mAdapter.saveSettings();
+        }
+        if (mDismissListener != null) {
+            mDismissListener.onDismiss(dialog);
+        }
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     private void loadSubMenu(int menu) {
         if (menu == MENU_MAIN) {
-            EmulationActivity activity = (EmulationActivity)NativeLibrary.getEmulationContext();
+            EmulationActivity activity = (EmulationActivity) NativeLibrary.getEmulationContext();
             mTitle.setText(activity.getGameTitle());
             mAdapter.loadMainMenu();
         } else if (menu == MENU_SETTINGS) {
@@ -96,30 +103,43 @@ public class RunningSettingDialog extends DialogFragment {
         mMenu = menu;
     }
 
+    public void setOnDismissListener(DialogInterface.OnDismissListener listener) {
+        mDismissListener = listener;
+    }
+
     public class SettingsItem {
         // setting type
         public static final int SETTING_FMV_HACK = 0;
         public static final int SETTING_SHOW_FPS = 1;
         public static final int SETTING_SCALE_FACTOR = 2;
-        public static final int SETTING_LINEAR_FILTER = 3;
-        public static final int SETTING_SKIP_SLOW_DRAW = 4;
-        public static final int SETTING_SKIP_CPU_WRITE = 5;
-        public static final int SETTING_SKIP_TEXTURE_COPY = 6;
-        public static final int SETTING_SKIP_FORMAT_REINTERPRETATION = 7;
-        public static final int SETTING_TEXTURE_LOAD_HACK = 8;
-        public static final int SETTING_ACCURATE_MUL = 9;
-        public static final int SETTING_SPEED_LIMIT = 10;
+        public static final int SETTING_SCREEN_LAYOUT = 3;
+        public static final int SETTING_LINEAR_FILTER = 4;
+        public static final int SETTING_SKIP_SLOW_DRAW = 5;
+        public static final int SETTING_SKIP_CPU_WRITE = 6;
+        public static final int SETTING_SKIP_TEXTURE_COPY = 7;
+        public static final int SETTING_SKIP_FORMAT_REINTERPRETATION = 8;
+        public static final int SETTING_TEXTURE_LOAD_HACK = 9;
+        public static final int SETTING_ACCURATE_MUL = 10;
+        public static final int SETTING_SPEED_LIMIT = 11;
 
         // pref
         public static final int SETTING_HAPTIC_FEEDBACK = 100;
+        public static final int SETTING_JOYSTICK_RELATIVE = 101;
+        public static final int SETTING_SHOW_OVERLAY = 102;
+        public static final int SETTING_CONTROLLER_SCALE = 103;
+        public static final int SETTING_CONTROLLER_ALPHA = 104;
 
         // func
         public static final int SETTING_LOAD_SUBMENU = 200;
         public static final int SETTING_EDIT_BUTTONS = 201;
         public static final int SETTING_SAVE_STATE = 202;
         public static final int SETTING_LOAD_STATE = 203;
-        public static final int SETTING_ROTATE_SCREEN = 204;
-        public static final int SETTING_EXIT_GAME = 205;
+        public static final int SETTING_LOAD_AMIIBO = 204;
+        public static final int SETTING_REMOVE_AMIIBO = 205;
+        public static final int SETTING_TOGGLE_CONTROLS = 206;
+        public static final int SETTING_RESET_OVERLAY = 207;
+        public static final int SETTING_ROTATE_SCREEN = 208;
+        public static final int SETTING_EXIT_GAME = 209;
 
         // view type
         public static final int TYPE_CHECKBOX = 0;
@@ -203,7 +223,7 @@ public class RunningSettingDialog extends DialogFragment {
 
         @Override
         public void onClick(View clicked) {
-            EmulationActivity activity = (EmulationActivity)NativeLibrary.getEmulationContext();
+            EmulationActivity activity = (EmulationActivity) NativeLibrary.getEmulationContext();
             switch (mItem.getSetting()) {
                 case SettingsItem.SETTING_LOAD_SUBMENU:
                     loadSubMenu(mItem.getValue());
@@ -220,12 +240,28 @@ public class RunningSettingDialog extends DialogFragment {
                     NativeLibrary.LoadState(1);
                     dismiss();
                     break;
+                case SettingsItem.SETTING_LOAD_AMIIBO:
+                    activity.loadAmiibo();
+                    dismiss();
+                    break;
+                case SettingsItem.SETTING_REMOVE_AMIIBO:
+                    activity.removeAmiibo();
+                    dismiss();
+                    break;
+                case SettingsItem.SETTING_TOGGLE_CONTROLS:
+                    activity.toggleControls();
+                    dismiss();
+                    break;
+                case SettingsItem.SETTING_RESET_OVERLAY:
+                    activity.resetOverlay();
+                    dismiss();
+                    break;
                 case SettingsItem.SETTING_ROTATE_SCREEN:
                     activity.rotateScreen();
                     dismiss();
                     break;
                 case SettingsItem.SETTING_EXIT_GAME:
-                    NativeLibrary.StopEmulation();
+                    activity.stopEmulation();
                     activity.finish();
                     break;
             }
@@ -269,14 +305,12 @@ public class RunningSettingDialog extends DialogFragment {
     }
 
     public final class RadioButtonSettingViewHolder
-            extends SettingViewHolder implements RadioGroup.OnCheckedChangeListener
-    {
+            extends SettingViewHolder implements RadioGroup.OnCheckedChangeListener {
         SettingsItem mItem;
         private TextView mTextSettingName;
         private RadioGroup mRadioGroup;
 
-        public RadioButtonSettingViewHolder(View itemView)
-        {
+        public RadioButtonSettingViewHolder(View itemView) {
             super(itemView);
         }
 
@@ -311,11 +345,25 @@ public class RunningSettingDialog extends DialogFragment {
                 RadioButton radio3 = mRadioGroup.findViewById(R.id.radio3);
                 radio3.setVisibility(View.VISIBLE);
                 radio3.setText("×4");
+            } else if (item.getSetting() == SettingsItem.SETTING_SCREEN_LAYOUT) {
+                RadioButton radio0 = mRadioGroup.findViewById(R.id.radio0);
+                radio0.setText(R.string.default_value);
+
+                RadioButton radio1 = mRadioGroup.findViewById(R.id.radio1);
+                radio1.setText(R.string.single_screen);
+
+                RadioButton radio2 = mRadioGroup.findViewById(R.id.radio2);
+                radio2.setText(R.string.large_screen);
+
+                RadioButton radio3 = mRadioGroup.findViewById(R.id.radio3);
+                radio3.setVisibility(View.VISIBLE);
+                radio3.setText(R.string.side_screen);
             }
         }
 
         @Override
-        public void onClick(View clicked) {}
+        public void onClick(View clicked) {
+        }
 
         @Override
         public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -396,6 +444,10 @@ public class RunningSettingDialog extends DialogFragment {
     public class SettingsAdapter extends RecyclerView.Adapter<SettingViewHolder> {
         private int[] mRunningSettings;
         private int mHapticFeedback;
+        private int mJoystickRelative;
+        private int mShowOverlay;
+        private int mControllerScale;
+        private int mControllerAlpha;
         private ArrayList<SettingsItem> mSettings;
 
         public void loadMainMenu() {
@@ -404,6 +456,10 @@ public class RunningSettingDialog extends DialogFragment {
             mSettings.add(new SettingsItem(SettingsItem.SETTING_EDIT_BUTTONS, R.string.emulation_edit_layout, SettingsItem.TYPE_BUTTON, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_SAVE_STATE, R.string.emulation_save_state, SettingsItem.TYPE_BUTTON, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_LOAD_STATE, R.string.emulation_load_state, SettingsItem.TYPE_BUTTON, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_LOAD_AMIIBO, R.string.menu_emulation_amiibo_load, SettingsItem.TYPE_BUTTON, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_REMOVE_AMIIBO, R.string.menu_emulation_amiibo_remove, SettingsItem.TYPE_BUTTON, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_TOGGLE_CONTROLS, R.string.emulation_toggle_controls, SettingsItem.TYPE_BUTTON, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_RESET_OVERLAY, R.string.emulation_touch_overlay_reset, SettingsItem.TYPE_BUTTON, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_ROTATE_SCREEN, R.string.emulation_rotate_screen, SettingsItem.TYPE_BUTTON, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_EXIT_GAME, R.string.emulation_close_game, SettingsItem.TYPE_BUTTON, 0));
             notifyDataSetChanged();
@@ -421,6 +477,26 @@ public class RunningSettingDialog extends DialogFragment {
                     R.string.emulation_haptic_feedback,
                     SettingsItem.TYPE_CHECKBOX, mHapticFeedback));
 
+            mJoystickRelative = InputOverlay.sJoystickRelative ? 1 : 0;
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_JOYSTICK_RELATIVE,
+                    R.string.emulation_control_joystick_rel_center,
+                    SettingsItem.TYPE_CHECKBOX, mJoystickRelative));
+
+            mShowOverlay = InputOverlay.sShowInputOverlay ? 1 : 0;
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_SHOW_OVERLAY,
+                    R.string.emulation_show_overlay,
+                    SettingsItem.TYPE_CHECKBOX, mShowOverlay));
+
+            mControllerScale = InputOverlay.sControllerScale;
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_CONTROLLER_SCALE,
+                    R.string.emulation_control_scale, SettingsItem.TYPE_SEEK_BAR,
+                    mControllerScale));
+
+            mControllerAlpha = InputOverlay.sControllerAlpha;
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_CONTROLLER_ALPHA,
+                    R.string.emulation_control_opacity, SettingsItem.TYPE_SEEK_BAR,
+                    mControllerAlpha));
+
             // native settings
             mSettings.add(new SettingsItem(SettingsItem.SETTING_FMV_HACK,
                     R.string.fmv_hack, SettingsItem.TYPE_CHECKBOX,
@@ -430,6 +506,9 @@ public class RunningSettingDialog extends DialogFragment {
                     mRunningSettings[i++]));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_SCALE_FACTOR,
                     R.string.internal_resolution, SettingsItem.TYPE_RADIO_GROUP,
+                    mRunningSettings[i++]));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_SCREEN_LAYOUT,
+                    R.string.running_layout, SettingsItem.TYPE_RADIO_GROUP,
                     mRunningSettings[i++]));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_SKIP_SLOW_DRAW,
                     R.string.setting_skip_slow_draw, SettingsItem.TYPE_CHECKBOX,
@@ -499,7 +578,7 @@ public class RunningSettingDialog extends DialogFragment {
                 return;
             }
 
-            EmulationActivity activity = (EmulationActivity)NativeLibrary.getEmulationContext();
+            EmulationActivity activity = (EmulationActivity) NativeLibrary.getEmulationContext();
             // pref settings
             SharedPreferences.Editor editor =
                     PreferenceManager.getDefaultSharedPreferences(activity).edit();
@@ -510,6 +589,38 @@ public class RunningSettingDialog extends DialogFragment {
                 InputOverlay.sUseHapticFeedback = feedback > 0;
             }
             mSettings.remove(0);
+
+            int relative = mSettings.get(0).getValue();
+            if (mJoystickRelative != relative) {
+                editor.putBoolean(InputOverlay.PREF_JOYSTICK_RELATIVE, relative > 0);
+                InputOverlay.sJoystickRelative = relative > 0;
+            }
+            mSettings.remove(0);
+
+            int overlay = mSettings.get(0).getValue();
+            if (mShowOverlay != overlay) {
+                editor.putBoolean(InputOverlay.PREF_SHOW_OVERLAY, overlay > 0);
+                InputOverlay.sShowInputOverlay = overlay > 0;
+            }
+            mSettings.remove(0);
+
+            int scale = mSettings.get(0).getValue();
+            if (mControllerScale != scale) {
+                editor.putInt(InputOverlay.PREF_CONTROLLER_SCALE, scale);
+                InputOverlay.sControllerScale = scale;
+            }
+            mSettings.remove(0);
+
+            int alpha = mSettings.get(0).getValue();
+            if (mControllerAlpha != alpha) {
+                editor.putInt(InputOverlay.PREF_CONTROLLER_ALPHA, alpha);
+                InputOverlay.sControllerAlpha = alpha;
+            }
+            mSettings.remove(0);
+
+            // apply prefs
+            editor.apply();
+            activity.refreshControls();
 
             // native settings
             boolean isChanged = false;

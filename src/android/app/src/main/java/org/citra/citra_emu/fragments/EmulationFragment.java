@@ -61,6 +61,10 @@ public final class EmulationFragment extends Fragment implements SurfaceHolder.C
         return fragment;
     }
 
+    public void refreshControls() {
+        mInputOverlay.refreshControls();
+    }
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);

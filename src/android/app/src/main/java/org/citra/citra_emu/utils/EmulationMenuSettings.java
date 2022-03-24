@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import org.citra.citra_emu.CitraApplication;
+import org.citra.citra_emu.overlay.InputOverlay;
 
 public class EmulationMenuSettings {
     private static SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(CitraApplication.getAppContext());
@@ -17,12 +18,12 @@ public class EmulationMenuSettings {
     public static final int LayoutOption_MobileLandscape = 5;
 
     public static boolean getJoystickRelCenter() {
-        return mPreferences.getBoolean("EmulationMenuSettings_JoystickRelCenter", true);
+        return mPreferences.getBoolean(InputOverlay.PREF_JOYSTICK_RELATIVE, true);
     }
 
     public static void setJoystickRelCenter(boolean value) {
         final SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putBoolean("EmulationMenuSettings_JoystickRelCenter", value);
+        editor.putBoolean(InputOverlay.PREF_JOYSTICK_RELATIVE, value);
         editor.apply();
     }
 
@@ -67,12 +68,12 @@ public class EmulationMenuSettings {
     }
 
     public static boolean getShowOverlay() {
-        return mPreferences.getBoolean("EmulationMenuSettings_ShowOverlay", true);
+        return mPreferences.getBoolean(InputOverlay.PREF_SHOW_OVERLAY, true);
     }
 
     public static void setShowOverlay(boolean value) {
         final SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putBoolean("EmulationMenuSettings_ShowOverlay", value);
+        editor.putBoolean(InputOverlay.PREF_SHOW_OVERLAY, value);
         editor.apply();
     }
 }

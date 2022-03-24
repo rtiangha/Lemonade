@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,7 +35,7 @@ import java.util.stream.Stream;
  * large dataset.
  */
 public final class GameAdapter extends RecyclerView.Adapter<GameViewHolder> implements
-        View.OnClickListener {
+        View.OnClickListener, View.OnLongClickListener {
     private Cursor mCursor;
     private GameDataSetObserver mObserver;
 
@@ -64,6 +65,7 @@ public final class GameAdapter extends RecyclerView.Adapter<GameViewHolder> impl
                 .inflate(R.layout.card_game, parent, false);
 
         gameCard.setOnClickListener(this);
+        gameCard.setOnLongClickListener(this);
 
         // Use that view to create a ViewHolder.
         return new GameViewHolder(gameCard);
@@ -202,6 +204,25 @@ public final class GameAdapter extends RecyclerView.Adapter<GameViewHolder> impl
         GameViewHolder holder = (GameViewHolder) view.getTag();
 
         EmulationActivity.launch((FragmentActivity) view.getContext(), holder.path, holder.title);
+    }
+
+    /**
+     * Show some game details.
+     *
+     * @param clicked Display the AlertDialog with game info.
+     */
+    @Override
+    public boolean onLongClick(View clicked) {
+        GameViewHolder holder = (GameViewHolder) clicked.getTag();
+        new AlertDialog.Builder(clicked.getContext())
+                .setTitle(R.string.game_details)
+                .setMessage("Title: " + holder.title + "\n" +
+                        "Company: " + holder.company + "\n" +
+                        "Country: " + holder.regions + "\n" +
+                        "Path: " + holder.path)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
+        return true;
     }
 
     public static class SpacesItemDecoration extends DividerItemDecoration {

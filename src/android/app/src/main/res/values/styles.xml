@@ -41,17 +41,10 @@
         <item name="android:windowTranslucentNavigation">true</item>
 
         <item name="android:windowBackground">@android:color/black</item>
-
-        <!-- Display cutout mode -->
-        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowFullscreen">true</item>
 
         <!-- Disallow force dark mode, to fix UI issues on MIUI -->
         <item name="android:forceDarkAllowed">false</item>
-
-        <!-- Enable window content transitions -->
-        <item name="android:windowContentTransitions">true</item>
-        <item name="android:windowAllowEnterTransitionOverlap">true</item>
-        <item name="android:windowAllowReturnTransitionOverlap">true</item>
     </style>
 
     <!-- Inherit from a base file picker theme that handles day/night -->

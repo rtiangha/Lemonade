@@ -34,19 +34,21 @@ public class UpdaterUtils {
 
     // search updates if the user have it enabled.
     public static void checkUpdatesInit(Context context) {
-        cleanDownloadFolder(context);
+        if (DirectoryInitialization.areCitraDirectoriesReady()) {
+            cleanDownloadFolder(context);
 
-        Settings settings = new Settings();
-        settings.loadSettings(null);
+            Settings settings = new Settings();
+            settings.loadSettings(null);
 
-        // ask updater permission on first boot.
-        IntSetting askUpdaterPermissionSetting =
-                (IntSetting) settings.getSection(Settings.SECTION_INTERFACE)
-                        .getSetting(SettingsFile.KEY_UPDATER_CHECK_AT_STARTUP);
-        int askUpdaterPermission = askUpdaterPermissionSetting.getValue();
+            // ask updater permission on first boot.
+            IntSetting askUpdaterPermissionSetting =
+                    (IntSetting) settings.getSection(Settings.SECTION_INTERFACE)
+                            .getSetting(SettingsFile.KEY_UPDATER_CHECK_AT_STARTUP);
+            int askUpdaterPermission = askUpdaterPermissionSetting.getValue();
 
-        if (askUpdaterPermission == 1) {
-            checkUpdates(context);
+            if (askUpdaterPermission == 1) {
+                checkUpdates(context);
+            }
         }
     }
 

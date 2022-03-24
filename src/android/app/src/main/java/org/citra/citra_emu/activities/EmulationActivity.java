@@ -1,40 +1,30 @@
 package org.citra.citra_emu.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.SparseIntArray;
 import android.view.InputDevice;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.SubMenu;
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.SeekBar;
-import android.widget.TextView;
+import android.view.WindowManager;
 
-import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import org.citra.citra_emu.CitraApplication;
 import org.citra.citra_emu.NativeLibrary;
 import org.citra.citra_emu.R;
 import org.citra.citra_emu.dialogs.RunningSettingDialog;
+import org.citra.citra_emu.features.settings.model.IntSetting;
+import org.citra.citra_emu.features.settings.model.Settings;
 import org.citra.citra_emu.features.settings.model.view.InputBindingSetting;
-import org.citra.citra_emu.features.settings.ui.SettingsActivity;
 import org.citra.citra_emu.features.settings.utils.SettingsFile;
 import org.citra.citra_emu.camera.StillImageCameraHelper;
 import org.citra.citra_emu.fragments.EmulationFragment;
@@ -43,96 +33,29 @@ import org.citra.citra_emu.utils.ControllerMappingHelper;
 import org.citra.citra_emu.utils.EmulationMenuSettings;
 import org.citra.citra_emu.utils.FileBrowserHelper;
 import org.citra.citra_emu.utils.FileUtil;
-import org.citra.citra_emu.utils.ForegroundService;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Retention;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.RECORD_AUDIO;
-import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 public final class EmulationActivity extends AppCompatActivity {
     public static final String EXTRA_SELECTED_GAME = "SelectedGame";
     public static final String EXTRA_SELECTED_TITLE = "SelectedTitle";
-    public static final int MENU_ACTION_EDIT_CONTROLS_PLACEMENT = 0;
-    public static final int MENU_ACTION_TOGGLE_CONTROLS = 1;
-    public static final int MENU_ACTION_ADJUST_SCALE = 2;
-    public static final int MENU_ACTION_ADJUST_OPACITY = 3;
-    public static final int MENU_ACTION_RUNNING_SETTING = 4;
-    public static final int MENU_ACTION_EXIT = 5;
-    public static final int MENU_ACTION_SHOW_FPS = 6;
-    public static final int MENU_ACTION_SCREEN_LAYOUT_LANDSCAPE = 7;
-    public static final int MENU_ACTION_SCREEN_LAYOUT_PORTRAIT = 8;
-    public static final int MENU_ACTION_SCREEN_LAYOUT_SINGLE = 9;
-    public static final int MENU_ACTION_SCREEN_LAYOUT_SIDEBYSIDE = 10;
-    public static final int MENU_ACTION_SWAP_SCREENS = 11;
-    public static final int MENU_ACTION_ROTATE_SCREEN = 12;
-    public static final int MENU_ACTION_RESET_OVERLAY = 13;
-    public static final int MENU_ACTION_SHOW_OVERLAY = 14;
-    public static final int MENU_ACTION_OPEN_SETTINGS = 15;
-    public static final int MENU_ACTION_LOAD_AMIIBO = 16;
-    public static final int MENU_ACTION_REMOVE_AMIIBO = 17;
-    public static final int MENU_ACTION_JOYSTICK_REL_CENTER = 18;
-    public static final int MENU_ACTION_DPAD_SLIDE_ENABLE = 19;
 
     public static final int REQUEST_SELECT_AMIIBO = 2;
-    private static final int EMULATION_RUNNING_NOTIFICATION = 0x1000;
-    private static SparseIntArray buttonsActionsMap = new SparseIntArray();
 
     private static WeakReference<EmulationActivity> sInstance = new WeakReference<>(null);
 
-    static {
-        buttonsActionsMap.append(R.id.menu_emulation_edit_layout,
-                EmulationActivity.MENU_ACTION_EDIT_CONTROLS_PLACEMENT);
-        buttonsActionsMap.append(R.id.menu_emulation_toggle_controls,
-                EmulationActivity.MENU_ACTION_TOGGLE_CONTROLS);
-        buttonsActionsMap
-                .append(R.id.menu_emulation_adjust_scale, EmulationActivity.MENU_ACTION_ADJUST_SCALE);
-        buttonsActionsMap
-                .append(R.id.menu_emulation_running_setting, EmulationActivity.MENU_ACTION_RUNNING_SETTING);
-        buttonsActionsMap
-                .append(R.id.menu_emulation_adjust_opacity, EmulationActivity.MENU_ACTION_ADJUST_OPACITY);
-        buttonsActionsMap.append(R.id.menu_emulation_show_fps,
-                EmulationActivity.MENU_ACTION_SHOW_FPS);
-        buttonsActionsMap.append(R.id.menu_screen_layout_landscape,
-                EmulationActivity.MENU_ACTION_SCREEN_LAYOUT_LANDSCAPE);
-        buttonsActionsMap.append(R.id.menu_screen_layout_portrait,
-                EmulationActivity.MENU_ACTION_SCREEN_LAYOUT_PORTRAIT);
-        buttonsActionsMap.append(R.id.menu_screen_layout_single,
-                EmulationActivity.MENU_ACTION_SCREEN_LAYOUT_SINGLE);
-        buttonsActionsMap.append(R.id.menu_screen_layout_sidebyside,
-                EmulationActivity.MENU_ACTION_SCREEN_LAYOUT_SIDEBYSIDE);
-        buttonsActionsMap.append(R.id.menu_emulation_swap_screens,
-                EmulationActivity.MENU_ACTION_SWAP_SCREENS);
-        buttonsActionsMap.append(R.id.menu_emulation_rotate_screen,
-                EmulationActivity.MENU_ACTION_ROTATE_SCREEN);
-        buttonsActionsMap
-                .append(R.id.menu_emulation_reset_overlay, EmulationActivity.MENU_ACTION_RESET_OVERLAY);
-        buttonsActionsMap
-                .append(R.id.menu_emulation_show_overlay, EmulationActivity.MENU_ACTION_SHOW_OVERLAY);
-        buttonsActionsMap
-                .append(R.id.menu_emulation_open_settings, EmulationActivity.MENU_ACTION_OPEN_SETTINGS);
-        buttonsActionsMap
-                .append(R.id.menu_emulation_amiibo_load, EmulationActivity.MENU_ACTION_LOAD_AMIIBO);
-        buttonsActionsMap
-                .append(R.id.menu_emulation_amiibo_remove, EmulationActivity.MENU_ACTION_REMOVE_AMIIBO);
-        buttonsActionsMap.append(R.id.menu_emulation_joystick_rel_center,
-                EmulationActivity.MENU_ACTION_JOYSTICK_REL_CENTER);
-        buttonsActionsMap.append(R.id.menu_emulation_dpad_slide_enable,
-                EmulationActivity.MENU_ACTION_DPAD_SLIDE_ENABLE);
-    }
-
-    private View mDecorView;
     private EmulationFragment mEmulationFragment;
     private SharedPreferences mPreferences;
     private ControllerMappingHelper mControllerMappingHelper;
-    private Intent foregroundService;
     private boolean activityRecreated;
+    private boolean mMenuVisible;
     private String mSelectedTitle;
     private String mPath;
 
@@ -144,13 +67,8 @@ public final class EmulationActivity extends AppCompatActivity {
         activity.startActivity(launcher);
     }
 
-    public static void tryDismissRunningNotification(Activity activity) {
-        NotificationManagerCompat.from(activity).cancel(EMULATION_RUNNING_NOTIFICATION);
-    }
-
     @Override
     protected void onDestroy() {
-        stopService(foregroundService);
         super.onDestroy();
     }
 
@@ -172,18 +90,18 @@ public final class EmulationActivity extends AppCompatActivity {
 
         mControllerMappingHelper = new ControllerMappingHelper();
 
-        // Get a handle to the Window containing the UI.
-        mDecorView = getWindow().getDecorView();
-        mDecorView.setOnSystemUiVisibilityChangeListener(visibility ->
-        {
-            if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-                // Go back to immersive fullscreen mode in 3s
-                Handler handler = new Handler(getMainLooper());
-                handler.postDelayed(this::enableFullscreenImmersive, 3000 /* 3s */);
-            }
-        });
-        // Set these options now so that the SurfaceView the game renders into is the right size.
-        enableFullscreenImmersive();
+        // only android 9+ support this feature.
+        Settings settings = new Settings();
+        settings.loadSettings(null);
+        IntSetting expandToCutoutAreaSetting =
+                (IntSetting) settings.getSection(Settings.SECTION_INTERFACE)
+                        .getSetting(SettingsFile.KEY_EXPAND_TO_CUTOUT_AREA);
+        int expandToCutoutArea = expandToCutoutAreaSetting.getValue();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && expandToCutoutArea == 1) {
+            getWindow().getAttributes().layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
 
         setTheme(R.style.CitraEmulationBase);
 
@@ -202,10 +120,6 @@ public final class EmulationActivity extends AppCompatActivity {
         setTitle(mSelectedTitle);
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        // Start a foreground service to prevent the app from getting killed in the background
-        foregroundService = new Intent(EmulationActivity.this, ForegroundService.class);
-        startForegroundService(foregroundService);
 
         // Override Citra core INI with the one set by our in game menu
         NativeLibrary.SwapScreens(EmulationMenuSettings.getSwapScreens(),
@@ -239,21 +153,26 @@ public final class EmulationActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        NativeLibrary.PauseEmulation();
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.emulation_close_game)
-                .setMessage(R.string.emulation_close_game_message)
-                .setPositiveButton(android.R.string.yes, (dialogInterface, i) ->
-                {
-                    mEmulationFragment.stopEmulation();
-                    finish();
-                })
-                .setNegativeButton(android.R.string.cancel, (dialogInterface, i) ->
-                    NativeLibrary.UnPauseEmulation())
-                .setOnCancelListener(dialogInterface ->
-                    NativeLibrary.UnPauseEmulation())
-                .create()
-                .show();
+        if (mMenuVisible) {
+            mEmulationFragment.stopEmulation();
+            finish();
+            sInstance = new WeakReference<>(null);
+        } else {
+            mMenuVisible = true;
+            mEmulationFragment.stopConfiguringControls();
+            RunningSettingDialog dialog = RunningSettingDialog.newInstance();
+            dialog.show(getSupportFragmentManager(), "RunningSettingDialog");
+            dialog.setOnDismissListener(v -> {
+                mMenuVisible = false;
+                hideSystemUI();
+            });
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        hideSystemUI();
     }
 
     @Override
@@ -287,229 +206,23 @@ public final class EmulationActivity extends AppCompatActivity {
         }
     }
 
-    private void enableFullscreenImmersive() {
-        // It would be nice to use IMMERSIVE_STICKY, but that doesn't show the toolbar.
-        mDecorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                        View.SYSTEM_UI_FLAG_FULLSCREEN |
-                        View.SYSTEM_UI_FLAG_IMMERSIVE);
+    private void hideSystemUI() {
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_emulation, menu);
-
-        int layoutOptionMenuItem = R.id.menu_screen_layout_landscape;
-        switch (EmulationMenuSettings.getLandscapeScreenLayout()) {
-            case EmulationMenuSettings.LayoutOption_SingleScreen:
-                layoutOptionMenuItem = R.id.menu_screen_layout_single;
-                break;
-            case EmulationMenuSettings.LayoutOption_SideScreen:
-                layoutOptionMenuItem = R.id.menu_screen_layout_sidebyside;
-                break;
-            case EmulationMenuSettings.LayoutOption_MobilePortrait:
-                layoutOptionMenuItem = R.id.menu_screen_layout_portrait;
-                break;
-        }
-
-        menu.findItem(layoutOptionMenuItem).setChecked(true);
-        menu.findItem(R.id.menu_emulation_joystick_rel_center).setChecked(EmulationMenuSettings.getJoystickRelCenter());
-        menu.findItem(R.id.menu_emulation_dpad_slide_enable).setChecked(EmulationMenuSettings.getDpadSlideEnable());
-        menu.findItem(R.id.menu_emulation_show_fps).setChecked(EmulationMenuSettings.getShowFps());
-        menu.findItem(R.id.menu_emulation_swap_screens).setChecked(EmulationMenuSettings.getSwapScreens());
-        menu.findItem(R.id.menu_emulation_show_overlay).setChecked(EmulationMenuSettings.getShowOverlay());
-
-        return true;
+    public void loadAmiibo() {
+        FileBrowserHelper.openFilePicker(this, REQUEST_SELECT_AMIIBO,
+                R.string.select_amiibo,
+                Collections.singletonList("bin"), false);
     }
 
-    private void DisplaySavestateWarning() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(CitraApplication.getAppContext());
-        if (preferences.getBoolean("savestateWarningShown", false)) {
-            return;
-        }
-
-        LayoutInflater inflater = mEmulationFragment.requireActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.dialog_checkbox, null);
-        CheckBox checkBox = view.findViewById(R.id.checkBox);
-
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.savestate_warning_title)
-                .setMessage(R.string.savestate_warning_message)
-                .setView(view)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    preferences.edit().putBoolean("savestateWarningShown", checkBox.isChecked()).apply();
-                })
-                .show();
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-
-        final NativeLibrary.SavestateInfo[] savestates = NativeLibrary.GetSavestateInfo();
-        if (savestates == null) {
-            menu.findItem(R.id.menu_emulation_save_state).setVisible(false);
-            menu.findItem(R.id.menu_emulation_load_state).setVisible(false);
-            return true;
-        }
-        menu.findItem(R.id.menu_emulation_save_state).setVisible(true);
-        menu.findItem(R.id.menu_emulation_load_state).setVisible(true);
-
-        final SubMenu saveStateMenu = menu.findItem(R.id.menu_emulation_save_state).getSubMenu();
-        final SubMenu loadStateMenu = menu.findItem(R.id.menu_emulation_load_state).getSubMenu();
-        saveStateMenu.clear();
-        loadStateMenu.clear();
-
-        // Update savestates information
-        for (int i = 0; i < NativeLibrary.SAVESTATE_SLOT_COUNT; ++i) {
-            final int slot = i + 1;
-            final String text = getString(R.string.emulation_empty_state_slot, slot);
-            saveStateMenu.add(text).setEnabled(true).setOnMenuItemClickListener((item) -> {
-                DisplaySavestateWarning();
-                NativeLibrary.SaveState(slot);
-                return true;
-            });
-            loadStateMenu.add(text).setEnabled(false).setOnMenuItemClickListener((item) -> {
-                NativeLibrary.LoadState(slot);
-                return true;
-            });
-        }
-        for (final NativeLibrary.SavestateInfo info : savestates) {
-            final String text = getString(R.string.emulation_occupied_state_slot, info.slot, info.time);
-            saveStateMenu.getItem(info.slot - 1).setTitle(text);
-            loadStateMenu.getItem(info.slot - 1).setTitle(text).setEnabled(true);
-        }
-        return true;
-    }
-
-    @SuppressWarnings("WrongConstant")
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int action = buttonsActionsMap.get(item.getItemId(), -1);
-
-        switch (action) {
-            // Edit the placement of the controls
-            case MENU_ACTION_EDIT_CONTROLS_PLACEMENT:
-                editControlsPlacement();
-                break;
-
-            // Enable/Disable specific buttons or the entire input overlay.
-            case MENU_ACTION_TOGGLE_CONTROLS:
-                toggleControls();
-                break;
-
-            // Adjust the scale of the overlay controls.
-            case MENU_ACTION_ADJUST_SCALE:
-                adjustScale();
-                break;
-
-            // Adjust the opacity of the overlay controls.
-            case MENU_ACTION_ADJUST_OPACITY:
-                adjustOpacity();
-                break;
-
-            // In-game settings dialog
-            case MENU_ACTION_RUNNING_SETTING:
-                RunningSettingDialog dialog = RunningSettingDialog.newInstance();
-                dialog.show(getSupportFragmentManager(), "RunningSettingDialog");
-                break;
-
-            // Toggle the visibility of the Performance stats TextView
-            case MENU_ACTION_SHOW_FPS: {
-                final boolean isShowFpsEnabled = !EmulationMenuSettings.getShowFps();
-                EmulationMenuSettings.setShowFps(isShowFpsEnabled);
-                item.setChecked(isShowFpsEnabled);
-
-                mEmulationFragment.updateShowFpsOverlay();
-                break;
-            }
-            // Sets the screen layout to Landscape
-            case MENU_ACTION_SCREEN_LAYOUT_LANDSCAPE:
-                changeScreenOrientation(EmulationMenuSettings.LayoutOption_MobileLandscape, item);
-                break;
-
-            // Sets the screen layout to Portrait
-            case MENU_ACTION_SCREEN_LAYOUT_PORTRAIT:
-                changeScreenOrientation(EmulationMenuSettings.LayoutOption_MobilePortrait, item);
-                break;
-
-            // Sets the screen layout to Single
-            case MENU_ACTION_SCREEN_LAYOUT_SINGLE:
-                changeScreenOrientation(EmulationMenuSettings.LayoutOption_SingleScreen, item);
-                break;
-
-            // Sets the screen layout to Side by Side
-            case MENU_ACTION_SCREEN_LAYOUT_SIDEBYSIDE:
-                changeScreenOrientation(EmulationMenuSettings.LayoutOption_SideScreen, item);
-                break;
-
-            // Swap the top and bottom screen locations
-            case MENU_ACTION_SWAP_SCREENS: {
-                final boolean isSwapScreensEnabled = !EmulationMenuSettings.getSwapScreens();
-                EmulationMenuSettings.setSwapScreens(isSwapScreensEnabled);
-                item.setChecked(isSwapScreensEnabled);
-
-                NativeLibrary.SwapScreens(isSwapScreensEnabled, getWindowManager().getDefaultDisplay()
-                        .getRotation());
-                break;
-            }
-
-            // Rotate screen
-            case MENU_ACTION_ROTATE_SCREEN:
-                rotateScreen();
-                break;
-
-            // Reset overlay placement
-            case MENU_ACTION_RESET_OVERLAY:
-                resetOverlay();
-                break;
-
-            // Show or hide overlay
-            case MENU_ACTION_SHOW_OVERLAY: {
-                final boolean isShowOverlayEnabled = !EmulationMenuSettings.getShowOverlay();
-                EmulationMenuSettings.setShowOverlay(isShowOverlayEnabled);
-                item.setChecked(isShowOverlayEnabled);
-
-                mEmulationFragment.refreshInputOverlay();
-                break;
-            }
-
-            case MENU_ACTION_EXIT:
-                mEmulationFragment.stopEmulation();
-                finish();
-                break;
-
-            case MENU_ACTION_OPEN_SETTINGS:
-                SettingsActivity.launch(this, SettingsFile.FILE_NAME_CONFIG, "");
-                break;
-
-            case MENU_ACTION_LOAD_AMIIBO:
-                FileBrowserHelper.openFilePicker(this, REQUEST_SELECT_AMIIBO,
-                                                 R.string.select_amiibo,
-                                                 Collections.singletonList("bin"), false);
-                break;
-
-            case MENU_ACTION_REMOVE_AMIIBO:
-                RemoveAmiibo();
-                break;
-
-            case MENU_ACTION_JOYSTICK_REL_CENTER:
-                final boolean isJoystickRelCenterEnabled = !EmulationMenuSettings.getJoystickRelCenter();
-                EmulationMenuSettings.setJoystickRelCenter(isJoystickRelCenterEnabled);
-                item.setChecked(isJoystickRelCenterEnabled);
-                break;
-            case MENU_ACTION_DPAD_SLIDE_ENABLE:
-                final boolean isDpadSlideEnabled = !EmulationMenuSettings.getDpadSlideEnable();
-                EmulationMenuSettings.setDpadSlideEnable(isDpadSlideEnabled);
-                item.setChecked(isDpadSlideEnabled);
-                break;
-        }
-
-        return true;
+    public void stopEmulation() {
+        mEmulationFragment.stopEmulation();
     }
 
     public void rotateScreen() {
@@ -518,13 +231,6 @@ public final class EmulationActivity extends AppCompatActivity {
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
-    }
-
-    private void changeScreenOrientation(int layoutOption, MenuItem item) {
-        item.setChecked(true);
-        NativeLibrary.NotifyOrientationChange(layoutOption, getWindowManager().getDefaultDisplay()
-                .getRotation());
-        EmulationMenuSettings.setLandscapeScreenLayout(layoutOption);
     }
 
     public void editControlsPlacement() {
@@ -538,6 +244,10 @@ public final class EmulationActivity extends AppCompatActivity {
     // Gets button presses
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if (mMenuVisible) {
+            return super.dispatchKeyEvent(event);
+        }
+
         int action;
         int button = mPreferences.getInt(InputBindingSetting.getInputButtonKey(event.getKeyCode()), event.getKeyCode());
 
@@ -608,7 +318,7 @@ public final class EmulationActivity extends AppCompatActivity {
         }
     }
 
-    private void RemoveAmiibo() {
+    public void removeAmiibo() {
         NativeLibrary.RemoveAmiibo();
     }
 
@@ -616,7 +326,7 @@ public final class EmulationActivity extends AppCompatActivity {
         return mSelectedTitle;
     }
 
-    private void toggleControls() {
+    public void toggleControls() {
         final SharedPreferences.Editor editor = mPreferences.edit();
         boolean[] enabledButtons = new boolean[14];
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -649,59 +359,7 @@ public final class EmulationActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private void adjustScale() {
-        LayoutInflater inflater = LayoutInflater.from(this);
-        View view = inflater.inflate(R.layout.dialog_seekbar, null);
-
-        final SeekBar seekbar = view.findViewById(R.id.seekbar);
-        final TextView value = view.findViewById(R.id.text_value);
-        final TextView units = view.findViewById(R.id.text_units);
-
-        seekbar.setMax(150);
-        seekbar.setProgress(mPreferences.getInt("controlScale", 50));
-        seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                value.setText(String.valueOf(progress + 50));
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                setControlScale(seekbar.getProgress());
-            }
-        });
-
-        value.setText(String.valueOf(seekbar.getProgress() + 50));
-        units.setText("%");
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.emulation_control_scale);
-        builder.setView(view);
-        final int previousProgress = seekbar.getProgress();
-        builder.setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> {
-            setControlScale(previousProgress);
-        });
-        builder.setPositiveButton(android.R.string.ok, (dialogInterface, i) ->
-        {
-            setControlScale(seekbar.getProgress());
-        });
-        builder.setNeutralButton(R.string.slider_default, (dialogInterface, i) -> {
-            setControlScale(50);
-        });
-
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-    }
-
-    private void setControlScale(int scale) {
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putInt("controlScale", scale);
-        editor.apply();
-        mEmulationFragment.refreshInputOverlay();
-    }
-
-    private void resetOverlay() {
+    public void resetOverlay() {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.emulation_touch_overlay_reset))
                 .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> mEmulationFragment.resetInputOverlay())
@@ -711,61 +369,12 @@ public final class EmulationActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void adjustOpacity() {
-        LayoutInflater inflater = LayoutInflater.from(this);
-        View view = inflater.inflate(R.layout.dialog_seekbar, null);
-
-        final SeekBar seekbar = view.findViewById(R.id.seekbar);
-        final TextView value = view.findViewById(R.id.text_value);
-        final TextView units = view.findViewById(R.id.text_units);
-
-        seekbar.setMax(100);
-        seekbar.setMin(3);
-        seekbar.setProgress(mPreferences.getInt("controlOpacity", 100));
-        seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                value.setText(String.valueOf(progress));
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                setControlOpacity(seekbar.getProgress());
-            }
-        });
-
-        value.setText(String.valueOf(seekbar.getProgress()));
-        units.setText("%");
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.emulation_control_opacity);
-        builder.setView(view);
-        final int previousProgress = seekbar.getProgress();
-        builder.setNegativeButton(android.R.string.cancel, (dialogInterface, i) -> {
-            setControlOpacity(previousProgress);
-        });
-        builder.setPositiveButton(android.R.string.ok, (dialogInterface, i) ->
-        {
-            setControlOpacity(seekbar.getProgress());
-        });
-        builder.setNeutralButton(R.string.slider_default, (dialogInterface, i) -> {
-            setControlOpacity(100);
-        });
-
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-    }
-
-    private void setControlOpacity(int opacity) {
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putInt("controlOpacity", opacity);
-        editor.apply();
-        mEmulationFragment.refreshInputOverlay();
-    }
-
     @Override
     public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        if (mMenuVisible) {
+            return false;
+        }
+
         if (((event.getSource() & InputDevice.SOURCE_CLASS_JOYSTICK) == 0)) {
             return super.dispatchGenericMotionEvent(event);
         }
@@ -875,15 +484,11 @@ public final class EmulationActivity extends AppCompatActivity {
         return true;
     }
 
-    public boolean isActivityRecreated() {
-        return activityRecreated;
+    public void refreshControls() {
+        mEmulationFragment.refreshControls();
     }
 
-    @Retention(SOURCE)
-    @IntDef({MENU_ACTION_EDIT_CONTROLS_PLACEMENT, MENU_ACTION_TOGGLE_CONTROLS, MENU_ACTION_ADJUST_SCALE,
-            MENU_ACTION_EXIT, MENU_ACTION_SHOW_FPS, MENU_ACTION_SCREEN_LAYOUT_LANDSCAPE,
-            MENU_ACTION_SCREEN_LAYOUT_PORTRAIT, MENU_ACTION_SCREEN_LAYOUT_SINGLE, MENU_ACTION_SCREEN_LAYOUT_SIDEBYSIDE,
-            MENU_ACTION_SWAP_SCREENS, MENU_ACTION_RESET_OVERLAY, MENU_ACTION_SHOW_OVERLAY, MENU_ACTION_OPEN_SETTINGS})
-    public @interface MenuAction {
+    public boolean isActivityRecreated() {
+        return activityRecreated;
     }
 }

@@ -15,6 +15,9 @@ public final class StartupHandler {
         // Ask the user to grant write permission if it's not already granted
         PermissionsHandler.checkWritePermission(parent);
 
+        // Ask the user if he wants to check for updates at startup if we haven't yet.
+        UpdaterUtils.checkUpdatesInit(parent);
+
         String start_file = "";
         Bundle extras = parent.getIntent().getExtras();
         if (extras != null) {
@@ -31,9 +34,6 @@ public final class StartupHandler {
     }
 
     public static void HandleInit(FragmentActivity parent) {
-        // Ask the user if he wants to check for updates at startup if we haven't yet.
-        UpdaterUtils.checkUpdatesInit(parent);
-
         if (PermissionsHandler.isFirstBoot(parent)) {
             // Prompt user with standard first boot disclaimer
             new AlertDialog.Builder(parent)

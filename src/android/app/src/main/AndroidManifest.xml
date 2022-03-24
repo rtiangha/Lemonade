@@ -58,8 +58,6 @@
             android:theme="@style/CitraEmulationBase"
             android:launchMode="singleTop"/>
 
-        <service android:name="org.citra.citra_emu.utils.ForegroundService"/>
-
         <activity
             android:name="org.citra.citra_emu.activities.CustomFilePickerActivity"
             android:label="@string/app_name"

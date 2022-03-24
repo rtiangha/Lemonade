@@ -134,8 +134,8 @@
     <string name="emulation_close_game">Fermer le jeu</string>
     <string name="emulation_close_game_message">Êtes-vous sûr de vouloir fermer le jeu en cours ?</string>
     <string name="menu_emulation_amiibo">Amiibo</string>
-    <string name="menu_emulation_amiibo_load">Charger</string>
-    <string name="menu_emulation_amiibo_remove">Supprimer</string>
+    <string name="menu_emulation_amiibo_load">Charger Amiibo</string>
+    <string name="menu_emulation_amiibo_remove">Supprimer Amiibo</string>
     <string name="select_amiibo">Sélection du fichier Amiibo</string>
     <string name="amiibo_load_error">Erreur lors du chargement de Amiibo</string>
     <string name="amiibo_load_error_message">Lors du chargement du fichier Amiibo spécifié, une erreur s\'est produite. Veuillez vérifier que le fichier est convenable.</string>
