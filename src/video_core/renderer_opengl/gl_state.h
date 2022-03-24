@@ -162,6 +162,18 @@ public:
     /// Apply this state as the current OpenGL state
     void Apply() const;
 
+    /// apply directly
+    static GLuint BindVertexArray(GLuint array);
+    static GLuint BindVertexBuffer(GLuint buffer);
+    static GLuint BindUniformBuffer(GLuint buffer);
+    static GLuint BindTexture2D(int index, GLuint texture);
+    static GLuint BindSampler(int index, GLuint sampler);
+    static GLuint BindTextureCube(GLuint texture_cube);
+    static GLuint BindReadFramebuffer(GLuint framebuffer);
+    static GLuint BindDrawFramebuffer(GLuint framebuffer);
+    static GLuint BindRenderbuffer(GLuint buffer);
+    static GLuint BindShaderProgram(GLuint shader);
+
     /// Resets any references to the given resource
     OpenGLState& ResetTexture(GLuint handle);
     OpenGLState& ResetSampler(GLuint handle);

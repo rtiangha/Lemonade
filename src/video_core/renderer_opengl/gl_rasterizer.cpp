@@ -155,6 +155,7 @@ RasterizerOpenGL::RasterizerOpenGL(Frontend::EmuWindow& emu_window)
 
     // Create render framebuffer
     framebuffer.Create();
+    state.draw.draw_framebuffer = framebuffer.handle;
 
     // Allocate and bind texture buffer lut textures
     texture_buffer_lut_lf.Create();
@@ -528,20 +529,14 @@ void RasterizerOpenGL::DrawTriangles() {
 }
 
 bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
-    MICROPROFILE_SCOPE(OpenGL_Drawing);
     const auto& regs = Pica::g_state.regs;
-
-    bool shadow_rendering = regs.framebuffer.output_merger.fragment_operation_mode ==
-                            Pica::FramebufferRegs::FragmentOperationMode::Shadow;
-
-    const bool has_stencil =
-        regs.framebuffer.framebuffer.depth_format == Pica::FramebufferRegs::DepthFormat::D24S8;
+    const bool shadow_rendering = regs.framebuffer.IsShadowRendering();
+    const bool has_stencil = regs.framebuffer.HasStencil();
 
     const bool write_color_fb = shadow_rendering || state.color_mask.red_enabled == GL_TRUE ||
                                 state.color_mask.green_enabled == GL_TRUE ||
                                 state.color_mask.blue_enabled == GL_TRUE ||
                                 state.color_mask.alpha_enabled == GL_TRUE;
-
     const bool write_depth_fb =
         (state.depth.test_enabled && state.depth.write_mask == GL_TRUE) ||
         (has_stencil && state.stencil.test_enabled && state.stencil.write_mask != 0);
@@ -553,17 +548,7 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
         (write_depth_fb || regs.framebuffer.output_merger.depth_test_enable != 0 ||
          (has_stencil && state.stencil.test_enabled));
 
-    Common::Rectangle<s32> viewport_rect_unscaled{
-        // These registers hold half-width and half-height, so must be multiplied by 2
-        regs.rasterizer.viewport_corner.x,  // left
-        regs.rasterizer.viewport_corner.y + // top
-            static_cast<s32>(Pica::float24::FromRaw(regs.rasterizer.viewport_size_y).ToFloat32() *
-                             2),
-        regs.rasterizer.viewport_corner.x + // right
-            static_cast<s32>(Pica::float24::FromRaw(regs.rasterizer.viewport_size_x).ToFloat32() *
-                             2),
-        regs.rasterizer.viewport_corner.y // bottom
-    };
+    const Common::Rectangle<s32> viewport_rect_unscaled = regs.rasterizer.GetViewportRect();
 
     Surface color_surface;
     Surface depth_surface;
@@ -571,104 +556,13 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
     std::tie(color_surface, depth_surface, surfaces_rect) =
         res_cache.GetFramebufferSurfaces(using_color_fb, using_depth_fb, viewport_rect_unscaled);
 
-    const u16 res_scale = color_surface != nullptr
-                              ? color_surface->res_scale
-                              : (depth_surface == nullptr ? 1u : depth_surface->res_scale);
-
-    Common::Rectangle<u32> draw_rect{
-        static_cast<u32>(std::clamp<s32>(static_cast<s32>(surfaces_rect.left) +
-                                             viewport_rect_unscaled.left * res_scale,
-                                         surfaces_rect.left, surfaces_rect.right)), // Left
-        static_cast<u32>(std::clamp<s32>(static_cast<s32>(surfaces_rect.bottom) +
-                                             viewport_rect_unscaled.top * res_scale,
-                                         surfaces_rect.bottom, surfaces_rect.top)), // Top
-        static_cast<u32>(std::clamp<s32>(static_cast<s32>(surfaces_rect.left) +
-                                             viewport_rect_unscaled.right * res_scale,
-                                         surfaces_rect.left, surfaces_rect.right)), // Right
-        static_cast<u32>(std::clamp<s32>(static_cast<s32>(surfaces_rect.bottom) +
-                                             viewport_rect_unscaled.bottom * res_scale,
-                                         surfaces_rect.bottom, surfaces_rect.top))}; // Bottom
-
-    // Bind the framebuffer surfaces
-    state.draw.draw_framebuffer = framebuffer.handle;
-    state.Apply();
-
-    if (shadow_rendering) {
-        if (!allow_shadow || color_surface == nullptr) {
-            return true;
-        }
-        glFramebufferParameteri(GL_DRAW_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH,
-                                color_surface->width * color_surface->res_scale);
-        glFramebufferParameteri(GL_DRAW_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT,
-                                color_surface->height * color_surface->res_scale);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0,
-                               0);
-        state.image_shadow_buffer = color_surface->texture.handle;
-    } else {
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                               color_surface != nullptr ? color_surface->texture.handle : 0, 0);
-        if (depth_surface != nullptr) {
-            if (has_stencil) {
-                // attach both depth and stencil
-                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                                       GL_TEXTURE_2D, depth_surface->texture.handle, 0);
-            } else {
-                // attach depth
-                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-                                       depth_surface->texture.handle, 0);
-                // clear stencil attachment
-                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0,
-                                       0);
-            }
-        } else {
-            if (is_mali_gpu) {
-                state.depth.test_enabled = false;
-                state.depth.write_mask = GL_FALSE;
-            } else {
-                // clear both depth and stencil attachment
-                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                                       GL_TEXTURE_2D, 0, 0);
-            }
-        }
-    }
-
-    // Sync the viewport
-    state.viewport.x =
-        static_cast<GLint>(surfaces_rect.left) + viewport_rect_unscaled.left * res_scale;
-    state.viewport.y =
-        static_cast<GLint>(surfaces_rect.bottom) + viewport_rect_unscaled.bottom * res_scale;
-    state.viewport.width = static_cast<GLsizei>(viewport_rect_unscaled.GetWidth() * res_scale);
-    state.viewport.height = static_cast<GLsizei>(viewport_rect_unscaled.GetHeight() * res_scale);
-
-    if (uniform_block_data.data.framebuffer_scale != res_scale) {
-        uniform_block_data.data.framebuffer_scale = res_scale;
-        uniform_block_data.dirty = true;
-    }
-
-    // Scissor checks are window-, not viewport-relative, which means that if the cached texture
-    // sub-rect changes, the scissor bounds also need to be updated.
-    GLint scissor_x1 =
-        static_cast<GLint>(surfaces_rect.left + regs.rasterizer.scissor_test.x1 * res_scale);
-    GLint scissor_y1 =
-        static_cast<GLint>(surfaces_rect.bottom + regs.rasterizer.scissor_test.y1 * res_scale);
-    // x2, y2 have +1 added to cover the entire pixel area, otherwise you might get cracks when
-    // scaling or doing multisampling.
-    GLint scissor_x2 =
-        static_cast<GLint>(surfaces_rect.left + (regs.rasterizer.scissor_test.x2 + 1) * res_scale);
-    GLint scissor_y2 = static_cast<GLint>(surfaces_rect.bottom +
-                                          (regs.rasterizer.scissor_test.y2 + 1) * res_scale);
-
-    if (uniform_block_data.data.scissor_x1 != scissor_x1 ||
-        uniform_block_data.data.scissor_x2 != scissor_x2 ||
-        uniform_block_data.data.scissor_y1 != scissor_y1 ||
-        uniform_block_data.data.scissor_y2 != scissor_y2) {
-
-        uniform_block_data.data.scissor_x1 = scissor_x1;
-        uniform_block_data.data.scissor_x2 = scissor_x2;
-        uniform_block_data.data.scissor_y1 = scissor_y1;
-        uniform_block_data.data.scissor_y2 = scissor_y2;
-        uniform_block_data.dirty = true;
+    u32 res_scale = 1;
+    GLuint color_attachment = 0;
+    if (color_surface) {
+        res_scale = color_surface->res_scale;
+        color_attachment = color_surface->texture.handle;
+    } else if (depth_surface) {
+        res_scale = depth_surface->res_scale;
     }
 
     bool need_duplicate_texture = false;
@@ -790,18 +684,126 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
                 CheckBarrier(state.texture_units[texture_index].texture_2d =
                                  surface->texture.handle);
             } else {
-                // Can occur when texture addr is null or its memory is unmapped/invalid
-                // HACK: In this case, the correct behaviour for the PICA is to use the last
-                // rendered colour. But because this would be impractical to implement, the
-                // next best alternative is to use a clear texture, essentially skipping
-                // the geometry in question.
-                // For example: a bug in Pokemon X/Y causes NULL-texture squares to be drawn
-                // on the male character's face, which in the OpenGL default appear black.
-                state.texture_units[texture_index].texture_2d = default_texture;
+                if (surface) {
+                    if (surface->texture.handle == color_attachment) {
+                        state.texture_units[texture_index].texture_2d = surface->texture.handle;
+                    }
+                } else {
+                    /// texture_null
+                    // Can occur when texture addr is null or its memory is unmapped/invalid
+                    // HACK: In this case, the correct behaviour for the PICA is to use the last
+                    // rendered colour. But because this would be impractical to implement, the
+                    // next best alternative is to use a clear texture, essentially skipping
+                    // the geometry in question.
+                    // For example: a bug in Pokemon X/Y causes NULL-texture squares to be drawn
+                    // on the male character's face, which in the OpenGL default appear black.
+                    state.texture_units[texture_index].texture_2d = texture_null.handle;
+                }
             }
         } else {
             state.texture_units[texture_index].texture_2d = 0;
         }
+    }
+
+    Common::Rectangle<u32> draw_rect{
+            static_cast<u32>(std::clamp<s32>(static_cast<s32>(surfaces_rect.left) +
+                                             viewport_rect_unscaled.left * res_scale,
+                                             surfaces_rect.left, surfaces_rect.right)), // Left
+            static_cast<u32>(std::clamp<s32>(static_cast<s32>(surfaces_rect.bottom) +
+                                             viewport_rect_unscaled.top * res_scale,
+                                             surfaces_rect.bottom, surfaces_rect.top)), // Top
+            static_cast<u32>(std::clamp<s32>(static_cast<s32>(surfaces_rect.left) +
+                                             viewport_rect_unscaled.right * res_scale,
+                                             surfaces_rect.left, surfaces_rect.right)), // Right
+            static_cast<u32>(std::clamp<s32>(static_cast<s32>(surfaces_rect.bottom) +
+                                             viewport_rect_unscaled.bottom * res_scale,
+                                             surfaces_rect.bottom, surfaces_rect.top))}; // Bottom
+
+    // Sync the viewport
+    state.viewport.x =
+            static_cast<GLint>(surfaces_rect.left) + viewport_rect_unscaled.left * res_scale;
+    state.viewport.y =
+            static_cast<GLint>(surfaces_rect.bottom) + viewport_rect_unscaled.bottom * res_scale;
+    state.viewport.width = static_cast<GLsizei>(viewport_rect_unscaled.GetWidth() * res_scale);
+    state.viewport.height = static_cast<GLsizei>(viewport_rect_unscaled.GetHeight() * res_scale);
+
+    // Bind the framebuffer surfaces
+    OpenGLState::BindDrawFramebuffer(framebuffer.handle);
+
+    if (shadow_rendering) {
+        if (color_surface == nullptr) {
+            return true;
+        }
+        framebuffer_info.color_attachment = 0;
+        framebuffer_info.depth_attachment = 0;
+        framebuffer_info.width = 0;
+        framebuffer_info.height = 0;
+        glFramebufferParameteri(GL_DRAW_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, framebuffer_info.width);
+        glFramebufferParameteri(GL_DRAW_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, framebuffer_info.height);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
+        state.image_shadow_buffer = color_surface->texture.handle;
+    } else {
+        if (framebuffer_info.color_attachment != color_attachment) {
+            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_attachment, 0);
+            framebuffer_info.color_attachment = color_attachment;
+        }
+        if (depth_surface != nullptr) {
+            if (has_stencil) {
+                if (framebuffer_info.depth_attachment != depth_surface->texture.handle) {
+                    // attach both depth and stencil
+                    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                                           GL_TEXTURE_2D, depth_surface->texture.handle, 0);
+                    framebuffer_info.depth_attachment = depth_surface->texture.handle;
+                    framebuffer_info.width = depth_surface->width;
+                    framebuffer_info.height = depth_surface->height;
+                }
+            } else if (framebuffer_info.depth_attachment != depth_surface->texture.handle) {
+                // attach depth
+                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_surface->texture.handle, 0);
+                // clear stencil attachment
+                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
+                framebuffer_info.depth_attachment = depth_surface->texture.handle;
+                framebuffer_info.width = depth_surface->width;
+                framebuffer_info.height = depth_surface->height;
+            }
+        } else if (framebuffer_info.depth_attachment != 0) {
+            if (framebuffer_info.width < surfaces_rect.right || framebuffer_info.height < surfaces_rect.top) {
+                // clear both depth and stencil attachment
+                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
+                framebuffer_info.depth_attachment = 0;
+                framebuffer_info.width = 0;
+                framebuffer_info.height = 0;
+            } else {
+                state.depth.test_enabled = false;
+                state.depth.write_mask = GL_FALSE;
+            }
+        }
+    }
+
+    // Scissor checks are window-, not viewport-relative, which means that if the cached texture
+    // sub-rect changes, the scissor bounds also need to be updated.
+    GLint scissor_x1 =
+            static_cast<GLint>(surfaces_rect.left + regs.rasterizer.scissor_test.x1 * res_scale);
+    GLint scissor_y1 =
+            static_cast<GLint>(surfaces_rect.bottom + regs.rasterizer.scissor_test.y1 * res_scale);
+    // x2, y2 have +1 added to cover the entire pixel area, otherwise you might get cracks when
+    // scaling or doing multisampling.
+    GLint scissor_x2 =
+            static_cast<GLint>(surfaces_rect.left + (regs.rasterizer.scissor_test.x2 + 1) * res_scale);
+    GLint scissor_y2 = static_cast<GLint>(surfaces_rect.bottom +
+                                          (regs.rasterizer.scissor_test.y2 + 1) * res_scale);
+
+    if (uniform_block_data.data.scissor_x1 != scissor_x1 ||
+        uniform_block_data.data.scissor_x2 != scissor_x2 ||
+        uniform_block_data.data.scissor_y1 != scissor_y1 ||
+        uniform_block_data.data.scissor_y2 != scissor_y2) {
+
+        uniform_block_data.data.scissor_x1 = scissor_x1;
+        uniform_block_data.data.scissor_x2 = scissor_x2;
+        uniform_block_data.data.scissor_y1 = scissor_y1;
+        uniform_block_data.data.scissor_y2 = scissor_y2;
+        uniform_block_data.dirty = true;
     }
 
     OGLTexture temp_tex;
@@ -1434,22 +1436,18 @@ void RasterizerOpenGL::NotifyPicaRegisterChanged(u32 id) {
 }
 
 void RasterizerOpenGL::FlushAll() {
-    MICROPROFILE_SCOPE(OpenGL_CacheManagement);
     res_cache.FlushAll();
 }
 
 void RasterizerOpenGL::FlushRegion(PAddr addr, u32 size) {
-    MICROPROFILE_SCOPE(OpenGL_CacheManagement);
     res_cache.FlushRegion(addr, size);
 }
 
 void RasterizerOpenGL::InvalidateRegion(PAddr addr, u32 size) {
-    MICROPROFILE_SCOPE(OpenGL_CacheManagement);
     res_cache.InvalidateRegion(addr, size, nullptr);
 }
 
 void RasterizerOpenGL::FlushAndInvalidateRegion(PAddr addr, u32 size) {
-    MICROPROFILE_SCOPE(OpenGL_CacheManagement);
     res_cache.FlushRegion(addr, size);
     res_cache.InvalidateRegion(addr, size, nullptr);
 }
@@ -1459,8 +1457,6 @@ void RasterizerOpenGL::ClearAll(bool flush) {
 }
 
 bool RasterizerOpenGL::AccelerateDisplayTransfer(const GPU::Regs::DisplayTransferConfig& config) {
-    MICROPROFILE_SCOPE(OpenGL_Blits);
-
     SurfaceParams src_params;
     src_params.addr = config.GetPhysicalInputAddress();
     src_params.width = config.output_width;

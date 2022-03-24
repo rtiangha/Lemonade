@@ -375,7 +375,7 @@ private:
 
     u16 resolution_scale_factor;
 
-    std::unordered_map<TextureCubeConfig, CachedTextureCube> texture_cube_cache;
+    std::unordered_map<u64, CachedTextureCube> texture_cube_cache;
 
     std::recursive_mutex mutex;
 

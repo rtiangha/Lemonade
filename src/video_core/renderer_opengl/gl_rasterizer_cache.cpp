@@ -20,6 +20,7 @@
 #include "common/bit_field.h"
 #include "common/color.h"
 #include "common/logging/log.h"
+#include "common/hash.h"
 #include "common/math_util.h"
 #include "common/microprofile.h"
 #include "common/scope_exit.h"
@@ -1355,7 +1356,8 @@ Surface RasterizerCacheOpenGL::GetTextureSurface(const Pica::Texture::TextureInf
 }
 
 const CachedTextureCube& RasterizerCacheOpenGL::GetTextureCube(const TextureCubeConfig& config) {
-    auto& cube = texture_cube_cache[config];
+    auto hash_key = Common::ComputeHash64(&config, sizeof(config));
+    auto& cube = texture_cube_cache[hash_key];
 
     struct Face {
         Face(std::shared_ptr<SurfaceWatcher>& watcher, PAddr address, GLenum gl_face)
@@ -1478,23 +1480,19 @@ SurfaceSurfaceRect_Tuple RasterizerCacheOpenGL::GetFramebufferSurfaces(
     color_params.height = config.GetHeight();
     SurfaceParams depth_params = color_params;
 
-    color_params.addr = config.GetColorBufferPhysicalAddress();
-    color_params.pixel_format = SurfaceParams::PixelFormatFromColorFormat(config.color_format);
-    color_params.UpdateParams();
+    SurfaceInterval color_vp_interval;
+    SurfaceInterval depth_vp_interval;
 
-    depth_params.addr = config.GetDepthBufferPhysicalAddress();
-    depth_params.pixel_format = SurfaceParams::PixelFormatFromDepthFormat(config.depth_format);
-    depth_params.UpdateParams();
+    Common::Rectangle<u32> depth_rect{};
+    Surface depth_surface = nullptr;
+    if (using_depth_fb) {
+        depth_params.addr = config.GetDepthBufferPhysicalAddress();
+        depth_params.pixel_format = SurfaceParams::PixelFormatFromDepthFormat(config.depth_format);
+        depth_params.UpdateParams();
+        depth_vp_interval = depth_params.GetSubRectInterval(viewport_clamped);
 
-    auto color_vp_interval = color_params.GetSubRectInterval(viewport_clamped);
-    auto depth_vp_interval = depth_params.GetSubRectInterval(viewport_clamped);
-
-    // Make sure that framebuffers don't overlap if both color and depth are being used
-    if (using_color_fb && using_depth_fb &&
-        boost::icl::length(color_vp_interval & depth_vp_interval)) {
-        LOG_CRITICAL(Render_OpenGL, "Color and depth framebuffer memory regions overlap; "
-                                    "overlapping framebuffers not supported!");
-        using_depth_fb = false;
+        std::tie(depth_surface, depth_rect) =
+                GetSurfaceSubRect(depth_params, ScaleMatch::Exact, false);
     }
 
     if (!using_depth_fb && g_texture_load_hack &&
@@ -1505,21 +1503,27 @@ SurfaceSurfaceRect_Tuple RasterizerCacheOpenGL::GetFramebufferSurfaces(
     Common::Rectangle<u32> color_rect{};
     Surface color_surface = nullptr;
     if (using_color_fb)
+        color_params.addr = config.GetColorBufferPhysicalAddress();
+    color_params.pixel_format = SurfaceParams::PixelFormatFromColorFormat(config.color_format);
+    color_params.UpdateParams();
+    color_vp_interval = color_params.GetSubRectInterval(viewport_clamped);
+    if (depth_surface && depth_rect.bottom > 0) {
+        SurfaceParams new_params = color_params;
+        new_params.height = depth_rect.top;
+        new_params.UpdateParams();
         std::tie(color_surface, color_rect) =
-            GetSurfaceSubRect(color_params, ScaleMatch::Exact, false);
-
-    Common::Rectangle<u32> depth_rect{};
-    Surface depth_surface = nullptr;
-    if (using_depth_fb)
-        std::tie(depth_surface, depth_rect) =
-            GetSurfaceSubRect(depth_params, ScaleMatch::Exact, false);
+                GetSurfaceSubRect(new_params, ScaleMatch::Exact, false);
+        color_rect.bottom += depth_rect.bottom;
+    } else {
+        std::tie(color_surface, color_rect) =
+                GetSurfaceSubRect(color_params, ScaleMatch::Exact, false);
+    }
 
     Common::Rectangle<u32> fb_rect{};
     if (color_surface != nullptr && depth_surface != nullptr) {
         fb_rect = color_rect;
         // Color and Depth surfaces must have the same dimensions and offsets
-        if (color_rect.bottom != depth_rect.bottom || color_rect.top != depth_rect.top ||
-            color_rect.left != depth_rect.left || color_rect.right != depth_rect.right) {
+        if (color_rect != depth_rect) {
             color_surface = GetSurface(color_params, ScaleMatch::Exact, false);
             depth_surface = GetSurface(depth_params, ScaleMatch::Exact, false);
             fb_rect = color_surface->GetScaledRect();
