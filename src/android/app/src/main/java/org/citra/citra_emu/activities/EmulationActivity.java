@@ -91,14 +91,7 @@ public final class EmulationActivity extends AppCompatActivity {
         mControllerMappingHelper = new ControllerMappingHelper();
 
         // only android 9+ support this feature.
-        Settings settings = new Settings();
-        settings.loadSettings(null);
-        IntSetting expandToCutoutAreaSetting =
-                (IntSetting) settings.getSection(Settings.SECTION_INTERFACE)
-                        .getSetting(SettingsFile.KEY_EXPAND_TO_CUTOUT_AREA);
-        int expandToCutoutArea = expandToCutoutAreaSetting.getValue();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && expandToCutoutArea == 1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             getWindow().getAttributes().layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }

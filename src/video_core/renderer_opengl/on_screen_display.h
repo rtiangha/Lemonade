@@ -8,10 +8,6 @@ namespace Layout {
     struct FramebufferLayout;
 }
 
-namespace Frontend {
-    class EmuWindow;
-}
-
 namespace OSD {
 
 enum class MessageType {
@@ -45,7 +41,7 @@ void Initialize();
 
 void AddMessage(const std::string &message, MessageType type, u32 duration, u32 color);
 
-void DrawMessage(const Frontend::EmuWindow &window, const Layout::FramebufferLayout &layout);
+void DrawMessage(const Layout::FramebufferLayout& layout);
 
 void Shutdown();
 

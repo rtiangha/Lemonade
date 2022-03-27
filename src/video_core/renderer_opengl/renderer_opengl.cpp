@@ -673,7 +673,7 @@ void RendererOpenGL::InitOpenGLObjects() {
         screen_info.display_texture = screen_info.texture.resource.handle;
     }
 
-    // init
+    /// init raster font
     OSD::Initialize();
     if (Settings::values.is_new_3ds) {
         OSD::AddMessage("New 3DS Model", OSD::MessageType::New3DS, OSD::Duration::NORMAL,
@@ -1149,7 +1149,7 @@ void RendererOpenGL::DrawScreens(const Layout::FramebufferLayout& layout, bool f
             }
         }
         // draw on screen display
-        OSD::DrawMessage(render_window, layout);
+        OSD::DrawMessage(layout);
     }
 }
 

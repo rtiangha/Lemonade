@@ -27,11 +27,6 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/button_credits"
-        android:title="@string/credits_title"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/button_updater"
         android:title="@string/updater_title"
         app:showAsAction="never" />

@@ -3,20 +3,21 @@ package org.citra.citra_emu.ui.main;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import org.citra.citra_emu.CitraApplication;
 import org.citra.citra_emu.NativeLibrary;
 import org.citra.citra_emu.R;
-import org.citra.citra_emu.activities.EmulationActivity;
-import org.citra.citra_emu.dialogs.CreditsDialog;
 import org.citra.citra_emu.features.settings.ui.SettingsActivity;
+import org.citra.citra_emu.features.settings.utils.SettingsFile;
+import org.citra.citra_emu.model.GameDatabase;
 import org.citra.citra_emu.model.GameProvider;
 import org.citra.citra_emu.ui.platform.PlatformGamesFragment;
 import org.citra.citra_emu.utils.AddDirectoryHelper;
@@ -32,15 +33,18 @@ import java.util.Arrays;
 import java.util.Collections;
 
 /**
- * The main Activity of the Lollipop style UI. Manages several PlatformGamesFragments, which
+ * The MainActivity of the Lollipop style UI. Manages several PlatformGamesFragments, which
  * individually display a grid of available games for each Fragment, in a tabbed layout.
  */
-public final class MainActivity extends AppCompatActivity implements MainView {
+public final class MainActivity extends AppCompatActivity {
+    public static final int REQUEST_ADD_DIRECTORY = 1;
+    public static final int REQUEST_INSTALL_CIA = 2;
+
+    private String mDirToAdd;
+    private long mLastClickTime = 0;
     private Toolbar mToolbar;
     private int mFrameLayoutId;
     private PlatformGamesFragment mPlatformGamesFragment;
-
-    private MainPresenter mPresenter = new MainPresenter(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +58,33 @@ public final class MainActivity extends AppCompatActivity implements MainView {
         setSupportActionBar(mToolbar);
 
         mFrameLayoutId = R.id.games_platform_frame;
-        mPresenter.onCreate();
+        refreshGameList();
+
+        mToolbar.setOnMenuItemClickListener(menuItem -> {
+            // Double-click prevention, using threshold of 500 ms
+            if (SystemClock.elapsedRealtime() - mLastClickTime < 500) {
+                return false;
+            }
+            mLastClickTime = SystemClock.elapsedRealtime();
+            switch (menuItem.getItemId()) {
+                case R.id.menu_settings_core:
+                    launchSettingsActivity(SettingsFile.FILE_NAME_CONFIG);
+                    return true;
+
+                case R.id.button_add_directory:
+                    launchFileListActivity(REQUEST_ADD_DIRECTORY);
+                    return true;
+
+                case R.id.button_install_cia:
+                    launchFileListActivity(REQUEST_INSTALL_CIA);
+                    return true;
+
+                case R.id.button_updater:
+                    openUpdaterDialog();
+                    return true;
+            }
+            return false;
+        });
 
         if (savedInstanceState == null) {
             StartupHandler.HandleInit(this);
@@ -86,7 +116,7 @@ public final class MainActivity extends AppCompatActivity implements MainView {
     @Override
     protected void onResume() {
         super.onResume();
-        mPresenter.addDirIfNeeded(new AddDirectoryHelper(this));
+        addDirIfNeeded(new AddDirectoryHelper(this));
     }
 
     // TODO: Replace with a ButterKnife injection.
@@ -102,17 +132,29 @@ public final class MainActivity extends AppCompatActivity implements MainView {
         return true;
     }
 
-    /**
-     * MainView
-     */
+    public void addDirIfNeeded(AddDirectoryHelper helper) {
+        if (mDirToAdd != null) {
+            helper.addDirectory(mDirToAdd, this::refresh);
 
-    @Override
+            mDirToAdd = null;
+        }
+    }
+
+    public void onDirectorySelected(String dir) {
+        mDirToAdd = dir;
+    }
+
+    public void refreshGameList() {
+        GameDatabase databaseHelper = CitraApplication.databaseHelper;
+        databaseHelper.scanLibrary(databaseHelper.getWritableDatabase());
+        refresh();
+    }
+
     public void refresh() {
         getContentResolver().insert(GameProvider.URI_REFRESH, null);
         refreshFragment();
     }
 
-    @Override
     public void launchSettingsActivity(String menuTag) {
         if (PermissionsHandler.hasWriteAccess(this)) {
             SettingsActivity.launch(this, menuTag, "");
@@ -121,21 +163,20 @@ public final class MainActivity extends AppCompatActivity implements MainView {
         }
     }
 
-    @Override
     public void launchFileListActivity(int request) {
         if (PermissionsHandler.hasWriteAccess(this)) {
             switch (request) {
-                case MainPresenter.REQUEST_ADD_DIRECTORY:
+                case REQUEST_ADD_DIRECTORY:
                     FileBrowserHelper.openDirectoryPicker(this,
-                            MainPresenter.REQUEST_ADD_DIRECTORY,
+                            REQUEST_ADD_DIRECTORY,
                             R.string.select_game_folder,
                             Arrays.asList("elf", "axf", "cci", "3ds",
                                     "cxi", "app", "3dsx", "cia",
                                     "rar", "zip", "7z", "torrent",
                                     "tar", "gz"));
                     break;
-                case MainPresenter.REQUEST_INSTALL_CIA:
-                    FileBrowserHelper.openFilePicker(this, MainPresenter.REQUEST_INSTALL_CIA,
+                case REQUEST_INSTALL_CIA:
+                    FileBrowserHelper.openFilePicker(this, REQUEST_INSTALL_CIA,
                             R.string.install_cia_title,
                             Collections.singletonList("cia"), true);
                     break;
@@ -145,14 +186,8 @@ public final class MainActivity extends AppCompatActivity implements MainView {
         }
     }
 
-    @Override
     public void openUpdaterDialog() {
         UpdaterUtils.openUpdaterWindow(this, null);
-    }
-
-    public void openCreditsDialog() {
-        CreditsDialog dialogCredits = CreditsDialog.newInstance();
-        dialogCredits.show(getSupportFragmentManager(), "CreditsDialog");
     }
 
     /**
@@ -164,7 +199,7 @@ public final class MainActivity extends AppCompatActivity implements MainView {
     protected void onActivityResult(int requestCode, int resultCode, Intent result) {
         super.onActivityResult(requestCode, resultCode, result);
         switch (requestCode) {
-            case MainPresenter.REQUEST_ADD_DIRECTORY:
+            case REQUEST_ADD_DIRECTORY:
                 // If the user picked a file, as opposed to just backing out.
                 if (resultCode == MainActivity.RESULT_OK) {
                     // When a new directory is picked, we currently will reset the existing games
@@ -172,14 +207,14 @@ public final class MainActivity extends AppCompatActivity implements MainView {
                     // TODO(bunnei): Consider fixing this in the future, or removing code for this.
                     getContentResolver().insert(GameProvider.URI_RESET, null);
                     // Add the new directory
-                    mPresenter.onDirectorySelected(FileBrowserHelper.getSelectedDirectory(result));
+                    onDirectorySelected(FileBrowserHelper.getSelectedDirectory(result));
                 }
                 break;
-            case MainPresenter.REQUEST_INSTALL_CIA:
+            case REQUEST_INSTALL_CIA:
                 // If the user picked a file, as opposed to just backing out.
                 if (resultCode == MainActivity.RESULT_OK) {
                     NativeLibrary.InstallCIAS(FileBrowserHelper.getSelectedFiles(result));
-                    mPresenter.refreshGameList();
+                    refreshGameList();
                 }
                 break;
         }
@@ -197,8 +232,8 @@ public final class MainActivity extends AppCompatActivity implements MainView {
                             .commit();
 
                     // Immediately prompt user to select a game directory on first boot
-                    if (mPresenter != null) {
-                        mPresenter.launchFileListActivity(MainPresenter.REQUEST_ADD_DIRECTORY);
+                    if (this != null) {
+                        launchFileListActivity(REQUEST_ADD_DIRECTORY);
                     }
                 } else {
                     Toast.makeText(this, R.string.write_permission_needed, Toast.LENGTH_SHORT)
@@ -209,17 +244,6 @@ public final class MainActivity extends AppCompatActivity implements MainView {
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
                 break;
         }
-    }
-
-    /**
-     * Called by the framework whenever any actionbar/toolbar icon is clicked.
-     *
-     * @param item The icon that was clicked on.
-     * @return True if the event was handled, false to bubble it up to the OS.
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return mPresenter.handleOptionSelection(item.getItemId());
     }
 
     private void refreshFragment() {

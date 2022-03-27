@@ -129,22 +129,6 @@ public:
      */
     void TouchMoved(unsigned framebuffer_x, unsigned framebuffer_y);
 
-    float GetScaleDensity() const {
-        return scale_density;
-    }
-
-    u32 GetSafeInsetLeft() const {
-        return safe_inset_left;
-    }
-
-    u32 GetSafeInsetTop() const {
-        return safe_inset_top;
-    }
-
-    float scale_density = 1.0f;
-    u32 safe_inset_left = 0;
-    u32 safe_inset_top = 0;
-
     /**
      * Returns currently active configuration.
      * @note Accesses to the returned object need not be consistent because it may be modified in

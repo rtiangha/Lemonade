@@ -112,14 +112,16 @@ public class RunningSettingDialog extends DialogFragment {
         public static final int SETTING_FMV_HACK = 0;
         public static final int SETTING_SHOW_FPS = 1;
         public static final int SETTING_SCALE_FACTOR = 2;
-        public static final int SETTING_LINEAR_FILTER = 3;
-        public static final int SETTING_SKIP_SLOW_DRAW = 4;
-        public static final int SETTING_SKIP_CPU_WRITE = 5;
-        public static final int SETTING_SKIP_TEXTURE_COPY = 6;
-        public static final int SETTING_SKIP_FORMAT_REINTERPRETATION = 7;
-        public static final int SETTING_TEXTURE_LOAD_HACK = 8;
-        public static final int SETTING_ACCURATE_MUL = 9;
-        public static final int SETTING_SPEED_LIMIT = 10;
+        public static final int SETTING_SCREEN_LAYOUT = 3;
+        public static final int SETTING_LINEAR_FILTER = 4;
+        public static final int SETTING_SKIP_SLOW_DRAW = 5;
+        public static final int SETTING_SKIP_CPU_WRITE = 6;
+        public static final int SETTING_SKIP_TEXTURE_COPY = 7;
+        public static final int SETTING_SKIP_FORMAT_REINTERPRETATION = 8;
+        public static final int SETTING_TEXTURE_LOAD_HACK = 9;
+        public static final int SETTING_ACCURATE_MUL = 10;
+        public static final int SETTING_CUSTOM_LAYOUT = 11;
+        public static final int SETTING_SPEED_LIMIT = 12;
 
         // pref
         public static final int SETTING_HAPTIC_FEEDBACK = 100;
@@ -344,6 +346,19 @@ public class RunningSettingDialog extends DialogFragment {
                 RadioButton radio3 = mRadioGroup.findViewById(R.id.radio3);
                 radio3.setVisibility(View.VISIBLE);
                 radio3.setText("×4");
+            } else if (item.getSetting() == SettingsItem.SETTING_SCREEN_LAYOUT) {
+                RadioButton radio0 = mRadioGroup.findViewById(R.id.radio0);
+                radio0.setText(R.string.default_value);
+
+                RadioButton radio1 = mRadioGroup.findViewById(R.id.radio1);
+                radio1.setText(R.string.single_screen_option);
+
+                RadioButton radio2 = mRadioGroup.findViewById(R.id.radio2);
+                radio2.setText(R.string.large_screen_option);
+
+                RadioButton radio3 = mRadioGroup.findViewById(R.id.radio3);
+                radio3.setVisibility(View.VISIBLE);
+                radio3.setText(R.string.side_screen_option);
             }
         }
 
@@ -493,6 +508,9 @@ public class RunningSettingDialog extends DialogFragment {
             mSettings.add(new SettingsItem(SettingsItem.SETTING_SCALE_FACTOR,
                     R.string.internal_resolution, SettingsItem.TYPE_RADIO_GROUP,
                     mRunningSettings[i++]));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_SCREEN_LAYOUT,
+                    R.string.running_layout, SettingsItem.TYPE_RADIO_GROUP,
+                    mRunningSettings[i++]));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_SKIP_SLOW_DRAW,
                     R.string.setting_skip_slow_draw, SettingsItem.TYPE_CHECKBOX,
                     mRunningSettings[i++]));
@@ -513,6 +531,9 @@ public class RunningSettingDialog extends DialogFragment {
                     mRunningSettings[i++]));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_ACCURATE_MUL,
                     R.string.shaders_accurate_mul, SettingsItem.TYPE_CHECKBOX,
+                    mRunningSettings[i++]));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_CUSTOM_LAYOUT,
+                    R.string.use_custom_layout, SettingsItem.TYPE_CHECKBOX,
                     mRunningSettings[i++]));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_SPEED_LIMIT,
                     R.string.frame_limit_slider, SettingsItem.TYPE_SEEK_BAR,

@@ -36,14 +36,14 @@ public final class CheckBoxSetting extends SettingsItem {
         try {
             IntSetting setting = (IntSetting) getSetting();
             return setting.getValue() == 1;
-        } catch (ClassCastException exception) {
+        } catch (ClassCastException ignored) {
         }
 
         // Try boolean setting
         try {
             BooleanSetting setting = (BooleanSetting) getSetting();
-            return setting.getValue() == true;
-        } catch (ClassCastException exception) {
+            return setting.getValue();
+        } catch (ClassCastException ignored) {
         }
 
         return mDefaultValue;
