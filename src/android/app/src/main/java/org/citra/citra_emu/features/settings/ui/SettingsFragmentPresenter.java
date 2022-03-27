@@ -373,7 +373,7 @@ public final class SettingsFragmentPresenter {
         // Setting filterMode = rendererSection.getSetting(SettingsFile.KEY_FILTER_MODE);
         Setting useAsynchronousGpuEmulation = rendererSection.getSetting(SettingsFile.KEY_USE_ASYNCHRONOUS_GPU_EMULATION);
         Setting shadersAccurateMul = rendererSection.getSetting(SettingsFile.KEY_SHADERS_ACCURATE_MUL);
-        // Setting shader = rendererSection.getSetting(SettingsFile.KEY_PP_SHADER_NAME);
+        Setting shader = rendererSection.getSetting(SettingsFile.KEY_PP_SHADER_NAME);
         Setting render3dMode = rendererSection.getSetting(SettingsFile.KEY_RENDER_3D);
         Setting factor3d = rendererSection.getSetting(SettingsFile.KEY_FACTOR_3D);
         Setting useDiskShaderCache = rendererSection.getSetting(SettingsFile.KEY_USE_DISK_SHADER_CACHE);
@@ -397,10 +397,14 @@ public final class SettingsFragmentPresenter {
         sl.add(new CheckBoxSetting(SettingsFile.KEY_SHADERS_ACCURATE_MUL, Settings.SECTION_RENDERER, R.string.shaders_accurate_mul, R.string.shaders_accurate_mul_description, false, shadersAccurateMul));
 
         // post process shaders
-        // TODO: for some with that opening graphics tab a crash happens, I'll try fix it in the future (dev life)
-        // String[] stringValues = getShaderValues();
-        // String[] stringEntries = getSettingEntries(stringValues);
-        // sl.add(new StringSingleChoiceSetting(SettingsFile.KEY_PP_SHADER_NAME, Settings.SECTION_RENDERER, R.string.post_processing_shader, 0, stringValues, stringValues, "", shader));
+        String[] shaderListEntries = getShaderList();
+        String[] shaderListValues = new String[shaderListEntries.length];
+        System.arraycopy(shaderListEntries, 0, shaderListValues, 0, shaderListEntries.length);
+        shaderListValues[0] = "";
+        sl.add(new StringSingleChoiceSetting(SettingsFile.KEY_PP_SHADER_NAME,
+                Settings.SECTION_RENDERER, R.string.post_processing_shader,
+                0, shaderListEntries, shaderListValues, "",
+                shader));
 
         sl.add(new CheckBoxSetting(SettingsFile.KEY_USE_DISK_SHADER_CACHE, Settings.SECTION_RENDERER, R.string.use_disk_shader_cache, R.string.use_disk_shader_cache_description, true, useDiskShaderCache));
 
@@ -447,15 +451,41 @@ public final class SettingsFragmentPresenter {
         Setting useCpuJit = coreSection.getSetting(SettingsFile.KEY_CPU_JIT);
         Setting hardwareRenderer = rendererSection.getSetting(SettingsFile.KEY_HW_RENDERER);
         Setting hardwareShader = rendererSection.getSetting(SettingsFile.KEY_HW_SHADER);
-        // Setting inaccurateEmulation = rendererSection.getSetting(SettingsFile.KEY_INACCURATE_EMULATION);
         Setting vsyncEnable = rendererSection.getSetting(SettingsFile.KEY_USE_VSYNC);
 
         sl.add(new HeaderSetting(null, null, R.string.debug_warning, 0));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_CPU_JIT, Settings.SECTION_CORE, R.string.cpu_jit, R.string.cpu_jit_description, true, useCpuJit, true, mView));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_HW_RENDERER, Settings.SECTION_RENDERER, R.string.hw_renderer, R.string.hw_renderer_description, true, hardwareRenderer, true, mView));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_HW_SHADER, Settings.SECTION_RENDERER, R.string.hw_shaders, R.string.hw_shaders_description, true, hardwareShader, true, mView));
-        // TODO (Gamer64): Useless for now.
-        // sl.add(new CheckBoxSetting(SettingsFile.KEY_INACCURATE_EMULATION, Settings.SECTION_RENDERER, R.string.inaccurate_emulation, R.string.inaccurate_emulation_description, false, inaccurateEmulation));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_USE_VSYNC, Settings.SECTION_RENDERER, R.string.vsync, R.string.vsync_description, true, vsyncEnable));
+    }
+
+    private String[] getShaderList() {
+        try {
+            String shadersPath =
+                    DirectoryInitialization.getUserDirectory() + "/shaders";
+
+            File file = new File(shadersPath);
+            File[] shaderFiles = file.listFiles();
+            if (shaderFiles != null) {
+                String[] result = new String[shaderFiles.length + 1];
+                result[0] = mView.getActivity().getString(R.string.off);
+                for (int i = 0; i < shaderFiles.length; i++) {
+                    String name = shaderFiles[i].getName();
+                    int extensionIndex = name.indexOf(".glsl");
+                    if (extensionIndex > 0) {
+                        name = name.substring(0, extensionIndex);
+                    }
+                    result[i + 1] = name;
+                }
+
+                return result;
+            }
+        } catch (Exception ex) {
+            Log.debug("[Settings] Unable to find shader files");
+            // return empty list
+        }
+
+        return new String[]{};
     }
 }

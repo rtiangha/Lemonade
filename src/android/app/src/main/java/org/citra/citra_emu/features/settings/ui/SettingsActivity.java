@@ -18,7 +18,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import org.citra.citra_emu.NativeLibrary;
 import org.citra.citra_emu.R;
 import org.citra.citra_emu.utils.DirectoryInitialization;
-import org.citra.citra_emu.utils.DirectoryStateReceiver;
+import org.citra.citra_emu.utils.DirectoryInitialization.DirectoryStateReceiver;
 import org.citra.citra_emu.utils.EmulationMenuSettings;
 
 public final class SettingsActivity extends AppCompatActivity implements SettingsActivityView {

@@ -47,8 +47,6 @@
     <string name="cpu_jit_description">Uses the Just-in-Time (JIT) compiler for CPU emulation. When enabled, game performance will be significantly improved.</string>
     <string name="init_clock">System clock type</string>
     <string name="init_clock_description">Set the emulated 3DS clock to either reflect that of your device or start at a simulated date and time.</string>
-    <string name="inaccurate_emulation">Inaccurate emulation</string>
-    <string name="inaccurate_emulation_description">Can improve performance at the cost of crashes/glitches!</string>
 
     <!-- System settings strings -->
     <string name="init_time">System clock starting time override</string>
@@ -123,6 +121,7 @@
     <string name="audio_input_type">Audio Input Device</string>
 
     <!-- Miscellaneous -->
+    <string name="off">Off</string>
     <string name="clear">Clear</string>
     <string name="slider_default">Default</string>
     <string name="ini_saved">Saved settings</string>

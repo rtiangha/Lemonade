@@ -6,6 +6,7 @@
 
 package org.citra.citra_emu.utils;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -186,5 +187,20 @@ public final class DirectoryInitialization {
         CITRA_DIRECTORIES_INITIALIZED,
         EXTERNAL_STORAGE_PERMISSION_NEEDED,
         CANT_FIND_EXTERNAL_STORAGE
+    }
+
+    public static class DirectoryStateReceiver extends BroadcastReceiver {
+        Action1<DirectoryInitializationState> callback;
+
+        public DirectoryStateReceiver(Action1<DirectoryInitializationState> callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            DirectoryInitializationState state = (DirectoryInitializationState) intent
+                    .getSerializableExtra(DirectoryInitialization.EXTRA_STATE);
+            callback.call(state);
+        }
     }
 }

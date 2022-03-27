@@ -15,7 +15,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import org.citra.citra_emu.CitraApplication;
 import org.citra.citra_emu.R;
-import org.citra.citra_emu.adapters.GameAdapter;
+import org.citra.citra_emu.ui.main.MainActivity.GameAdapter;
 import org.citra.citra_emu.model.GameDatabase;
 
 public final class PlatformGamesFragment extends Fragment implements PlatformGamesView {

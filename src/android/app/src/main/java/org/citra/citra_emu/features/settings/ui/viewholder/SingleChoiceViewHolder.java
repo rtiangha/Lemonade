@@ -46,6 +46,12 @@ public final class SingleChoiceViewHolder extends SettingViewHolder {
                     mTextSettingDescription.setText(choices[i]);
                 }
             }
+        } else if (item instanceof StringSingleChoiceSetting) {
+            StringSingleChoiceSetting setting = (StringSingleChoiceSetting) item;
+            String[] choices = setting.getChoicesId();
+            int valueIndex = setting.getSelectValueIndex();
+            if (valueIndex != -1)
+                mTextSettingDescription.setText(choices[valueIndex]);
         } else if (item instanceof ThemeSingleChoiceSetting) {
             ThemeSingleChoiceSetting setting = (ThemeSingleChoiceSetting) item;
             int selected = setting.getSelectedValue();
@@ -66,11 +72,11 @@ public final class SingleChoiceViewHolder extends SettingViewHolder {
     public void onClick(View clicked) {
         int position = getAdapterPosition();
         if (mItem instanceof SingleChoiceSetting) {
-            getAdapter().onSingleChoiceClick((SingleChoiceSetting) mItem);
+            getAdapter().onSingleChoiceClick((SingleChoiceSetting) mItem, position);
         } else if (mItem instanceof ThemeSingleChoiceSetting) {
-            getAdapter().onSingleChoiceClick((ThemeSingleChoiceSetting) mItem);
+            getAdapter().onSingleChoiceClick((ThemeSingleChoiceSetting) mItem, position);
         } else if (mItem instanceof StringSingleChoiceSetting) {
-            getAdapter().onStringSingleChoiceClick((StringSingleChoiceSetting) mItem);
+            getAdapter().onStringSingleChoiceClick((StringSingleChoiceSetting) mItem, position);
         }
     }
 }

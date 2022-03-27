@@ -138,8 +138,9 @@ public final class SettingsAdapter extends RecyclerView.Adapter<SettingViewHolde
         mView.onSettingChanged();
     }
 
-    public void onSingleChoiceClick(ThemeSingleChoiceSetting item) {
+    public void onSingleChoiceClick(ThemeSingleChoiceSetting item, int position) {
         mClickedItem = item;
+        mClickedPosition = position;
 
         int value = getSelectionForSingleChoiceValue(item);
 
@@ -151,8 +152,9 @@ public final class SettingsAdapter extends RecyclerView.Adapter<SettingViewHolde
         mDialog = builder.show();
     }
 
-    public void onSingleChoiceClick(SingleChoiceSetting item) {
+    public void onSingleChoiceClick(SingleChoiceSetting item, int position) {
         mClickedItem = item;
+        mClickedPosition = position;
 
         int value = getSelectionForSingleChoiceValue(item);
 
@@ -164,8 +166,9 @@ public final class SettingsAdapter extends RecyclerView.Adapter<SettingViewHolde
         mDialog = builder.show();
     }
 
-    public void onStringSingleChoiceClick(StringSingleChoiceSetting item) {
+    public void onStringSingleChoiceClick(StringSingleChoiceSetting item, int position) {
         mClickedItem = item;
+        mClickedPosition = position;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mView.getActivity());
 

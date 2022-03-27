@@ -34,7 +34,7 @@ public final class SliderViewHolder extends SettingViewHolder {
             mTextSettingDescription.setText(item.getDescriptionId());
             mTextSettingDescription.setVisibility(View.VISIBLE);
         } else {
-            mTextSettingDescription.setVisibility(View.GONE);
+            mTextSettingDescription.setText(mItem.getSelectedValue() + mItem.getUnits());
         }
     }
 

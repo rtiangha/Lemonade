@@ -29,7 +29,7 @@ import org.citra.citra_emu.activities.EmulationActivity;
 import org.citra.citra_emu.overlay.InputOverlay;
 import org.citra.citra_emu.utils.DirectoryInitialization;
 import org.citra.citra_emu.utils.DirectoryInitialization.DirectoryInitializationState;
-import org.citra.citra_emu.utils.DirectoryStateReceiver;
+import org.citra.citra_emu.utils.DirectoryInitialization.DirectoryStateReceiver;
 import org.citra.citra_emu.utils.EmulationMenuSettings;
 import org.citra.citra_emu.utils.Log;
 

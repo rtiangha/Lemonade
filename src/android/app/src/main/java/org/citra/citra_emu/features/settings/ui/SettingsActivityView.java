@@ -3,7 +3,7 @@ package org.citra.citra_emu.features.settings.ui;
 import android.content.IntentFilter;
 
 import org.citra.citra_emu.features.settings.model.Settings;
-import org.citra.citra_emu.utils.DirectoryStateReceiver;
+import org.citra.citra_emu.utils.DirectoryInitialization.DirectoryStateReceiver;
 
 /**
  * Abstraction for the Activity that manages SettingsFragments.
