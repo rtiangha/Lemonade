@@ -103,8 +103,28 @@ public final class DirectoryInitialization {
         return false;
     }
 
-    public static String getShadersDirectory() {
-        return getUserDirectory() + File.separator + "shaders";
+    public static File getCheatFile(String programId) {
+        File cheatsPath = new File(userPath, "cheats");
+        if (!cheatsPath.isDirectory() && !cheatsPath.mkdir()) {
+            return null;
+        }
+        return new File(cheatsPath, programId + ".txt");
+    }
+
+    public static String getSDMCDirectory() {
+        return getUserDirectory() + File.separator + "sdmc";
+    }
+
+    public static String getApplicationDirectory() {
+        return getSDMCDirectory() + "/Nintendo 3DS/00000000000000000000000000000000/00000000000000000000000000000000/title";
+    }
+
+    public static String getSystemTitleDirectory() {
+        return getUserDirectory() + "/nand/00000000000000000000000000000000/title";
+    }
+
+    public static File getShaderCacheFile(String programId) {
+        return new File(getUserDirectory() + "/cache/" + programId + ".cache");
     }
 
     private static void initializeInternalStorage(Context context) {

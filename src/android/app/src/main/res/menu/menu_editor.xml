@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_toggle_list"
+        android:title="@string/toggle_list"
+        android:icon="@drawable/ic_folder"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/menu_delete_sdmc"
+        android:title="@string/delete_app_sdmc"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/menu_delete_shader_cache"
+        android:title="@string/delete_shader_cache"
+        app:showAsAction="never"/>
+
+</menu>

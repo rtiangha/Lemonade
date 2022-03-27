@@ -20,7 +20,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -30,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.citra.citra_emu.CitraApplication;
 import org.citra.citra_emu.NativeLibrary;
 import org.citra.citra_emu.R;
+import org.citra.citra_emu.activities.EditorActivity;
 import org.citra.citra_emu.activities.EmulationActivity;
 import org.citra.citra_emu.features.settings.ui.SettingsActivity;
 import org.citra.citra_emu.features.settings.utils.SettingsFile;
@@ -500,14 +500,8 @@ public final class MainActivity extends AppCompatActivity {
         @Override
         public boolean onLongClick(View clicked) {
             GameViewHolder holder = (GameViewHolder) clicked.getTag();
-            new AlertDialog.Builder(clicked.getContext())
-                    .setTitle(R.string.game_details)
-                    .setMessage("Title: " + holder.title + "\n" +
-                            "Company: " + holder.company + "\n" +
-                            "Country: " + holder.regions + "\n" +
-                            "Path: " + holder.path)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show();
+            String gameId = NativeLibrary.GetAppId(holder.path);
+            EditorActivity.launch(clicked.getContext(), gameId, holder.title);
             return true;
         }
 

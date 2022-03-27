@@ -114,6 +114,8 @@ public final class NativeLibrary {
         return EmulationActivity.get();
     }
 
+    public static native String GetAppId(String path);
+
     /**
      * Handles touch movement.
      *
