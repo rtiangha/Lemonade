@@ -294,7 +294,9 @@
 
     <!-- Cheat Manager -->
     <string name="cheats">Cheats</string>
-    <string name="toggle_list">Toggle List</string>
+    <string name="cheat_list">Cheat List</string>
+    <string name="edit_cheat">Edit Cheat</string>
+    <string name="open_app_archive">Open Archive Directory</string>
     <string name="delete_app_sdmc">Delete Archive Directory</string>
     <string name="delete_shader_cache">Delete Shader Cache</string>
     <string name="delete_confirm_notice">Are you sure to delete the game archive directory?</string>

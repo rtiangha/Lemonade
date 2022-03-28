@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -39,9 +40,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.citra.citra_emu.NativeLibrary;
 import org.citra.citra_emu.R;
 import org.citra.citra_emu.utils.DirectoryInitialization;
 
@@ -136,7 +140,9 @@ public final class EditorActivity extends AppCompatActivity {
 
     private String mProgramId;
     private boolean mReloadText;
+    private boolean mCancelSave;
     private EditText mEditor;
+    private Button mBtnConfirm;
     private RecyclerView mListView;
     private CheatEntryAdapter mAdapter;
     private List<CheatEntry> mCheats;
@@ -192,17 +198,16 @@ public final class EditorActivity extends AppCompatActivity {
         mListView.addItemDecoration(new DividerItemDecoration(lineDivider));
         mListView.setLayoutManager(new LinearLayoutManager(this));
 
-        Button buttonConfirm = findViewById(R.id.button_confirm);
-        buttonConfirm.setOnClickListener(view -> {
-            saveCheatCode(mProgramId);
-            mEditor.clearFocus();
+        mCancelSave = false;
+        Button buttonCancel = findViewById(R.id.button_cancel);
+        buttonCancel.setOnClickListener(view -> {
+            mCancelSave = true;
             finish();
         });
 
-        Button buttonCancel = findViewById(R.id.button_cancel);
-        buttonCancel.setOnClickListener(view -> {
-            mEditor.clearFocus();
-            finish();
+        mBtnConfirm = findViewById(R.id.button_confirm);
+        mBtnConfirm.setOnClickListener(view -> {
+            toggleListView(mEditor.getVisibility() == View.VISIBLE);
         });
 
         loadCheatFile(mProgramId);
@@ -210,18 +215,27 @@ public final class EditorActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (!mCancelSave) {
+            saveCheatCode(mProgramId);
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_editor, menu);
+        menu.findItem(R.id.menu_open_archive).setVisible(isMiUiSystem());
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_toggle_list:
-                toggleListView(mEditor.getVisibility() == View.VISIBLE);
-                return true;
+            case R.id.menu_open_archive:
+                jumpToExplore();
+                break;
 
             case R.id.menu_delete_sdmc:
                 deleteAppSdmc();
@@ -249,12 +263,63 @@ public final class EditorActivity extends AppCompatActivity {
                 mReloadText = false;
             }
             mAdapter.loadCheats(mCheats);
+            mBtnConfirm.setText(R.string.edit_cheat);
         } else {
             mListView.setVisibility(View.INVISIBLE);
             mEditor.setVisibility(View.VISIBLE);
             // reload
             mEditor.setText(loadCheatText());
+            mBtnConfirm.setText(R.string.cheat_list);
         }
+    }
+
+    private void jumpToExplore() {
+        String root;
+        String pid = mProgramId.substring(0, 8).toLowerCase();
+        String subid = mProgramId.substring(8).toLowerCase();
+        if (pid.equals("00040010") || pid.equals("00040030")) {
+            root = DirectoryInitialization.getSystemTitleDirectory();
+        } else {
+            root = DirectoryInitialization.getApplicationDirectory();
+        }
+        String path = String.format("%s/%s/%s", root, pid, subid);
+
+        try {
+            Intent intent = new Intent("miui.intent.action.OPEN");
+            intent.addFlags(0x10000000);
+            if (isMiUiInternational()) {
+                intent.setPackage("com.mi.android.globalFileexplorer");
+            } else {
+                intent.setPackage("com.android.fileexplorer");
+            }
+            intent.putExtra("explorer_path", path);
+            startActivity(intent);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    private boolean isMiUiSystem() {
+        try {
+            Class<?> c = Class.forName("android.os.SystemProperties");
+            Method get = c.getMethod("get", String.class);
+            String miuiName = (String) get.invoke(null, "ro.miui.ui.version.name");
+            return !TextUtils.isEmpty(miuiName);
+        } catch (Exception e) {
+            // ignore
+        }
+        return false;
+    }
+
+    private boolean isMiUiInternational() {
+        try {
+            Class<?> buildClazz = Class.forName("miui.os.Build");
+            Field isInternational = buildClazz.getDeclaredField("IS_INTERNATIONAL_BUILD");
+            return isInternational.getBoolean(null);
+        } catch (Exception e) {
+            // ignore
+        }
+        return false;
     }
 
     private void deleteShaderCache() {
@@ -274,24 +339,26 @@ public final class EditorActivity extends AppCompatActivity {
             String subid = mProgramId.substring(8).toLowerCase();
             if (pid.equals("00040010") || pid.equals("00040030")) {
                 String system = DirectoryInitialization.getSystemTitleDirectory();
-                String path = system + "/" + pid + "/" + subid;
+                String path = String.format("%s/%s/%s", system, pid, subid);
                 deleteContents(new File(path));
             } else if (pid.equals("00040000")) {
+                // App
                 String root = DirectoryInitialization.getApplicationDirectory();
-                String path = root + "/" + pid + "/" + subid;
+                String path = String.format("%s/%s/%s/content", root, pid, subid);
                 deleteContents(new File(path));
-
-                // DLC
-                path = root + "/0004000e/" + subid;
+                // Updates
+                path = String.format("%s/0004000e/%s/content", root, subid);
                 deleteContents(new File(path));
-
-                // DLC
-                path = root + "/0004008c/" + subid;
+                // DLCs
+                path = String.format("%s/0004008c/%s/content", root, subid);
                 deleteContents(new File(path));
-            } else if (pid.equals("0004000e")) {
-                // DLC
+            } else if (pid.equals("0004000e") || pid.equals("0004008c")) {
+                // Updates
                 String root = DirectoryInitialization.getApplicationDirectory();
-                String path = root + "/" + pid + "/" + subid;
+                String path = String.format("%s/0004000e/%s/content", root, subid);
+                deleteContents(new File(path));
+                // DLCs
+                path = String.format("%s/0004008c/%s/content", root, subid);
                 deleteContents(new File(path));
             }
             Toast.makeText(this, "Delete Success!", Toast.LENGTH_LONG).show();
@@ -306,7 +373,7 @@ public final class EditorActivity extends AppCompatActivity {
         if (cheatFile == null || !cheatFile.exists()) {
             String code = getBuiltinCheat(programId);
             loadCheatCode(code);
-            if (code.contains("*citra_enabled")) {
+            if (code.contains(CHEAT_ENABLED_TEXT)) {
                 saveCheatCode(programId);
             }
             return;
@@ -348,6 +415,7 @@ public final class EditorActivity extends AppCompatActivity {
         String[] lines = data.split(System.lineSeparator());
         CheatEntry entry = new CheatEntry();
         for (String line : lines) {
+            line = line.trim();
             if (!line.isEmpty()) {
                 if (line.charAt(0) == '[') {
                     if (entry.infos.size() > 0 || entry.codes.size() > 0) {
@@ -362,7 +430,7 @@ public final class EditorActivity extends AppCompatActivity {
                         entry.infos.add(line);
                     }
                 } else {
-                    entry.codes.add(line);
+                    entry.codes.add(validateCheat(line));
                 }
             }
         }
@@ -370,6 +438,37 @@ public final class EditorActivity extends AppCompatActivity {
         if (entry.infos.size() > 0 || entry.codes.size() > 0) {
             mCheats.add(entry);
         }
+    }
+
+    private String validateCheat(String line) {
+        StringBuilder sb = new StringBuilder();
+        boolean insertSpace = false;
+        for (int i = 0; i < line.length(); ++i) {
+            char c = line.charAt(i);
+            if (c >= '0' && c <= '9') {
+                sb.append(c);
+                insertSpace = true;
+            } else if (c >= 'a' && c <= 'z') {
+                sb.append(Character.toUpperCase(c));
+                insertSpace = true;
+            } else if (c >= 'A' && c <= 'Z') {
+                sb.append(c);
+                insertSpace = true;
+            } else if (Character.isWhitespace(c)) {
+                if (insertSpace) {
+                    sb.append(' ');
+                    insertSpace = false;
+                }
+            } else {
+                // invalid cheat code
+                sb.append(line.substring(i));
+                break;
+            }
+        }
+        if (sb.length() > 0 && sb.charAt(sb.length() - 1) == ' ') {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
     }
 
     private String loadCheatText() {

@@ -3,10 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menu_toggle_list"
-        android:title="@string/toggle_list"
-        android:icon="@drawable/ic_folder"
-        app:showAsAction="ifRoom"/>
+        android:id="@+id/menu_open_archive"
+        android:title="@string/open_app_archive"
+        app:showAsAction="never"/>
 
     <item
         android:id="@+id/menu_delete_sdmc"
