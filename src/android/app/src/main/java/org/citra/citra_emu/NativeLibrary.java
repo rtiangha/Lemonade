@@ -116,6 +116,8 @@ public final class NativeLibrary {
 
     public static native String GetAppId(String path);
 
+    public static native void reloadCheatCode();
+
     /**
      * Handles touch movement.
      *

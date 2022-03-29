@@ -48,6 +48,7 @@ public final class EmulationActivity extends AppCompatActivity {
     public static final String EXTRA_SELECTED_TITLE = "SelectedTitle";
 
     public static final int REQUEST_SELECT_AMIIBO = 2;
+    public static final int REQUEST_CHEAT_CODE = 3;
 
     private static WeakReference<EmulationActivity> sInstance = new WeakReference<>(null);
 
@@ -288,6 +289,8 @@ public final class EmulationActivity extends AppCompatActivity {
                     onAmiiboSelected(selectedFiles[0]);
                 }
                 break;
+            case REQUEST_CHEAT_CODE:
+                NativeLibrary.reloadCheatCode();
         }
     }
 
@@ -475,6 +478,13 @@ public final class EmulationActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    public void launchCheatCode() {
+        Intent intent = new Intent(this, EditorActivity.class);
+        intent.putExtra(EditorActivity.ARG_PROGRAM_ID, NativeLibrary.GetAppId(mPath));
+        intent.putExtra(EditorActivity.ARG_PROGRAM_TITLE, mSelectedTitle);
+        startActivityForResult(intent, REQUEST_CHEAT_CODE);
     }
 
     public void refreshControls() {

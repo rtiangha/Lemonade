@@ -11,6 +11,7 @@
 
 #include "audio_core/dsp_interface.h"
 #include "common/file_util.h"
+#include "core/cheats/cheats.h"
 #include "common/logging/log.h"
 #include "common/microprofile.h"
 #include "common/scm_rev.h"
@@ -511,6 +512,11 @@ void Java_org_citra_citra_1emu_NativeLibrary_CreateConfigFile(JNIEnv* env,
 jint Java_org_citra_citra_1emu_NativeLibrary_DefaultCPUCore(JNIEnv* env,
                                                             [[maybe_unused]] jclass clazz) {
     return 0;
+}
+
+JNIEXPORT void JNICALL Java_org_citra_citra_1emu_NativeLibrary_reloadCheatCode(JNIEnv* env, jclass obj) {
+    Core::System& system{Core::System::GetInstance()};
+    system.CheatEngine().ReloadCheatFile();
 }
 
 void Java_org_citra_citra_1emu_NativeLibrary_Run__Ljava_lang_String_2Ljava_lang_String_2Z(

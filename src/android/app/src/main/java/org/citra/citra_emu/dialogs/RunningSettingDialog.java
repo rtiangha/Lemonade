@@ -140,7 +140,8 @@ public class RunningSettingDialog extends DialogFragment {
         public static final int SETTING_TOGGLE_CONTROLS = 206;
         public static final int SETTING_RESET_OVERLAY = 207;
         public static final int SETTING_ROTATE_SCREEN = 208;
-        public static final int SETTING_EXIT_GAME = 209;
+        public static final int SETTING_CHEAT_CODE = 209;
+        public static final int SETTING_EXIT_GAME = 210;
 
         // view type
         public static final int TYPE_CHECKBOX = 0;
@@ -259,6 +260,10 @@ public class RunningSettingDialog extends DialogFragment {
                     break;
                 case SettingsItem.SETTING_ROTATE_SCREEN:
                     activity.rotateScreen();
+                    dismiss();
+                    break;
+                case SettingsItem.SETTING_CHEAT_CODE:
+                    activity.launchCheatCode();
                     dismiss();
                     break;
                 case SettingsItem.SETTING_EXIT_GAME:
@@ -462,6 +467,7 @@ public class RunningSettingDialog extends DialogFragment {
             mSettings.add(new SettingsItem(SettingsItem.SETTING_TOGGLE_CONTROLS, R.string.emulation_toggle_controls, SettingsItem.TYPE_BUTTON, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_RESET_OVERLAY, R.string.emulation_touch_overlay_reset, SettingsItem.TYPE_BUTTON, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_ROTATE_SCREEN, R.string.emulation_rotate_screen, SettingsItem.TYPE_BUTTON, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_CHEAT_CODE, R.string.cheat_code, SettingsItem.TYPE_BUTTON, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_EXIT_GAME, R.string.emulation_close_game, SettingsItem.TYPE_BUTTON, 0));
             notifyDataSetChanged();
         }
