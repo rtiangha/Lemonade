@@ -157,6 +157,10 @@ RasterizerOpenGL::RasterizerOpenGL(Frontend::EmuWindow& emu_window)
     framebuffer.Create();
     state.draw.draw_framebuffer = framebuffer.handle;
 
+    // null texture
+    texture_null.Create();
+    state.texture_units[0].texture_2d = texture_null.handle;
+
     // Allocate and bind texture buffer lut textures
     texture_buffer_lut_lf.Create();
     texture_buffer_lut_rg.Create();
