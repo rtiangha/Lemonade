@@ -145,10 +145,6 @@ static void WritePicaReg(u32 id, u32 value, u32 mask) {
         DebugUtils::OnPicaRegWrite({(u16)id, (u16)mask, regs.reg_array[id]});
     }
 
-    if (g_debug_context)
-        g_debug_context->OnEvent(DebugContext::Event::PicaCommandLoaded,
-                                 reinterpret_cast<void*>(&id));
-
     switch (id) {
     // Trigger IRQ
     case PICA_REG_INDEX(trigger_irq):
@@ -231,9 +227,6 @@ static void WritePicaReg(u32 id, u32 value, u32 mask) {
                     shader_engine->SetupBatch(g_state.vs, regs.vs.main_offset);
 
                     // Send to vertex shader
-                    if (g_debug_context)
-                        g_debug_context->OnEvent(DebugContext::Event::VertexShaderInvocation,
-                                                 static_cast<void*>(&immediate_input));
                     Shader::UnitState shader_unit;
                     Shader::AttributeBuffer output{};
 
@@ -254,10 +247,6 @@ static void WritePicaReg(u32 id, u32 value, u32 mask) {
                     // change it to flush triangles whenever a drawing config register changes
                     // See: https://github.com/citra-emu/citra/pull/2866#issuecomment-327011550
                     VideoCore::g_renderer->Rasterizer()->DrawTriangles();
-                    if (g_debug_context) {
-                        g_debug_context->OnEvent(DebugContext::Event::FinishedPrimitiveBatch,
-                                                 nullptr);
-                    }
                 }
             }
         }
@@ -289,9 +278,6 @@ static void WritePicaReg(u32 id, u32 value, u32 mask) {
 #if PICA_LOG_TEV
         DebugUtils::DumpTevStageConfig(regs.GetTevStages());
 #endif
-        if (g_debug_context)
-            g_debug_context->OnEvent(DebugContext::Event::IncomingPrimitiveBatch, nullptr);
-
         PrimitiveAssembler<Shader::OutputVertex>& primitive_assembler = g_state.primitive_assembler;
 
         bool accelerate_draw = VideoCore::g_hw_shader_enabled && primitive_assembler.IsEmpty();
@@ -334,22 +320,6 @@ static void WritePicaReg(u32 id, u32 value, u32 mask) {
         const u16* index_address_16 = reinterpret_cast<const u16*>(index_address_8);
         bool index_u16 = index_info.format != 0;
 
-        if (g_debug_context && g_debug_context->recorder) {
-            for (int i = 0; i < 3; ++i) {
-                const auto texture = regs.texturing.GetTextures()[i];
-                if (!texture.enabled)
-                    continue;
-
-                u8* texture_data =
-                    VideoCore::g_memory->GetPhysicalPointer(texture.config.GetPhysicalAddress());
-                g_debug_context->recorder->MemoryAccessed(
-                    texture_data,
-                    Pica::TexturingRegs::NibblesPerPixel(texture.format) * texture.config.width /
-                        2 * texture.config.height,
-                    texture.config.GetPhysicalAddress());
-            }
-        }
-
         DebugUtils::MemoryAccessTracker memory_accesses;
 
         // Simple circular-replacement vertex cache
@@ -386,12 +356,6 @@ static void WritePicaReg(u32 id, u32 value, u32 mask) {
                     continue;
                 }
 
-                if (g_debug_context && Pica::g_debug_context->recorder) {
-                    int size = index_u16 ? 2 : 1;
-                    memory_accesses.AddAccess(base_address + index_info.offset + size * index,
-                                              size);
-                }
-
                 for (unsigned int i = 0; i < VERTEX_CACHE_SIZE; ++i) {
                     if (vertex_cache_valid[i] && vertex == vertex_cache_ids[i]) {
                         vs_output = vertex_cache[i];
@@ -407,9 +371,6 @@ static void WritePicaReg(u32 id, u32 value, u32 mask) {
                 loader.LoadVertex(base_address, index, vertex, input, memory_accesses);
 
                 // Send to vertex shader
-                if (g_debug_context)
-                    g_debug_context->OnEvent(DebugContext::Event::VertexShaderInvocation,
-                                             (void*)&input);
                 shader_unit.LoadInput(regs.vs, input);
                 shader_engine->Run(g_state.vs, shader_unit);
                 shader_unit.WriteOutput(regs.vs, vs_output);
@@ -426,16 +387,7 @@ static void WritePicaReg(u32 id, u32 value, u32 mask) {
             g_state.geometry_pipeline.SubmitVertex(vs_output);
         }
 
-        for (auto& range : memory_accesses.ranges) {
-            g_debug_context->recorder->MemoryAccessed(
-                VideoCore::g_memory->GetPhysicalPointer(range.first), range.second, range.first);
-        }
-
         VideoCore::g_renderer->Rasterizer()->DrawTriangles();
-        if (g_debug_context) {
-            g_debug_context->OnEvent(DebugContext::Event::FinishedPrimitiveBatch, nullptr);
-        }
-
         break;
     }
 
@@ -648,19 +600,11 @@ static void WritePicaReg(u32 id, u32 value, u32 mask) {
     }
 
     VideoCore::g_renderer->Rasterizer()->NotifyPicaRegisterChanged(id);
-
-    if (g_debug_context)
-        g_debug_context->OnEvent(DebugContext::Event::PicaCommandProcessed,
-                                 reinterpret_cast<void*>(&id));
 }
 
 void ProcessCommandList(PAddr list, u32 size) {
 
     u32* buffer = (u32*)VideoCore::g_memory->GetPhysicalPointer(list);
-
-    if (Pica::g_debug_context && Pica::g_debug_context->recorder) {
-        Pica::g_debug_context->recorder->MemoryAccessed((u8*)buffer, size, list);
-    }
 
     g_state.cmd_list.addr = list;
     g_state.cmd_list.head_ptr = g_state.cmd_list.current_ptr = buffer;

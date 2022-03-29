@@ -40,14 +40,6 @@ inline void Write(u32 addr, const T data) {
     }
 
     g_regs[index] = static_cast<u32>(data);
-
-    // Notify tracer about the register write
-    // This is happening *after* handling the write to make sure we properly catch all memory reads.
-    if (Pica::g_debug_context && Pica::g_debug_context->recorder) {
-        // addr + GPU VBase - IO VBase + IO PBase
-        Pica::g_debug_context->recorder->RegisterWritten<T>(
-            addr + HW::VADDR_LCD - 0x1EC00000 + 0x10100000, data);
-    }
 }
 
 // Explicitly instantiate template functions because we aren't defining this in the header:

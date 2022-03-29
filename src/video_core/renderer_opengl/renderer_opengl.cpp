@@ -414,10 +414,6 @@ void RendererOpenGL::SwapBuffers() {
 
     prev_state.Apply();
     RefreshRasterizerSetting();
-
-    if (Pica::g_debug_context && Pica::g_debug_context->recorder) {
-        Pica::g_debug_context->recorder->FrameFinished();
-    }
 }
 
 void RendererOpenGL::RenderScreenshot() {
