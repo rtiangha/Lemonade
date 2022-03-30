@@ -1144,9 +1144,9 @@ void RendererOpenGL::DrawScreens(const Layout::FramebufferLayout& layout, bool f
                                        (float)bottom_screen.GetHeight());
             }
         }
-        // draw on screen display
-        OSD::DrawMessage(layout);
     }
+    // draw on screen display
+    OSD::DrawMessage(layout);
 }
 
 void RendererOpenGL::TryPresent(int timeout_ms) {

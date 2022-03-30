@@ -725,7 +725,8 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
     state.viewport.height = static_cast<GLsizei>(viewport_rect_unscaled.GetHeight() * res_scale);
 
     // Bind the framebuffer surfaces
-    OpenGLState::BindDrawFramebuffer(framebuffer.handle);
+    state.draw.draw_framebuffer = framebuffer.handle;
+    state.Apply();
 
     if (shadow_rendering) {
         if (color_surface == nullptr) {
