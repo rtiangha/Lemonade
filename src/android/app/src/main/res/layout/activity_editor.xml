@@ -33,7 +33,7 @@
 
         <EditText
             android:id="@+id/code_content"
-            android:hint="@string/cheat_code"
+            android:hint="@string/cheats"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scrollbars="horizontal|vertical"

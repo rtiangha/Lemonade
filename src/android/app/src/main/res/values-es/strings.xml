@@ -188,7 +188,4 @@
     <!-- Teclado -->
     <string name="keyboard_please_input">Por favor ponga:</string>
     <string name="input_text_max_length">Longitud máxima de entrada: %1$d.</string>
-
-    <!-- Menú de trucos/hacks -->
-    <string name="cheat_code">Código de Truco</string>
 </resources>

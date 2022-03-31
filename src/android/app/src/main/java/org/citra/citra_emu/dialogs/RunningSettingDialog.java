@@ -467,7 +467,7 @@ public class RunningSettingDialog extends DialogFragment {
             mSettings.add(new SettingsItem(SettingsItem.SETTING_TOGGLE_CONTROLS, R.string.emulation_toggle_controls, SettingsItem.TYPE_BUTTON, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_RESET_OVERLAY, R.string.emulation_touch_overlay_reset, SettingsItem.TYPE_BUTTON, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_ROTATE_SCREEN, R.string.emulation_rotate_screen, SettingsItem.TYPE_BUTTON, 0));
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_CHEAT_CODE, R.string.cheat_code, SettingsItem.TYPE_BUTTON, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_CHEAT_CODE, R.string.cheats, SettingsItem.TYPE_BUTTON, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_EXIT_GAME, R.string.emulation_close_game, SettingsItem.TYPE_BUTTON, 0));
             notifyDataSetChanged();
         }

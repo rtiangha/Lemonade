@@ -34,6 +34,7 @@ import org.citra.citra_emu.NativeLibrary;
 import org.citra.citra_emu.R;
 import org.citra.citra_emu.activities.EditorActivity;
 import org.citra.citra_emu.activities.EmulationActivity;
+import org.citra.citra_emu.dialogs.GameDetailsDialog;
 import org.citra.citra_emu.dialogs.ShortcutDialog;
 import org.citra.citra_emu.dialogs.UpdaterDialog;
 import org.citra.citra_emu.features.settings.ui.SettingsActivity;
@@ -505,20 +506,9 @@ public final class MainActivity extends AppCompatActivity {
         @Override
         public boolean onLongClick(View clicked) {
             GameViewHolder holder = (GameViewHolder) clicked.getTag();
-            String gameId = NativeLibrary.GetAppId(holder.path);
-            FragmentManager fm = ((FragmentActivity) clicked.getContext()).getSupportFragmentManager();
-            ShortcutDialog shortcutDialog = ShortcutDialog.newInstance(holder.path);
-            new AlertDialog.Builder(clicked.getContext())
-                    .setTitle(R.string.game_details)
-                    .setMessage("Title: " + holder.title + "\n" +
-                            "Company: " + holder.company + "\n" +
-                            "Country: " + holder.regions + "\n" +
-                            "Path: " + holder.path)
-                    .setPositiveButton(R.string.shortcut, (dialog, id) ->
-                            shortcutDialog.show(fm, "fragment_shortcut"))
-                    .setNeutralButton(R.string.cheats, (dialog, id) ->
-                            EditorActivity.launch(clicked.getContext(), gameId, holder.title))
-            .show();
+            FragmentActivity activity = (FragmentActivity) clicked.getContext();
+            GameDetailsDialog.newInstance(holder.path).show(
+                    activity.getSupportFragmentManager(), "GameDetailsDialog");
             return true;
         }
 

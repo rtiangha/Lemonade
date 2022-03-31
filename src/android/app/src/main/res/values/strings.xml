@@ -292,7 +292,6 @@
 
     <!-- Cheat Manager -->
     <string name="cheats">Cheats</string>
-    <string name="cheat_code">Cheat Code</string>
     <string name="cheat_list">Cheat List</string>
     <string name="edit_cheat">Edit Cheat</string>
     <string name="open_app_archive">Open Archive Directory</string>
@@ -308,4 +307,7 @@
     <string name="grant_permission">Grant Permission</string>
     <string name="create_success">Create Success!</string>
     <string name="create_failed">Create Failed!</string>
+
+    <!-- Game details manager -->
+    <string name="launch_game">Launch Game</string>
 </resources>
