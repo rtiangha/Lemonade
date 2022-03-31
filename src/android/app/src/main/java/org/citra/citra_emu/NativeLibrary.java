@@ -217,11 +217,6 @@ public final class NativeLibrary {
     public static native void setRunningSettings(int[] settings);
 
     /**
-     * Returns the performance stats for the current game
-     **/
-    public static native double[] GetPerfStats();
-
-    /**
      * Notifies the core emulation that the orientation has changed.
      */
     public static native void NotifyOrientationChange(int layout_option, int rotation);

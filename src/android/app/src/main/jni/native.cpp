@@ -661,24 +661,6 @@ void Java_org_citra_citra_1emu_NativeLibrary_InitGameIni(JNIEnv* env, [[maybe_un
     env->ReleaseStringUTFChars(j_game_id, game_id.data());
 }
 
-jdoubleArray Java_org_citra_citra_1emu_NativeLibrary_GetPerfStats(JNIEnv* env,
-                                                                  [[maybe_unused]] jclass clazz) {
-    auto& core = Core::System::GetInstance();
-    jdoubleArray j_stats = env->NewDoubleArray(4);
-
-    if (core.IsPoweredOn()) {
-        auto results = core.GetAndResetPerfStats();
-
-        // Converting the structure into an array makes it easier to pass it to the frontend
-        double stats[4] = {results.system_fps, results.game_fps, results.frametime,
-                           results.emulation_speed};
-
-        env->SetDoubleArrayRegion(j_stats, 0, 4, stats);
-    }
-
-    return j_stats;
-}
-
 void Java_org_citra_citra_1emu_utils_DirectoryInitialization_SetSysDirectory(
     JNIEnv* env, [[maybe_unused]] jclass clazz, jstring j_path) {
     std::string_view path = env->GetStringUTFChars(j_path, 0);

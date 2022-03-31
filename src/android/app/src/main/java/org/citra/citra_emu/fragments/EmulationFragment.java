@@ -3,10 +3,7 @@ package org.citra.citra_emu.fragments;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.Choreographer;
 import android.view.LayoutInflater;
@@ -16,7 +13,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,13 +26,10 @@ import org.citra.citra_emu.overlay.InputOverlay;
 import org.citra.citra_emu.utils.DirectoryInitialization;
 import org.citra.citra_emu.utils.DirectoryInitialization.DirectoryInitializationState;
 import org.citra.citra_emu.utils.DirectoryInitialization.DirectoryStateReceiver;
-import org.citra.citra_emu.utils.EmulationMenuSettings;
 import org.citra.citra_emu.utils.Log;
 
 public final class EmulationFragment extends Fragment implements SurfaceHolder.Callback, Choreographer.FrameCallback {
     private static final String KEY_GAMEPATH = "gamepath";
-
-    private static final Handler perfStatsUpdateHandler = new Handler();
 
     private SharedPreferences mPreferences;
 
@@ -47,10 +40,6 @@ public final class EmulationFragment extends Fragment implements SurfaceHolder.C
     private DirectoryStateReceiver directoryStateReceiver;
 
     private EmulationActivity activity;
-
-    private TextView mPerfStats;
-
-    private Runnable perfStatsUpdater;
 
     public static EmulationFragment newInstance(String gamePath) {
         Bundle args = new Bundle();
@@ -104,15 +93,11 @@ public final class EmulationFragment extends Fragment implements SurfaceHolder.C
         surfaceView.getHolder().addCallback(this);
 
         mInputOverlay = contents.findViewById(R.id.surface_input_overlay);
-        mPerfStats = contents.findViewById(R.id.show_fps_text);
 
         Button doneButton = contents.findViewById(R.id.done_control_config);
         if (doneButton != null) {
             doneButton.setOnClickListener(v -> stopConfiguringControls());
         }
-
-        // Show/hide the "Show FPS" overlay
-        updateShowFpsOverlay();
 
         // The new Surface created here will get passed to the native code via onSurfaceChanged.
         return contents;
@@ -191,43 +176,6 @@ public final class EmulationFragment extends Fragment implements SurfaceHolder.C
         editor.apply();
 
         mInputOverlay.resetButtonPlacement();
-    }
-
-    public void updateShowFpsOverlay() {
-        if (EmulationMenuSettings.getShowFps()) {
-            final int SYSTEM_FPS = 0;
-            final int FPS = 1;
-            final int FRAMETIME = 2;
-            final int SPEED = 3;
-
-            final int BLUE = -16776961;
-
-            perfStatsUpdater = () ->
-            {
-                final double[] perfStats = NativeLibrary.GetPerfStats();
-                if (perfStats[FPS] > 0) {
-                    mPerfStats.setText(String.format("CITRA ENHANCED | FPS: %d | SPD: %d%%", (int) (perfStats[FPS] + 0.5),
-                            (int) (perfStats[SPEED] * 100.0 + 0.5)));
-                }
-
-                perfStatsUpdateHandler.postDelayed(perfStatsUpdater, 2000);
-            };
-            perfStatsUpdateHandler.post(perfStatsUpdater);
-
-            Typeface tf = Typeface.createFromAsset(activity.getAssets(), "fonts/bubble.ttf");
-
-            mPerfStats.setTypeface(tf);
-
-            mPerfStats.setShadowLayer(1.6f, 1.5f, 1.3f, Color.BLACK);
-
-            mPerfStats.setVisibility(View.VISIBLE);
-        } else {
-            if (perfStatsUpdater != null) {
-                perfStatsUpdateHandler.removeCallbacks(perfStatsUpdater);
-            }
-
-            mPerfStats.setVisibility(View.GONE);
-        }
     }
 
     @Override

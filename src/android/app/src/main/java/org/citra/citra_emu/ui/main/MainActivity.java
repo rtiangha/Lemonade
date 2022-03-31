@@ -515,7 +515,7 @@ public final class MainActivity extends AppCompatActivity {
                             "Country: " + holder.regions + "\n" +
                             "Path: " + holder.path)
                     .setPositiveButton(R.string.shortcut, (dialog, id) ->
-                            shortcutDialog.show(fm, "shortcut_fragment"))
+                            shortcutDialog.show(fm, "fragment_shortcut"))
                     .setNeutralButton(R.string.cheats, (dialog, id) ->
                             EditorActivity.launch(clicked.getContext(), gameId, holder.title))
             .show();

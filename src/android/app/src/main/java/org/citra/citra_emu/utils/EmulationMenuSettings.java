@@ -47,16 +47,6 @@ public class EmulationMenuSettings {
         editor.apply();
     }
 
-    public static boolean getShowFps() {
-        return mPreferences.getBoolean("EmulationMenuSettings_ShowFps", false);
-    }
-
-    public static void setShowFps(boolean value) {
-        final SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putBoolean("EmulationMenuSettings_ShowFps", value);
-        editor.apply();
-    }
-
     public static boolean getSwapScreens() {
         return mPreferences.getBoolean("EmulationMenuSettings_SwapScreens", false);
     }
