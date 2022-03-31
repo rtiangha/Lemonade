@@ -13,6 +13,7 @@
 #include "core/hle/kernel/process.h"
 #include "core/hle/service/y2r_u.h"
 #include "core/hw/y2r.h"
+#include "core/settings.h"
 
 SERVICE_CONSTRUCT_IMPL(Service::Y2R::Y2R_U)
 SERIALIZE_EXPORT_IMPL(Service::Y2R::Y2R_U)
@@ -521,9 +522,15 @@ void Y2R_U::StartConversion(Kernel::HLERequestContext& ctx) {
     Memory::RasterizerFlushVirtualRegion(conversion.dst.address, total_output_size,
                                          Memory::FlushMode::FlushAndInvalidate);
 
-    HW::Y2R::PerformConversion(system.Memory(), conversion);
+    if (!Settings::values.y2r_perform_hack || completion_event->ShouldWait(nullptr)) {
+        HW::Y2R::PerformConversion(system.Memory(), conversion);
+    }
 
-    completion_event->Signal();
+    if (Settings::values.y2r_event_delay) {
+        Core::System::GetInstance().CoreTiming().ScheduleEvent(40000, conversion_delay_event);
+    } else {
+        completion_event->Signal();
+    }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
     rb.Push(RESULT_SUCCESS);
@@ -696,6 +703,8 @@ Y2R_U::Y2R_U(Core::System& system) : ServiceFramework("y2r:u", 1), system(system
     RegisterHandlers(functions);
 
     completion_event = system.Kernel().CreateEvent(Kernel::ResetType::OneShot, "Y2R:Completed");
+    conversion_delay_event = Core::System::GetInstance().CoreTiming().RegisterEvent(
+        "Y2R delay", [this](u64, int late) { completion_event->Signal(); });
 }
 
 Y2R_U::~Y2R_U() = default;

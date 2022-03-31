@@ -172,9 +172,9 @@ PicaFSConfig PicaFSConfig::BuildFromRegs(const Pica::Regs& regs) {
             state.lighting.light[light_index].geometric_factor_0 = light.config.geometric_factor_0 != 0;
             state.lighting.light[light_index].geometric_factor_1 = light.config.geometric_factor_1 != 0;
             state.lighting.light[light_index].dist_atten_enable =
-                    !regs.lighting.IsDistAttenDisabled(num);
+                !regs.lighting.IsDistAttenDisabled(num);
             state.lighting.light[light_index].spot_atten_enable =
-                    !regs.lighting.IsSpotAttenDisabled(num);
+                !regs.lighting.IsSpotAttenDisabled(num);
             state.lighting.light[light_index].shadow_enable = !regs.lighting.IsShadowDisabled(num);
         }
 
@@ -1768,10 +1768,13 @@ struct Vertex {
            semantic(VSOutputAttributes::POSITION_Z) + ", " +
            semantic(VSOutputAttributes::POSITION_W) + ");\n";
     out += "    gl_Position = vtx_pos;\n";
-    out += "#if !defined(CITRA_GLES) || defined(GL_EXT_clip_cull_distance)\n";
-    out += "    gl_ClipDistance[0] = -vtx_pos.z;\n"; // fixed PICA clipping plane z <= 0
-    out += "    gl_ClipDistance[1] = dot(clip_coef, vtx_pos);\n";
-    out += "#endif // !defined(CITRA_GLES) || defined(GL_EXT_clip_cull_distance)\n\n";
+
+    if (!Settings::values.disable_clip_coef) {
+        out += "#if !defined(CITRA_GLES) || defined(GL_EXT_clip_cull_distance)\n";
+        out += "    gl_ClipDistance[0] = -vtx_pos.z;\n"; // fixed PICA clipping plane z <= 0
+        out += "    gl_ClipDistance[1] = dot(clip_coef, vtx_pos);\n";
+        out += "#endif // !defined(CITRA_GLES) || defined(GL_EXT_clip_cull_distance)\n\n";
+    }
 
     out += "    vec4 vtx_quat = GetVertexQuaternion(vtx);\n";
     out += "    normquat = mix(vtx_quat, -vtx_quat, bvec4(quats_opposite));\n\n";

@@ -9,7 +9,6 @@
 
 #include <android/native_window_jni.h>
 
-#include "audio_core/dsp_interface.h"
 #include "common/file_util.h"
 #include "core/cheats/cheats.h"
 #include "common/logging/log.h"
@@ -56,7 +55,6 @@ std::mutex running_mutex;
 std::condition_variable running_cv;
 
 static std::map<std::string, std::unique_ptr<Loader::AppLoader>> s_app_loaders;
-static JavaVM* s_java_vm = nullptr;
 
 } // Anonymous namespace
 
@@ -69,6 +67,16 @@ static std::string GetJString(JNIEnv* env, jstring jstr) {
     std::string result = s;
     env->ReleaseStringUTFChars(jstr, s);
     return result;
+}
+
+static Loader::AppLoader* GetAppLoader(const std::string& path) {
+    auto iter = s_app_loaders.find(path);
+    if (iter != s_app_loaders.end()) {
+        return iter->second.get();
+    }
+
+    auto result = s_app_loaders.emplace(path, Loader::GetLoader(path));
+    return result.first->second.get();
 }
 
 static bool DisplayAlertMessage(const char* caption, const char* text, bool yes_no) {
@@ -220,21 +228,6 @@ static Core::System::ResultStatus RunCitra(const std::string& filepath) {
     LoadDiskCacheProgress(VideoCore::LoadCallbackStage::Complete, 0, 0);
 
     SCOPE_EXIT({ TryShutdown(); });
-
-    // Audio stretching on Android is only useful with lower framerates, disable it when fullspeed
-    Core::TimingEventType* audio_stretching_event{};
-    const s64 audio_stretching_ticks{msToCycles(500)};
-    audio_stretching_event =
-        system.CoreTiming().RegisterEvent("AudioStretchingEvent", [&](u64, s64 cycles_late) {
-            if (Settings::values.enable_audio_stretching) {
-                Core::DSP().EnableStretching(
-                    Core::System::GetInstance().GetAndResetPerfStats().emulation_speed < 0.95);
-            }
-
-            system.CoreTiming().ScheduleEvent(audio_stretching_ticks - cycles_late,
-                                              audio_stretching_event);
-        });
-    system.CoreTiming().ScheduleEvent(audio_stretching_ticks, audio_stretching_event);
 
     // Start running emulation
     while (!stop_run) {
@@ -646,18 +639,9 @@ JNIEXPORT void JNICALL Java_org_citra_citra_1emu_NativeLibrary_setRunningSetting
     env->ReleaseIntArrayElements(array, settings, 0);
 }
 
-static Loader::AppLoader* GetAppLoader(const std::string& path) {
-    auto iter = s_app_loaders.find(path);
-    if (iter != s_app_loaders.end()) {
-        return iter->second.get();
-    }
-
-    auto result = s_app_loaders.emplace(path, Loader::GetLoader(path));
-    return result.first->second.get();
-}
-
-jstring ToJString(JNIEnv* env, const std::string& str) {
-    return env->NewStringUTF(str.c_str());
+jstring ToJString(const std::string& str) {
+    jstring jstr = IDCache::GetEnvForThread()->NewStringUTF(str.c_str());
+    return jstr;
 }
 
 JNIEXPORT jstring JNICALL Java_org_citra_citra_1emu_NativeLibrary_GetAppId(JNIEnv* env, jclass obj,
@@ -665,7 +649,7 @@ JNIEXPORT jstring JNICALL Java_org_citra_citra_1emu_NativeLibrary_GetAppId(JNIEn
     Loader::AppLoader* app_loader = GetAppLoader(GetJString(env, jPath));
     u64 programId;
     app_loader->ReadProgramId(programId);
-    return ToJString(env, fmt::format("{:016X}", programId));
+    return ToJString(fmt::format("{:016X}", programId));
 }
 
 void Java_org_citra_citra_1emu_NativeLibrary_InitGameIni(JNIEnv* env, [[maybe_unused]] jclass clazz,

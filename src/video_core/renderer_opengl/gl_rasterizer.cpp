@@ -1474,6 +1474,27 @@ bool RasterizerOpenGL::AccelerateDisplayTransfer(const GPU::Regs::DisplayTransfe
     dst_params.pixel_format = SurfaceParams::PixelFormatFromGPUPixelFormat(config.output_format);
     dst_params.UpdateParams();
 
+    // hack for Tales of the Abyss / Pac Man Party 3D
+    if (Settings::values.display_transfer_hack) {
+        if (dst_params.height == 400) {
+            if (dst_params.addr == 0x183CE430) {
+                dst_params.addr -= 0xCE430;
+                dst_params.end -= 0xCE430;
+            } else if (dst_params.addr == 0x18387F30) {
+                dst_params.addr -= 0x41A30;
+                dst_params.end -= 0x41A30;
+            }
+        } else {
+            if (dst_params.addr == 0x180B4830) {
+                dst_params.addr -= 0x34830;
+                dst_params.end -= 0x34830;
+            } else if (dst_params.addr == 0x1807C430) {
+                dst_params.addr += 0x3BFD0;
+                dst_params.end += 0x3BFD0;
+            }
+        }
+    }
+
     Common::Rectangle<u32> src_rect;
     Surface src_surface;
     std::tie(src_surface, src_rect) =
@@ -1722,6 +1743,10 @@ void RasterizerOpenGL::SyncClipEnabled() {
 }
 
 void RasterizerOpenGL::SyncClipCoef() {
+    if (Settings::values.disable_clip_coef) {
+        return;
+    }
+
     const auto raw_clip_coef = Pica::g_state.regs.rasterizer.GetClipCoef();
     const GLvec4 new_clip_coef = {raw_clip_coef.x.ToFloat32(), raw_clip_coef.y.ToFloat32(),
                                   raw_clip_coef.z.ToFloat32(), raw_clip_coef.w.ToFloat32()};

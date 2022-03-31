@@ -1,5 +1,6 @@
 package org.citra.citra_emu.ui.main;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -20,10 +21,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.citra.citra_emu.CitraApplication;
@@ -31,6 +34,8 @@ import org.citra.citra_emu.NativeLibrary;
 import org.citra.citra_emu.R;
 import org.citra.citra_emu.activities.EditorActivity;
 import org.citra.citra_emu.activities.EmulationActivity;
+import org.citra.citra_emu.dialogs.ShortcutDialog;
+import org.citra.citra_emu.dialogs.UpdaterDialog;
 import org.citra.citra_emu.features.settings.ui.SettingsActivity;
 import org.citra.citra_emu.features.settings.utils.SettingsFile;
 import org.citra.citra_emu.model.GameDatabase;
@@ -501,7 +506,19 @@ public final class MainActivity extends AppCompatActivity {
         public boolean onLongClick(View clicked) {
             GameViewHolder holder = (GameViewHolder) clicked.getTag();
             String gameId = NativeLibrary.GetAppId(holder.path);
-            EditorActivity.launch(clicked.getContext(), gameId, holder.title);
+            FragmentManager fm = ((FragmentActivity) clicked.getContext()).getSupportFragmentManager();
+            ShortcutDialog shortcutDialog = ShortcutDialog.newInstance(holder.path);
+            new AlertDialog.Builder(clicked.getContext())
+                    .setTitle(R.string.game_details)
+                    .setMessage("Title: " + holder.title + "\n" +
+                            "Company: " + holder.company + "\n" +
+                            "Country: " + holder.regions + "\n" +
+                            "Path: " + holder.path)
+                    .setPositiveButton(R.string.shortcut, (dialog, id) ->
+                            shortcutDialog.show(fm, "shortcut_fragment"))
+                    .setNeutralButton(R.string.cheats, (dialog, id) ->
+                            EditorActivity.launch(clicked.getContext(), gameId, holder.title))
+            .show();
             return true;
         }
 
