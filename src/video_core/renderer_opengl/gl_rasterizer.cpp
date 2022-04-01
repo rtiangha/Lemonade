@@ -56,11 +56,11 @@ static bool IsVendorIntel() {
 
 RasterizerOpenGL::RasterizerOpenGL(Frontend::EmuWindow& emu_window)
     : is_mali_gpu(IsVendorMali()), shader_dirty(true),
-      vertex_buffer(GL_ARRAY_BUFFER, is_mali_gpu ? 36231 : VERTEX_BUFFER_SIZE, false),
-      uniform_buffer(GL_UNIFORM_BUFFER, is_mali_gpu ? 22312 : UNIFORM_BUFFER_SIZE, false),
-      index_buffer(GL_ELEMENT_ARRAY_BUFFER, is_mali_gpu ? 45312 : INDEX_BUFFER_SIZE, false),
+      vertex_buffer(GL_ARRAY_BUFFER, VERTEX_BUFFER_SIZE, false),
+      uniform_buffer(GL_UNIFORM_BUFFER, UNIFORM_BUFFER_SIZE, false),
+      index_buffer(GL_ELEMENT_ARRAY_BUFFER, INDEX_BUFFER_SIZE, false),
       texture_buffer(GL_TEXTURE_BUFFER, is_mali_gpu ? 11264 : TEXTURE_BUFFER_SIZE, false),
-      texture_lf_buffer(GL_TEXTURE_BUFFER, is_mali_gpu ? 52512 : TEXTURE_BUFFER_SIZE, false) {
+      texture_lf_buffer(GL_TEXTURE_BUFFER, is_mali_gpu ? 525312 : TEXTURE_BUFFER_SIZE, false) {
 
     allow_shadow = GLES || (GLAD_GL_ARB_shader_image_load_store && GLAD_GL_ARB_shader_image_size &&
                             GLAD_GL_ARB_framebuffer_no_attachments);
