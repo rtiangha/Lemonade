@@ -9,14 +9,6 @@ import org.citra.citra_emu.overlay.InputOverlay;
 public class EmulationMenuSettings {
     private static SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(CitraApplication.getAppContext());
 
-    // These must match what is defined in src/core/settings.h
-    public static final int LayoutOption_Default = 0;
-    public static final int LayoutOption_SingleScreen = 1;
-    public static final int LayoutOption_LargeScreen = 2;
-    public static final int LayoutOption_SideScreen = 3;
-    public static final int LayoutOption_MobilePortrait = 4;
-    public static final int LayoutOption_MobileLandscape = 5;
-
     public static boolean getJoystickRelCenter() {
         return mPreferences.getBoolean(InputOverlay.PREF_JOYSTICK_RELATIVE, true);
     }
@@ -38,7 +30,7 @@ public class EmulationMenuSettings {
     }
 
     public static int getLandscapeScreenLayout() {
-        return mPreferences.getInt("EmulationMenuSettings_LandscapeScreenLayout", LayoutOption_MobileLandscape);
+        return mPreferences.getInt(InputOverlay.PREF_SCREEN_LAYOUT, 0);
     }
 
     public static void setLandscapeScreenLayout(int value) {

@@ -22,7 +22,6 @@ import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Display;
-import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
@@ -51,6 +50,10 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
     public static final String PREF_SHOW_OVERLAY = "ShowOverlay";
     public static final String PREF_CONTROLLER_SCALE = "ControllerScale";
     public static final String PREF_CONTROLLER_ALPHA = "ControllerAlpha";
+
+    // emulation
+    public static final String PREF_SCREEN_LAYOUT = "ScreenLayout";
+    public static int sScreenLayout = 0;
 
     public static boolean sUseHapticFeedback = false;
     public static boolean sJoystickRelative = true;
@@ -87,6 +90,7 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
         sShowInputOverlay = mPreferences.getBoolean(InputOverlay.PREF_SHOW_OVERLAY, true);
         sControllerScale = mPreferences.getInt(InputOverlay.PREF_CONTROLLER_SCALE, 50);
         sControllerAlpha = mPreferences.getInt(InputOverlay.PREF_CONTROLLER_ALPHA, 100);
+        sScreenLayout = mPreferences.getInt(InputOverlay.PREF_SCREEN_LAYOUT, 0);
 
         // Reset 3ds touchscreen pointer ID
         mTouchscreenPointerId = -1;

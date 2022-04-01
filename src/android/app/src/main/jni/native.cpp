@@ -573,7 +573,6 @@ JNIEXPORT jintArray JNICALL Java_org_citra_citra_1emu_NativeLibrary_getRunningSe
     settings[i++] = Settings::values.core_ticks_hack > 0;
     settings[i++] = Settings::values.show_fps;
     settings[i++] = std::min(std::max(Settings::values.resolution_factor - 1, 0), 3);
-    settings[i++] = static_cast<int>(Settings::values.layout_option);
     settings[i++] = Settings::values.skip_slow_draw;
     settings[i++] = Settings::values.skip_cpu_write;
     settings[i++] = Settings::values.skip_texture_copy;
@@ -602,11 +601,6 @@ JNIEXPORT void JNICALL Java_org_citra_citra_1emu_NativeLibrary_setRunningSetting
 
     // Scale Factor
     Settings::values.resolution_factor = settings[i++] + 1;
-
-    // Screen Layout
-    auto screen_layout = static_cast<Settings::LayoutOption>(settings[i++]);
-    Settings::values.layout_option = screen_layout;
-    window->UpdateLayout();
 
     // Skip Slow Draw
     Settings::values.skip_slow_draw = settings[i++] > 0;

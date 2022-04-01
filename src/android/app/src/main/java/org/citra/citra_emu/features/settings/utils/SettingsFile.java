@@ -275,7 +275,7 @@ public final class SettingsFile {
     }
 
     private static File getCustomGameSettingsFile(String gameId) {
-        return new File(DirectoryInitialization.getUserDirectory() + "/GameSettings/" + gameId + ".ini");
+        return new File(DirectoryInitialization.getUserDirectory() + "/gamesettings/" + gameId + ".ini");
     }
 
     private static SettingSection sectionFromLine(String line, boolean isCustomGame) {

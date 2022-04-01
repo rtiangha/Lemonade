@@ -127,6 +127,5 @@ public class Settings {
 
             SettingsFile.saveCustomGameSettings(gameId, sections);
         }
-
     }
 }

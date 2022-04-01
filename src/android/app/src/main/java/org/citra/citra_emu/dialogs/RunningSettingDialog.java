@@ -2,6 +2,7 @@ package org.citra.citra_emu.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
@@ -15,9 +16,11 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -31,6 +34,7 @@ import org.citra.citra_emu.NativeLibrary;
 import org.citra.citra_emu.R;
 import org.citra.citra_emu.activities.EmulationActivity;
 import org.citra.citra_emu.overlay.InputOverlay;
+import org.citra.citra_emu.utils.EmulationMenuSettings;
 
 import java.util.ArrayList;
 
@@ -53,6 +57,16 @@ public class RunningSettingDialog extends DialogFragment {
         long heapsize = Debug.getNativeHeapAllocatedSize() >> 20;
         mInfo.setText(String.format("RAM:%dMB", heapsize));
         mHandler.postDelayed(this::setHeapInfo, 1000);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        // Update framebuffer layout when closing the settings
+        Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        int rotation = display.getRotation();
+        NativeLibrary.NotifyOrientationChange(EmulationMenuSettings.getLandscapeScreenLayout(),
+                rotation);
     }
 
     @NonNull
@@ -112,7 +126,6 @@ public class RunningSettingDialog extends DialogFragment {
         public static final int SETTING_FMV_HACK = 0;
         public static final int SETTING_SHOW_FPS = 1;
         public static final int SETTING_SCALE_FACTOR = 2;
-        public static final int SETTING_SCREEN_LAYOUT = 3;
         public static final int SETTING_LINEAR_FILTER = 4;
         public static final int SETTING_SKIP_SLOW_DRAW = 5;
         public static final int SETTING_SKIP_CPU_WRITE = 6;
@@ -129,6 +142,7 @@ public class RunningSettingDialog extends DialogFragment {
         public static final int SETTING_SHOW_OVERLAY = 102;
         public static final int SETTING_CONTROLLER_SCALE = 103;
         public static final int SETTING_CONTROLLER_ALPHA = 104;
+        public static final int SETTING_SCREEN_LAYOUT = 105;
 
         // func
         public static final int SETTING_LOAD_SUBMENU = 200;
@@ -454,6 +468,7 @@ public class RunningSettingDialog extends DialogFragment {
         private int mShowOverlay;
         private int mControllerScale;
         private int mControllerAlpha;
+        private int mScreenLayout;
         private ArrayList<SettingsItem> mSettings;
 
         public void loadMainMenu() {
@@ -504,6 +519,11 @@ public class RunningSettingDialog extends DialogFragment {
                     R.string.emulation_control_opacity, SettingsItem.TYPE_SEEK_BAR,
                     mControllerAlpha));
 
+            mScreenLayout = InputOverlay.sScreenLayout;
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_SCREEN_LAYOUT,
+                    R.string.running_layout, SettingsItem.TYPE_RADIO_GROUP,
+                    mScreenLayout));
+
             // native settings
             mSettings.add(new SettingsItem(SettingsItem.SETTING_FMV_HACK,
                     R.string.fmv_hack, SettingsItem.TYPE_CHECKBOX,
@@ -513,9 +533,6 @@ public class RunningSettingDialog extends DialogFragment {
                     mRunningSettings[i++]));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_SCALE_FACTOR,
                     R.string.internal_resolution, SettingsItem.TYPE_RADIO_GROUP,
-                    mRunningSettings[i++]));
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_SCREEN_LAYOUT,
-                    R.string.running_layout, SettingsItem.TYPE_RADIO_GROUP,
                     mRunningSettings[i++]));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_SKIP_SLOW_DRAW,
                     R.string.setting_skip_slow_draw, SettingsItem.TYPE_CHECKBOX,
@@ -544,6 +561,7 @@ public class RunningSettingDialog extends DialogFragment {
             mSettings.add(new SettingsItem(SettingsItem.SETTING_SPEED_LIMIT,
                     R.string.frame_limit_slider, SettingsItem.TYPE_SEEK_BAR,
                     mRunningSettings[i++]));
+            notifyDataSetChanged();
         }
 
         @NonNull
@@ -625,6 +643,13 @@ public class RunningSettingDialog extends DialogFragment {
             if (mControllerAlpha != alpha) {
                 editor.putInt(InputOverlay.PREF_CONTROLLER_ALPHA, alpha);
                 InputOverlay.sControllerAlpha = alpha;
+            }
+            mSettings.remove(0);
+
+            int layout = mSettings.get(0).getValue();
+            if (mScreenLayout != layout) {
+                editor.putInt(InputOverlay.PREF_SCREEN_LAYOUT, layout);
+                InputOverlay.sScreenLayout = layout;
             }
             mSettings.remove(0);
 

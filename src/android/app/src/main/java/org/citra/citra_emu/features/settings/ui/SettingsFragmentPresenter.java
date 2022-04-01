@@ -41,7 +41,6 @@ public final class SettingsFragmentPresenter {
     private String mGameID;
 
     private Settings mSettings;
-    private SettingsActivity mActivity;
     private ArrayList<SettingsItem> mSettingsList;
 
     public SettingsFragmentPresenter(SettingsFragmentView view) {

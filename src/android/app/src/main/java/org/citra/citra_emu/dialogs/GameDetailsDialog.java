@@ -15,10 +15,12 @@ import android.graphics.Shader;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -123,6 +125,11 @@ public final class GameDetailsDialog extends DialogFragment
         FragmentManager fm = ((FragmentActivity) contents.getContext()).getSupportFragmentManager();
         ShortcutDialog shortcutDialog = ShortcutDialog.newInstance(mGamePath);
         Button buttonShortcut = contents.findViewById(R.id.button_shortcut);
+        if (ShortcutManagerCompat.isRequestPinShortcutSupported(getContext())) {
+            buttonShortcut.setVisibility(View.VISIBLE);
+        } else {
+            buttonShortcut.setVisibility(View.INVISIBLE);
+        }
         buttonShortcut.setOnClickListener(view ->
         {
             this.dismiss();
