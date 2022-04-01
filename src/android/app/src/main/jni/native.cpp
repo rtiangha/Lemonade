@@ -567,7 +567,7 @@ void Java_org_citra_citra_1emu_NativeLibrary_SetUserSetting(JNIEnv* env,
 
 JNIEXPORT jintArray JNICALL Java_org_citra_citra_1emu_NativeLibrary_getRunningSettings(JNIEnv* env, jclass clazz) {
     int i = 0;
-    int settings[13];
+    int settings[12];
 
     // get settings
     settings[i++] = Settings::values.core_ticks_hack > 0;
