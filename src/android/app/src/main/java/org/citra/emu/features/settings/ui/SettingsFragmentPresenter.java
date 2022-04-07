@@ -396,7 +396,6 @@ public final class SettingsFragmentPresenter {
         String[] shaderListEntries = getShaderList();
         String[] shaderListValues = new String[shaderListEntries.length];
         System.arraycopy(shaderListEntries, 0, shaderListValues, 0, shaderListEntries.length);
-        shaderListValues[0] = "";
         sl.add(new StringSingleChoiceSetting(SettingsFile.KEY_PP_SHADER_NAME,
                 Settings.SECTION_RENDERER, R.string.post_processing_shader,
                 0, shaderListEntries, shaderListValues, "",
