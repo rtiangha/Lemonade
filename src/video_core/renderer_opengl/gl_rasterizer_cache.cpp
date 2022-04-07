@@ -1246,7 +1246,7 @@ Surface RasterizerCacheOpenGL::GetTextureSurface(const Pica::Texture::TextureInf
     params.is_tiled = true;
     params.pixel_format = SurfaceParams::PixelFormatFromTextureFormat(info.format);
     params.is_texture = g_texture_load_hack &&
-                        (params.addr < 0x181FFFFF || params.pixel_format > PixelFormat::RGBA4);
+            (params.addr < 0x181FFFFF || params.pixel_format > PixelFormat::RGBA4);
     params.res_scale = texture_filterer->IsNull() ? 1 : resolution_scale_factor;
     params.UpdateParams();
 
@@ -1510,6 +1510,11 @@ SurfaceSurfaceRect_Tuple RasterizerCacheOpenGL::GetFramebufferSurfaces(
     SurfaceInterval color_vp_interval;
     SurfaceInterval depth_vp_interval;
 
+    if (!using_depth_fb && g_texture_load_hack &&
+        color_params.addr > 0x18000000 && color_params.addr < 0x181FFFFF) {
+        color_params.is_texture = true;
+    }
+
     Common::Rectangle<u32> depth_rect{};
     Surface depth_surface = nullptr;
     if (using_depth_fb) {
@@ -1520,11 +1525,6 @@ SurfaceSurfaceRect_Tuple RasterizerCacheOpenGL::GetFramebufferSurfaces(
 
         std::tie(depth_surface, depth_rect) =
                 GetSurfaceSubRect(depth_params, ScaleMatch::Exact, false);
-    }
-
-    if (!using_depth_fb && g_texture_load_hack &&
-        color_params.addr > 0x18000000 && color_params.addr < 0x181FFFFF) {
-        color_params.is_texture = true;
     }
 
     Common::Rectangle<u32> color_rect{};
@@ -1874,13 +1874,14 @@ void RasterizerCacheOpenGL::FlushRegion(PAddr addr, u32 size, Surface flush_surf
 
         if (surface->is_texture && !surface->gl_buffer.empty()) {
             // skip texture
+        } else if (!GLES || surface->pixel_format < PixelFormat::D16) {
+            if (surface->type != SurfaceType::Fill) {
+                SurfaceParams params = surface->FromInterval(interval);
+                surface->DownloadGLTexture(surface->GetSubRect(params), read_framebuffer.handle,
+                                           draw_framebuffer.handle);
+            }
+            surface->FlushGLBuffer(boost::icl::first(interval), boost::icl::last_next(interval));
         }
-        if (surface->type != SurfaceType::Fill) {
-            SurfaceParams params = surface->FromInterval(interval);
-            surface->DownloadGLTexture(surface->GetSubRect(params), read_framebuffer.handle,
-                                       draw_framebuffer.handle);
-        }
-        surface->FlushGLBuffer(boost::icl::first(interval), boost::icl::last_next(interval));
         flushed_intervals += interval;
     }
     // Reset dirty regions

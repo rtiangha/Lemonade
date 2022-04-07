@@ -15,6 +15,8 @@ void LoadOverrides(u64 program_id) {
         // state.regs.pipeline.gs_unit_exclusive_configuration = 0
         // state.regs.gs.max_input_attribute_index = 0
         Settings::values.skip_slow_draw = true;
+        // may cause display issues
+        Settings::values.texture_load_hack = false;
     } else if (program_id == 0x00040000001CCD00 || program_id == 0x00040000001B4500) {
         // The Alliance Alive
         Settings::values.core_downcount_hack = true;
@@ -33,6 +35,23 @@ void LoadOverrides(u64 program_id) {
     } else if (program_id == 0x00040000001ACB00) {
         // Dragon Quest Monsters Joker 3 Professional
         Settings::values.skip_slow_draw = true;
+    } else if (program_id == 0x00040000000D2800 || program_id == 0x0004000000065800 ||
+               program_id == 0x0004000000766600) {
+        // Rune Factory 4
+        Settings::values.texture_load_hack = false;
+    } else if (program_id == 0x0004000000055D00 || program_id == 0x0004000000055E00) {
+        // Pokémon X/Y
+        Settings::values.texture_load_hack = false;
+    } else if (program_id == 0x000400000004B500) {
+        // Monster Hunter 4
+        Settings::values.texture_load_hack = true;
+    } else if (program_id == 0x0004000000126300 || program_id == 0x000400000011D700 ||
+               program_id == 0x0004000000126100 || program_id == 0x0004000000153200) {
+        // Monster Hunter 4 Ultimate
+        Settings::values.texture_load_hack = true;
+    } else if (program_id == 0x0004000000155400) {
+        // Monster Hunter X
+        Settings::values.texture_load_hack = true;
     } else if (program_id == 0x000400000008FE00) {
         // 1001 Spikes
         Settings::values.core_downcount_hack = true;

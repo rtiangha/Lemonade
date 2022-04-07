@@ -375,7 +375,7 @@ void RasterFont::Draw(const Layout::FramebufferLayout& layout) {
     draw_info.shadow_x = draw_info.font_width / 4.0f;
     draw_info.shadow_y = -draw_info.font_height / 6.0f;
     draw_info.start_x = draw_info.font_width - 0.95f;
-    draw_info.start_y = 0.95f - draw_info.font_height * 1.1f;
+    draw_info.start_y = 0.98f - draw_info.font_height * 1.1f;
 
     OpenGL::OpenGLState state = OpenGL::OpenGLState::GetCurState();
     state.draw.shader_program = shader.handle;
