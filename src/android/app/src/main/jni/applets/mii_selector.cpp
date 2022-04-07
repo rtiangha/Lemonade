@@ -66,16 +66,16 @@ void AndroidMiiSelector::Setup(const Frontend::MiiSelectorConfig& config) {
 
 void InitJNI(JNIEnv* env) {
     s_mii_selector_class = reinterpret_cast<jclass>(
-        env->NewGlobalRef(env->FindClass("org/citra/emu/applets/MiiSelector")));
+        env->NewGlobalRef(env->FindClass("org/citra/emu/ui/MiiSelector")));
     s_mii_selector_config_class = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("org/citra/emu/applets/MiiSelector$MiiSelectorConfig")));
+        env->FindClass("org/citra/emu/ui/MiiSelector$MiiSelectorConfig")));
     s_mii_selector_data_class = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("org/citra/emu/applets/MiiSelector$MiiSelectorData")));
+        env->FindClass("org/citra/emu/ui/MiiSelector$MiiSelectorData")));
 
     s_mii_selector_execute =
         env->GetStaticMethodID(s_mii_selector_class, "Execute",
-                               "(Lorg/citra/citra_emu/applets/MiiSelector$MiiSelectorConfig;)Lorg/"
-                               "citra/citra_emu/applets/MiiSelector$MiiSelectorData;");
+                               "(Lorg/citra/emu/ui/MiiSelector$MiiSelectorConfig;)Lorg/"
+                               "citra/emu/ui/MiiSelector$MiiSelectorData;");
 }
 
 void CleanupJNI(JNIEnv* env) {
