@@ -209,7 +209,7 @@ System::ResultStatus System::RunLoop(bool tight_loop) {
             if (kernel->GetCurrentThreadManager().GetCurrentThread() == nullptr) {
                 LOG_TRACE(Core_ARM11, "Core {} idling", cpu_core->GetID());
                 cpu_core->GetTimer().Idle();
-                PrepareReschedule();
+                kernel->PrepareReschedule();
             } else {
                 if (tight_loop) {
                     cpu_core->Run();
@@ -384,7 +384,6 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window, u32 system_mo
                 std::make_shared<ARM_DynCom>(this, *memory, USER32MODE, i, timing->GetTimer(i)));
         }
     }
-
     running_core = cpu_cores[0].get();
 
     kernel->SetCPUs(cpu_cores);
