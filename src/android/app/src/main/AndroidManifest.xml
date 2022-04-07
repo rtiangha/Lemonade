@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.citra.citra_emu">
+    package="org.citra.emu">
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false"/>
@@ -25,7 +25,7 @@
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
 
     <application
-        android:name="org.citra.citra_emu.CitraApplication"
+        android:name="org.citra.emu.CitraApplication"
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
@@ -35,7 +35,7 @@
         android:requestLegacyExternalStorage="true">
 
         <activity
-            android:name="org.citra.citra_emu.ui.main.MainActivity"
+            android:name="org.citra.emu.ui.MainActivity"
             android:theme="@style/CitraBase"
             android:resizeableActivity="false">
 
@@ -48,13 +48,13 @@
         </activity>
 
         <activity
-            android:name="org.citra.citra_emu.features.settings.ui.SettingsActivity"
+            android:name="org.citra.emu.features.settings.ui.SettingsActivity"
             android:configChanges="orientation|screenSize|uiMode"
             android:theme="@style/CitraSettingsBase"
             android:label="@string/preferences_settings"/>
 
         <activity
-            android:name=".activities.EditorActivity"
+            android:name="org.citra.emu.ui.EditorActivity"
             android:label="@string/app_name"
             android:screenOrientation="behind"
             android:windowSoftInputMode="adjustUnspecified|stateHidden"
@@ -62,14 +62,14 @@
             android:theme="@style/CitraBase"/>
 
         <activity
-            android:name="org.citra.citra_emu.activities.EmulationActivity"
+            android:name="org.citra.emu.ui.EmulationActivity"
             android:resizeableActivity="false"
             android:theme="@style/CitraEmulationBase"
             android:screenOrientation="userLandscape"
             android:launchMode="singleTop"/>
 
         <activity
-            android:name="org.citra.citra_emu.activities.CustomFilePickerActivity"
+            android:name="org.citra.emu.ui.CustomFilePickerActivity"
             android:label="@string/app_name"
             android:theme="@style/FilePickerTheme">
             <intent-filter>
@@ -78,10 +78,10 @@
             </intent-filter>
         </activity>
 
-        <service android:name="org.citra.citra_emu.utils.DirectoryInitialization"/>
+        <service android:name="org.citra.emu.utils.DirectoryInitialization"/>
 
         <provider
-            android:name="org.citra.citra_emu.model.GameProvider"
+            android:name="org.citra.emu.model.GameProvider"
             android:authorities="${applicationId}.provider"
             android:enabled="true"
             android:exported="false">

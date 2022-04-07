@@ -84,13 +84,13 @@ void AndroidKeyboard::ShowError(const std::string& error) {
 
 void InitJNI(JNIEnv* env) {
     s_software_keyboard_class = reinterpret_cast<jclass>(
-        env->NewGlobalRef(env->FindClass("org/citra/citra_emu/applets/SoftwareKeyboard")));
+        env->NewGlobalRef(env->FindClass("org/citra/emu/applets/SoftwareKeyboard")));
     s_keyboard_config_class = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("org/citra/citra_emu/applets/SoftwareKeyboard$KeyboardConfig")));
+        env->FindClass("org/citra/emu/applets/SoftwareKeyboard$KeyboardConfig")));
     s_keyboard_data_class = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("org/citra/citra_emu/applets/SoftwareKeyboard$KeyboardData")));
+        env->FindClass("org/citra/emu/applets/SoftwareKeyboard$KeyboardData")));
     s_validation_error_class = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("org/citra/citra_emu/applets/SoftwareKeyboard$ValidationError")));
+        env->FindClass("org/citra/emu/applets/SoftwareKeyboard$ValidationError")));
 
     s_swkbd_execute = env->GetStaticMethodID(
         s_software_keyboard_class, "Execute",

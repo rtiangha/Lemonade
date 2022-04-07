@@ -148,16 +148,16 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     LOG_INFO(Frontend, "Logging backend initialised");
 
     // Initialize Java classes
-    const jclass native_library_class = env->FindClass("org/citra/citra_emu/NativeLibrary");
+    const jclass native_library_class = env->FindClass("org/citra/emu/NativeLibrary");
     s_native_library_class = reinterpret_cast<jclass>(env->NewGlobalRef(native_library_class));
     s_savestate_info_class = reinterpret_cast<jclass>(
-        env->NewGlobalRef(env->FindClass("org/citra/citra_emu/NativeLibrary$SavestateInfo")));
+        env->NewGlobalRef(env->FindClass("org/citra/emu/NativeLibrary$SavestateInfo")));
     s_core_error_class = reinterpret_cast<jclass>(
-        env->NewGlobalRef(env->FindClass("org/citra/citra_emu/NativeLibrary$CoreError")));
+        env->NewGlobalRef(env->FindClass("org/citra/emu/NativeLibrary$CoreError")));
     s_disk_cache_progress_class = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("org/citra/citra_emu/disk_shader_cache/DiskShaderCacheProgress")));
+        env->FindClass("org/citra/emu/disk_shader_cache/DiskShaderCacheProgress")));
     s_load_callback_stage_class = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass(
-        "org/citra/citra_emu/disk_shader_cache/DiskShaderCacheProgress$LoadCallbackStage")));
+        "org/citra/emu/disk_shader_cache/DiskShaderCacheProgress$LoadCallbackStage")));
 
     // Initialize Java methods
     s_on_core_error = env->GetStaticMethodID(
