@@ -44,9 +44,10 @@ public class UpdaterUtils {
             IntSetting askUpdaterPermissionSetting =
                     (IntSetting) settings.getSection(Settings.SECTION_INTERFACE)
                             .getSetting(SettingsFile.KEY_UPDATER_CHECK_AT_STARTUP);
-            int askUpdaterPermission = askUpdaterPermissionSetting.getValue();
+            boolean askUpdaterPermission = askUpdaterPermissionSetting == null ||
+                    askUpdaterPermissionSetting.getValueAsString().equals("1");
 
-            if (askUpdaterPermission == 1) {
+            if (askUpdaterPermission) {
                 checkUpdates(context);
             }
         }

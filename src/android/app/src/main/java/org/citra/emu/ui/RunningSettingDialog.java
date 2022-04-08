@@ -106,7 +106,7 @@ public class RunningSettingDialog extends DialogFragment {
 
     private void loadSubMenu(int menu) {
         if (menu == MENU_MAIN) {
-            EmulationActivity activity = (EmulationActivity) NativeLibrary.getEmulationContext();
+            EmulationActivity activity = (EmulationActivity) NativeLibrary.sEmulationActivity.get();
             mTitle.setText(activity.getGameTitle());
             mAdapter.loadMainMenu();
         } else if (menu == MENU_SETTINGS) {
@@ -238,7 +238,7 @@ public class RunningSettingDialog extends DialogFragment {
 
         @Override
         public void onClick(View clicked) {
-            EmulationActivity activity = (EmulationActivity) NativeLibrary.getEmulationContext();
+            EmulationActivity activity = (EmulationActivity) NativeLibrary.sEmulationActivity.get();
             switch (mItem.getSetting()) {
                 case SettingsItem.SETTING_LOAD_SUBMENU:
                     loadSubMenu(mItem.getValue());
@@ -605,7 +605,7 @@ public class RunningSettingDialog extends DialogFragment {
                 return;
             }
 
-            EmulationActivity activity = (EmulationActivity) NativeLibrary.getEmulationContext();
+            EmulationActivity activity = (EmulationActivity) NativeLibrary.sEmulationActivity.get();
             // pref settings
             SharedPreferences.Editor editor =
                     PreferenceManager.getDefaultSharedPreferences(activity).edit();

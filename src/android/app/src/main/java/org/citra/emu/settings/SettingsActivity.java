@@ -9,6 +9,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -107,6 +108,26 @@ public final class SettingsActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_settings, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_reset_setting) {
+            File ini = new File(DirectoryInitialization.getUserDirectory() + "/config/" + SettingsFile.FILE_NAME_CONFIG + ".ini");
+            try {
+                ini.delete();
+            } catch (Exception e) {
+                // ignore
+            }
+            mSettings.loadSettings(this);
+            // show settings
+            SettingsFragment fragment = getFragment();
+            if (fragment != null) {
+                fragment.loadSettingsList();
+            }
+            return true;
+        }
+        return false;
     }
 
     public void showSettingsFragment(String menuTag, boolean addToStack, String gameID) {

@@ -42,7 +42,7 @@ public final class CheckBoxSetting extends SettingsItem {
         // Try boolean setting
         try {
             BooleanSetting setting = (BooleanSetting) getSetting();
-            return setting.getValue();
+            return setting.getValue() == true;
         } catch (ClassCastException ignored) {
         }
 

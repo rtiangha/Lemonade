@@ -4,6 +4,7 @@ import android.content.Context;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -193,7 +194,7 @@ public final class SettingsFragment extends Fragment {
         mActivity.onSettingChanged();
     }
 
-    private void loadSettingsList() {
+    public void loadSettingsList() {
         if (!TextUtils.isEmpty(mGameID)) {
             getActivity().setTitle("Game Settings: " + mGameID);
         }
@@ -260,8 +261,14 @@ public final class SettingsFragment extends Fragment {
         getActivity().setTitle(R.string.preferences_interface);
 
         SettingSection interfaceSection = mSettings.getSection(Settings.SECTION_INTERFACE);
+        Setting expandToCutoutArea = interfaceSection.getSetting(SettingsFile.KEY_EXPAND_TO_CUTOUT_AREA);
         Setting checkUpdates = interfaceSection.getSetting(SettingsFile.KEY_UPDATER_CHECK_AT_STARTUP);
         Setting design = interfaceSection.getSetting(SettingsFile.KEY_DESIGN);
+
+        // only android 9+ support this feature.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            sl.add(new CheckBoxSetting(SettingsFile.KEY_EXPAND_TO_CUTOUT_AREA, Settings.SECTION_INTERFACE, R.string.expand_to_cutout_area, R.string.expand_to_cutout_area_description, false, expandToCutoutArea));
+        }
 
         sl.add(new CheckBoxSetting(SettingsFile.KEY_UPDATER_CHECK_AT_STARTUP, Settings.SECTION_INTERFACE, R.string.updater_check_startup, R.string.updater_check_startup_description, true, checkUpdates));
 

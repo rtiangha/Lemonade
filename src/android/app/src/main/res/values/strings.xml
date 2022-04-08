@@ -37,6 +37,11 @@
     <string name="generic_buttons">Buttons</string>
 
     <!-- Interface settings strings -->
+    <string name="interface_text">Interface</string>
+    <string name="expand_to_cutout_area">Expand To Cutout Area</string>
+    <string name="expand_to_cutout_area_description">Expands the display area to include the cutout (or notch) area.</string>
+    <string name="updater_check_startup">Check for updates at startup</string>
+    <string name="updater_check_startup_description">If allowed, Citra Enhanced will check for updates when opened. A pop-up will appear when a new version is available. An internet connection is required.</string>
     <string name="design">Change Theme (Light, Dark)</string>
     <string name="design_updated">Theme will update when exiting Settings</string>
 
@@ -110,9 +115,6 @@
     <string name="use_disk_shader_cache">Use disk shader cache</string>
     <string name="use_disk_shader_cache_description">Reduce stuttering by storing and loading generated shaders to disk. It cannot be used without Enabling Hardware Shader.</string>
 
-    <!-- Interface strings -->
-    <string name="interface_text">Interface</string>
-
     <!-- Audio settings strings -->
     <string name="audio_stretch">Enable audio stretching</string>
     <string name="audio_stretch_description">Stretches audio to reduce stuttering. When enabled, increases audio latency and slightly reduces performance.</string>
@@ -128,6 +130,7 @@
     <string name="loading">Loading...</string>
     <string name="current_directory">Current Directory</string>
     <string name="game_details">Game Details</string>
+    <string name="reset_setting">Reset Setting</string>
 
     <!-- Game Grid Screen-->
     <string name="grid_menu_core_settings">Settings</string>
@@ -276,8 +279,6 @@
     <string name="error">Error</string>
 
     <!-- Update available dialog -->
-    <string name="updater_check_startup">Check for updates at startup</string>
-    <string name="updater_check_startup_description">If allowed, Citra Enhanced will check for updates when opened. A pop-up will appear when a new version is available. An internet connection is required.</string>
     <string name="updates_alert">Update available</string>
     <string name="updater_alert_body">A new version of Citra Enhanced is available, do you want to update?</string>
     <string name="not_now">Not now</string>

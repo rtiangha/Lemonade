@@ -21,6 +21,9 @@ import androidx.fragment.app.FragmentActivity;
 
 import org.citra.emu.NativeLibrary;
 import org.citra.emu.R;
+import org.citra.emu.settings.SettingsFile;
+import org.citra.emu.settings.model.IntSetting;
+import org.citra.emu.settings.model.Settings;
 import org.citra.emu.settings.view.InputBindingSetting;
 import org.citra.emu.utils.StillImageCameraHelper;
 import org.citra.emu.utils.ControllerMappingHelper;
@@ -30,9 +33,9 @@ import org.citra.emu.utils.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.RECORD_AUDIO;
@@ -43,8 +46,6 @@ public final class EmulationActivity extends AppCompatActivity {
 
     public static final int REQUEST_SELECT_AMIIBO = 2;
     public static final int REQUEST_CHEAT_CODE = 3;
-
-    private static WeakReference<EmulationActivity> sInstance = new WeakReference<>(null);
 
     private EmulationFragment mEmulationFragment;
     private SharedPreferences mPreferences;
@@ -70,7 +71,6 @@ public final class EmulationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sInstance = new WeakReference<>(this);
 
         if (savedInstanceState == null) {
             // Get params we were passed
@@ -85,8 +85,16 @@ public final class EmulationActivity extends AppCompatActivity {
 
         mControllerMappingHelper = new ControllerMappingHelper();
 
+        Settings settings = new Settings();
+        settings.loadSettings(null);
+
         // only android 9+ support this feature.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        IntSetting expandToCutoutAreaSetting =
+                (IntSetting) settings.getSection(Settings.SECTION_INTERFACE)
+                        .getSetting(SettingsFile.KEY_EXPAND_TO_CUTOUT_AREA);
+        boolean expandToCutoutArea = expandToCutoutAreaSetting == null ||
+                expandToCutoutAreaSetting.getValueAsString().equals("1");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && expandToCutoutArea) {
             getWindow().getAttributes().layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
@@ -112,10 +120,6 @@ public final class EmulationActivity extends AppCompatActivity {
         // Override Citra core INI with the one set by our in game menu
         NativeLibrary.SwapScreens(EmulationMenuSettings.getSwapScreens(),
                 getWindowManager().getDefaultDisplay().getRotation());
-    }
-
-    public static EmulationActivity get() {
-        return sInstance.get();
     }
 
     @Override
@@ -144,7 +148,6 @@ public final class EmulationActivity extends AppCompatActivity {
         if (mMenuVisible) {
             mEmulationFragment.stopEmulation();
             finish();
-            sInstance = new WeakReference<>(null);
         } else {
             mMenuVisible = true;
             mEmulationFragment.stopConfiguringControls();

@@ -108,10 +108,6 @@ public final class NativeLibrary {
      */
     public static native boolean onTouchEvent(float x_axis, float y_axis, boolean pressed);
 
-    public static Context getEmulationContext() {
-        return EmulationActivity.get();
-    }
-
     public static native String GetAppId(String path);
 
     public static native void reloadCheatCode();
