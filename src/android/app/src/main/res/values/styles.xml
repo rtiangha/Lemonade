@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <style name="NNF_BaseTheme" parent="Theme.AppCompat.DialogWhenLarge">
+        <!-- You can override this in your sub theme -->
+        <item name="nnf_toolbarTheme">@style/ThemeOverlay.AppCompat.ActionBar</item>
+        <item name="nnf_separator_color">@color/nnf_dark_separator_color</item>
+        <item name="nnf_save_icon_color">?attr/colorAccent</item>
+        <item name="nnf_dir_icon_color">?attr/colorAccent</item>
+
+        <!-- These are important. Handled by toolbar. -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="NNF_BaseTheme.Light" parent="Theme.AppCompat.Light.DialogWhenLarge">
+        <!-- You can override this in your sub theme -->
+        <item name="nnf_toolbarTheme">@style/ThemeOverlay.AppCompat.ActionBar</item>
+        <item name="nnf_separator_color">@color/nnf_light_separator_color</item>
+        <item name="nnf_save_icon_color">?attr/colorAccent</item>
+        <item name="nnf_dir_icon_color">?attr/colorAccent</item>
+
+        <!-- These are important. Handled by toolbar. -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
     <!-- Inherit from the material theme -->
     <style name="CitraBase" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Main theme colors -->
@@ -11,9 +35,6 @@
         <item name="colorAccent">@color/citra_accent</item>
 
         <item name="titleTextColor">@color/citra_logo_text_color</item>
-
-        <!-- Disallow force dark mode, to fix UI issues on MIUI -->
-        <item name="android:forceDarkAllowed">false</item>
 
         <!-- Enable window content transitions -->
         <item name="android:windowContentTransitions">true</item>
@@ -28,9 +49,6 @@
         <item name="colorPrimary">@color/citra_orange</item>
         <item name="colorPrimaryDark">@color/citra_orange_dark</item>
         <item name="colorAccent">@color/citra_accent</item>
-
-        <!-- Disallow force dark mode, to fix UI issues on MIUI -->
-        <item name="android:forceDarkAllowed">false</item>
     </style>
 
     <!-- Inherit from the Base Citra Dialog Theme -->
@@ -42,9 +60,6 @@
 
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:windowFullscreen">true</item>
-
-        <!-- Disallow force dark mode, to fix UI issues on MIUI -->
-        <item name="android:forceDarkAllowed">false</item>
     </style>
 
     <!-- Inherit from a base file picker theme that handles day/night -->
@@ -53,9 +68,6 @@
         <item name="colorPrimaryDark">@color/citra_orange_dark</item>
         <item name="colorAccent">@color/citra_accent</item>
         <item name="android:windowBackground">@color/card_view_background</item>
-
-        <!-- Disallow force dark mode, to fix UI issues on MIUI -->
-        <item name="android:forceDarkAllowed">false</item>
 
         <!-- Need to set this also to style create folder dialog -->
         <item name="alertDialogTheme">@style/FilePickerAlertDialogTheme</item>

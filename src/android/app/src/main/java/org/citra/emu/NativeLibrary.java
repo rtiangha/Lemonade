@@ -115,6 +115,12 @@ public final class NativeLibrary {
         NetPlayManager.AddNetPlayMessage(type, message);
     }
 
+    public static boolean isValidFile(String filename) {
+        String name = filename.toLowerCase();
+        return (name.endsWith(".cci") || name.endsWith(".3ds") || name.endsWith(".elf") ||
+                name.endsWith(".cxi") || name.endsWith(".app") || name.endsWith(".3dsx"));
+    }
+
     public static native void reloadCheatCode();
 
     /**

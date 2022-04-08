@@ -20,12 +20,9 @@ public final class FileBrowserHelper {
         Intent i = new Intent(activity, CustomFilePickerActivity.class);
 
         i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
-        i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
         i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_DIR);
         i.putExtra(FilePickerActivity.EXTRA_START_PATH,
                 Environment.getExternalStorageDirectory().getPath());
-        i.putExtra(CustomFilePickerActivity.EXTRA_TITLE, title);
-        i.putExtra(CustomFilePickerActivity.EXTRA_EXTENSIONS, String.join(",", extensions));
 
         activity.startActivityForResult(i, requestCode);
     }
@@ -35,12 +32,9 @@ public final class FileBrowserHelper {
         Intent i = new Intent(activity, CustomFilePickerActivity.class);
 
         i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, allowMultiple);
-        i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
         i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE);
         i.putExtra(FilePickerActivity.EXTRA_START_PATH,
                 Environment.getExternalStorageDirectory().getPath());
-        i.putExtra(CustomFilePickerActivity.EXTRA_TITLE, title);
-        i.putExtra(CustomFilePickerActivity.EXTRA_EXTENSIONS, String.join(",", extensions));
 
         activity.startActivityForResult(i, requestCode);
     }
