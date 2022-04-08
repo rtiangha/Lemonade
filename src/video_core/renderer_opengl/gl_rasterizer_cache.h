@@ -202,7 +202,8 @@ struct CachedSurface : SurfaceParams, std::enable_shared_from_this<CachedSurface
     /// level_watchers[i] watches the (i+1)-th level mipmap source surface
     std::array<std::shared_ptr<SurfaceWatcher>, 7> level_watchers;
 
-    const Core::CustomTexInfo* custom_tex_info = nullptr;
+    bool is_custom = false;
+    Core::CustomTexInfo custom_tex_info;
 
     static constexpr unsigned int GetGLBytesPerPixel(PixelFormat format) {
         // OpenGL needs 4 bpp alignment for D24 since using GL_UNSIGNED_INT as type
@@ -220,7 +221,7 @@ struct CachedSurface : SurfaceParams, std::enable_shared_from_this<CachedSurface
     void FlushGLBuffer(PAddr flush_start, PAddr flush_end);
 
     // Custom texture loading and dumping
-    const Core::CustomTexInfo* LoadCustomTexture(u64 tex_hash, Common::Rectangle<u32>& custom_rect);
+    bool LoadCustomTexture(u64 tex_hash);
     void DumpTexture(GLuint target_tex, u64 tex_hash);
 
     // Upload/Download data in gl_buffer in/to this surface's texture

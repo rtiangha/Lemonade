@@ -386,9 +386,8 @@ public final class SettingsFragmentPresenter {
         sl.add(new CheckBoxSetting(SettingsFile.KEY_SHOW_FPS, Settings.SECTION_RENDERER, R.string.emulation_show_fps, 0, false, showFps));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_CPU_USAGE_LIMIT, Settings.SECTION_RENDERER, R.string.cpu_usage_limit, R.string.cpu_usage_limit_description, false, cpuUsageLimit));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_TEXTURE_LOAD_HACK, Settings.SECTION_RENDERER, R.string.setting_texture_load_hack, R.string.setting_texture_load_hack_description, false, textureLoadHack));
-        sl.add(new SubmenuSetting(null, null, R.string.setting_custom_textures_title, 0, Settings.SECTION_CUSTOM_TEXTURES));
-        // That's not linear filtering...
-        // sl.add(new CheckBoxSetting(SettingsFile.KEY_FILTER_MODE, Settings.SECTION_RENDERER, R.string.linear_filtering, R.string.linear_filtering_description, true, filterMode));
+        // TODO(Gamer64): hide custom textures for now, crashes like official.
+        // sl.add(new SubmenuSetting(null, null, R.string.setting_custom_textures_title, 0, Settings.SECTION_CUSTOM_TEXTURES));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_USE_ASYNCHRONOUS_GPU_EMULATION, Settings.SECTION_RENDERER, R.string.asynchronous_gpu, R.string.asynchronous_gpu_description, true, useAsynchronousGpuEmulation));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_SHADERS_ACCURATE_MUL, Settings.SECTION_RENDERER, R.string.shaders_accurate_mul, R.string.shaders_accurate_mul_description, false, shadersAccurateMul));
 
@@ -423,7 +422,7 @@ public final class SettingsFragmentPresenter {
 
         sl.add(new CheckBoxSetting(SettingsFile.KEY_CUSTOM_TEXTURES, Settings.SECTION_RENDERER, R.string.setting_custom_textures, 0, false, customTextures));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_PRELOAD_TEXTURES, Settings.SECTION_RENDERER, R.string.setting_preload_textures, R.string.setting_preload_textures_description, false, preloadTextures));
-        // dump textures don't works for now
+        // TODO(Gamer64): dump textures don't works for now
         // sl.add(new CheckBoxSetting(SettingsFile.KEY_DUMP_TEXTURES, Settings.SECTION_RENDERER, R.string.setting_dump_textures, 0, false, dumpTextures));
     }
 

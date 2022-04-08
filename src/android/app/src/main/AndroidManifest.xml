@@ -65,7 +65,6 @@
             android:name="org.citra.emu.ui.EmulationActivity"
             android:resizeableActivity="false"
             android:theme="@style/CitraEmulationBase"
-            android:screenOrientation="userLandscape"
             android:launchMode="singleTop"/>
 
         <activity
