@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -34,12 +35,14 @@ import org.citra.emu.NativeLibrary;
 import org.citra.emu.R;
 import org.citra.emu.overlay.InputOverlay;
 import org.citra.emu.utils.EmulationMenuSettings;
+import org.citra.emu.utils.NetPlayManager;
 
 import java.util.ArrayList;
 
 public class RunningSettingDialog extends DialogFragment {
     public static final int MENU_MAIN = 0;
     public static final int MENU_SETTINGS = 1;
+    public static final int MENU_MULTIPLAYER = 2;
 
     private int mMenu;
     private TextView mTitle;
@@ -112,6 +115,9 @@ public class RunningSettingDialog extends DialogFragment {
         } else if (menu == MENU_SETTINGS) {
             mTitle.setText(R.string.preferences_settings);
             mAdapter.loadSettingsMenu();
+        } else if (menu == MENU_MULTIPLAYER) {
+            mTitle.setText(R.string.multiplayer);
+            mAdapter.loadMultiplayerMenu();
         }
         mMenu = menu;
     }
@@ -156,11 +162,18 @@ public class RunningSettingDialog extends DialogFragment {
         public static final int SETTING_CHEAT_CODE = 209;
         public static final int SETTING_EXIT_GAME = 210;
 
+        public static final int SETTING_MULTIPLAYER_ROOM_TEXT = 300;
+        public static final int SETTING_MULTIPLAYER_CREATE_ROOM = 301;
+        public static final int SETTING_MULTIPLAYER_JOIN_ROOM = 302;
+        public static final int SETTING_MULTIPLAYER_ROOM_MEMBER = 303;
+        public static final int SETTING_MULTIPLAYER_EXIT_ROOM = 304;
+
         // view type
         public static final int TYPE_CHECKBOX = 0;
         public static final int TYPE_RADIO_GROUP = 1;
         public static final int TYPE_SEEK_BAR = 2;
         public static final int TYPE_BUTTON = 3;
+        public static final int TYPE_TEXT = 4;
 
         private int mSetting;
         private String mName;
@@ -217,11 +230,11 @@ public class RunningSettingDialog extends DialogFragment {
         public abstract void onClick(View clicked);
     }
 
-    public final class ButtonSettingViewHolder extends SettingViewHolder {
+    public final class TextSettingViewHolder extends SettingViewHolder {
         SettingsItem mItem;
         private TextView mName;
 
-        public ButtonSettingViewHolder(View itemView) {
+        public TextSettingViewHolder(View itemView) {
             super(itemView);
         }
 
@@ -283,7 +296,49 @@ public class RunningSettingDialog extends DialogFragment {
                     activity.stopEmulation();
                     activity.finish();
                     break;
+                case SettingsItem.SETTING_MULTIPLAYER_CREATE_ROOM:
+                    NetPlayManager.ShowCreateRoomDialog(getActivity());
+                    dismiss();
+                    break;
+                case SettingsItem.SETTING_MULTIPLAYER_JOIN_ROOM:
+                    NetPlayManager.ShowJoinRoomDialog(getActivity());
+                    dismiss();
+                    break;
+                case SettingsItem.SETTING_MULTIPLAYER_EXIT_ROOM:
+                    NetPlayManager.NetPlayLeaveRoom();
+                    dismiss();
+                    break;
             }
+        }
+    }
+
+    public final class ButtonSettingViewHolder extends SettingViewHolder {
+        SettingsItem mItem;
+        private TextView mName;
+        private Button mButton;
+
+        public ButtonSettingViewHolder(View itemView) {
+            super(itemView);
+            itemView.setOnClickListener(null);
+        }
+
+        @Override
+        protected void findViews(View root) {
+            mName = root.findViewById(R.id.text_setting_name);
+            mButton = root.findViewById(R.id.button_setting);
+            mButton.setText(R.string.multiplayer_kick_member);
+        }
+
+        @Override
+        public void bind(SettingsItem item) {
+            mItem = item;
+            mName.setText(mItem.getName());
+            mButton.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View clicked) {
+            NetPlayManager.NetPlayKickUser(mItem.getName());
         }
     }
 
@@ -472,17 +527,42 @@ public class RunningSettingDialog extends DialogFragment {
 
         public void loadMainMenu() {
             mSettings = new ArrayList<>();
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_LOAD_SUBMENU, R.string.preferences_settings, SettingsItem.TYPE_BUTTON, MENU_SETTINGS));
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_EDIT_BUTTONS, R.string.emulation_edit_layout, SettingsItem.TYPE_BUTTON, 0));
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_SAVE_STATE, R.string.emulation_save_state, SettingsItem.TYPE_BUTTON, 0));
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_LOAD_STATE, R.string.emulation_load_state, SettingsItem.TYPE_BUTTON, 0));
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_LOAD_AMIIBO, R.string.menu_emulation_amiibo_load, SettingsItem.TYPE_BUTTON, 0));
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_REMOVE_AMIIBO, R.string.menu_emulation_amiibo_remove, SettingsItem.TYPE_BUTTON, 0));
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_TOGGLE_CONTROLS, R.string.emulation_toggle_controls, SettingsItem.TYPE_BUTTON, 0));
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_RESET_OVERLAY, R.string.emulation_touch_overlay_reset, SettingsItem.TYPE_BUTTON, 0));
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_ROTATE_SCREEN, R.string.emulation_rotate_screen, SettingsItem.TYPE_BUTTON, 0));
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_CHEAT_CODE, R.string.cheats, SettingsItem.TYPE_BUTTON, 0));
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_EXIT_GAME, R.string.emulation_close_game, SettingsItem.TYPE_BUTTON, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_LOAD_SUBMENU, R.string.preferences_settings, SettingsItem.TYPE_TEXT, MENU_SETTINGS));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_EDIT_BUTTONS, R.string.emulation_edit_layout, SettingsItem.TYPE_TEXT, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_SAVE_STATE, R.string.emulation_save_state, SettingsItem.TYPE_TEXT, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_LOAD_STATE, R.string.emulation_load_state, SettingsItem.TYPE_TEXT, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_LOAD_AMIIBO, R.string.menu_emulation_amiibo_load, SettingsItem.TYPE_TEXT, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_REMOVE_AMIIBO, R.string.menu_emulation_amiibo_remove, SettingsItem.TYPE_TEXT, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_TOGGLE_CONTROLS, R.string.emulation_toggle_controls, SettingsItem.TYPE_TEXT, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_RESET_OVERLAY, R.string.emulation_touch_overlay_reset, SettingsItem.TYPE_TEXT, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_LOAD_SUBMENU, R.string.multiplayer, SettingsItem.TYPE_TEXT, MENU_MULTIPLAYER));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_ROTATE_SCREEN, R.string.emulation_rotate_screen, SettingsItem.TYPE_TEXT, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_CHEAT_CODE, R.string.cheats, SettingsItem.TYPE_TEXT, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_EXIT_GAME, R.string.emulation_close_game, SettingsItem.TYPE_TEXT, 0));
+            notifyDataSetChanged();
+        }
+
+        public void loadMultiplayerMenu() {
+            String[] infos = NetPlayManager.NetPlayRoomInfo();
+            mSettings = new ArrayList<>();
+
+            if (infos.length > 0) {
+                String roomTitle = getString(R.string.multiplayer_room_title, infos[0]);
+                mSettings.add(new SettingsItem(SettingsItem.SETTING_MULTIPLAYER_ROOM_TEXT, roomTitle, SettingsItem.TYPE_TEXT, 0));
+                if (false && NetPlayManager.NetPlayIsHostedRoom()) {
+                    for (int i = 1; i < infos.length; ++i) {
+                        mSettings.add(new SettingsItem(SettingsItem.SETTING_MULTIPLAYER_ROOM_MEMBER, infos[i], SettingsItem.TYPE_BUTTON, 0));
+                    }
+                } else {
+                    for (int i = 1; i < infos.length; ++i) {
+                        mSettings.add(new SettingsItem(SettingsItem.SETTING_MULTIPLAYER_ROOM_MEMBER, infos[i], SettingsItem.TYPE_TEXT, 0));
+                    }
+                }
+                mSettings.add(new SettingsItem(SettingsItem.SETTING_MULTIPLAYER_EXIT_ROOM, R.string.multiplayer_exit_room, SettingsItem.TYPE_TEXT, 0));
+            } else {
+                mSettings.add(new SettingsItem(SettingsItem.SETTING_MULTIPLAYER_CREATE_ROOM, R.string.multiplayer_create_room, SettingsItem.TYPE_TEXT, 0));
+                mSettings.add(new SettingsItem(SettingsItem.SETTING_MULTIPLAYER_JOIN_ROOM, R.string.multiplayer_join_room, SettingsItem.TYPE_TEXT, 0));
+            }
             notifyDataSetChanged();
         }
 
@@ -581,6 +661,9 @@ public class RunningSettingDialog extends DialogFragment {
                 case SettingsItem.TYPE_BUTTON:
                     itemView = inflater.inflate(R.layout.list_item_running_button, parent, false);
                     return new ButtonSettingViewHolder(itemView);
+                case SettingsItem.TYPE_TEXT:
+                    itemView = inflater.inflate(R.layout.list_item_running_text, parent, false);
+                    return new TextSettingViewHolder(itemView);
             }
             return null;
         }

@@ -29,6 +29,7 @@ import androidx.fragment.app.DialogFragment;
 import org.citra.emu.ui.EmulationActivity;
 import org.citra.emu.utils.EmulationMenuSettings;
 import org.citra.emu.utils.Log;
+import org.citra.emu.utils.NetPlayManager;
 
 import java.lang.ref.WeakReference;
 import java.util.Date;
@@ -109,6 +110,10 @@ public final class NativeLibrary {
     public static native boolean onTouchEvent(float x_axis, float y_axis, boolean pressed);
 
     public static native String GetAppId(String path);
+
+    public static void AddNetPlayMessage(int type, String message) {
+        NetPlayManager.AddNetPlayMessage(type, message);
+    }
 
     public static native void reloadCheatCode();
 

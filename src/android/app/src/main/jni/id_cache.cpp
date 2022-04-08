@@ -12,6 +12,8 @@
 #include "jni/camera/still_image_camera.h"
 #include "jni/id_cache.h"
 
+#include "multiplayer.h"
+
 #include <jni.h>
 
 static constexpr jint JNI_VERSION = JNI_VERSION_1_6;
@@ -33,6 +35,7 @@ static jmethodID s_exit_emulation_activity;
 static jmethodID s_request_camera_permission;
 static jmethodID s_request_mic_permission;
 static jmethodID s_disk_cache_load_progress;
+static jmethodID s_add_netplay_message;
 
 static std::unordered_map<VideoCore::LoadCallbackStage, jobject> s_java_load_callback_stages;
 
@@ -117,6 +120,10 @@ jmethodID GetDiskCacheLoadProgress() {
     return s_disk_cache_load_progress;
 }
 
+jmethodID GetAddNetplayMessage() {
+    return s_add_netplay_message;
+}
+
 jobject GetJavaLoadCallbackStage(VideoCore::LoadCallbackStage stage) {
     const auto it = s_java_load_callback_stages.find(stage);
     ASSERT_MSG(it != s_java_load_callback_stages.end(), "Invalid LoadCallbackStage: {}", stage);
@@ -182,6 +189,8 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     s_disk_cache_load_progress = env->GetStaticMethodID(
         s_disk_cache_progress_class, "loadProgress",
         "(Lorg/citra/emu/utils/DiskShaderCacheProgress$LoadCallbackStage;II)V");
+    s_add_netplay_message =
+            env->GetStaticMethodID(s_native_library_class, "AddNetPlayMessage", "(ILjava/lang/String;)V");
 
     // Initialize LoadCallbackStage map
     const auto to_java_load_callback_stage = [env](const std::string& stage) {
@@ -205,6 +214,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     MiiSelector::InitJNI(env);
     SoftwareKeyboard::InitJNI(env);
     Camera::StillImage::InitJNI(env);
+    NetworkInit();
 
     return JNI_VERSION;
 }

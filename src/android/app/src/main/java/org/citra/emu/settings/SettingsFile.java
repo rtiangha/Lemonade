@@ -65,7 +65,6 @@ public final class SettingsFile {
     public static final String KEY_RENDER_3D = "render_3d";
     public static final String KEY_FACTOR_3D = "factor_3d";
     public static final String KEY_PP_SHADER_NAME = "pp_shader_name";
-    // public static final String KEY_FILTER_MODE = "filter_mode";
     public static final String KEY_TEXTURE_FILTER_NAME = "texture_filter_name";
     public static final String KEY_USE_ASYNCHRONOUS_GPU_EMULATION = "use_asynchronous_gpu_emulation";
 
@@ -147,7 +146,7 @@ public final class SettingsFile {
      *
      * @param ini          The ini file to load the settings from
      * @param isCustomGame
-     * @param view         The current view.
+     * @param activity         The current view.
      * @return An Observable that emits a HashMap of the file's contents, then completes.
      */
     static HashMap<String, SettingSection> readFile(final File ini, boolean isCustomGame, SettingsActivity activity) {
@@ -201,7 +200,7 @@ public final class SettingsFile {
      * failed.
      *
      * @param gameId the id of the game to load it's settings.
-     * @param view   The current view.
+     * @param activity   The current view.
      */
     public static HashMap<String, SettingSection> readCustomGameSettings(final String gameId, SettingsActivity activity) {
         return readFile(getCustomGameSettingsFile(gameId), true, activity);
@@ -213,7 +212,7 @@ public final class SettingsFile {
      *
      * @param fileName The target filename without a path or extension.
      * @param sections The HashMap containing the Settings we want to serialize.
-     * @param view     The current view.
+     * @param activity     The current view.
      */
     public static void saveFile(final String fileName, TreeMap<String, SettingSection> sections,
                                 SettingsActivity activity) {

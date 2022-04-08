@@ -484,6 +484,10 @@ public final class EmulationActivity extends AppCompatActivity {
         startActivityForResult(intent, REQUEST_CHEAT_CODE);
     }
 
+    public void addNetPlayMessage(String msg) {
+        mEmulationFragment.addNetPlayMessage(msg);
+    }
+
     public void refreshControls() {
         mEmulationFragment.refreshControls();
     }

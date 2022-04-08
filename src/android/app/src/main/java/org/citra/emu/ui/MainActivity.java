@@ -43,6 +43,7 @@ import org.citra.emu.utils.StartupHandler;
 import org.citra.emu.utils.ThemeUtil;
 import org.citra.emu.utils.UpdaterUtils;
 
+import java.lang.ref.WeakReference;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -57,11 +58,16 @@ public final class MainActivity extends AppCompatActivity {
     public static final int REQUEST_ADD_DIRECTORY = 1;
     public static final int REQUEST_INSTALL_CIA = 2;
 
+    private static WeakReference<MainActivity> sInstance = new WeakReference<>(null);
     private String mDirToAdd;
     private long mLastClickTime = 0;
     private Toolbar mToolbar;
     private int mFrameLayoutId;
     private PlatformGamesFragment mPlatformGamesFragment;
+
+    public static MainActivity get() {
+        return sInstance.get();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +75,7 @@ public final class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        sInstance = new WeakReference<>(this);
 
         findViews();
 
@@ -267,6 +274,13 @@ public final class MainActivity extends AppCompatActivity {
         if (mPlatformGamesFragment != null) {
             mPlatformGamesFragment.refresh();
         }
+    }
+
+    public void addNetPlayMessage(String msg) {
+        if (msg.isEmpty()) {
+            return;
+        }
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
     @Override

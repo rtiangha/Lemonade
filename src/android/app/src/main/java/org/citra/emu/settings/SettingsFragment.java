@@ -279,9 +279,10 @@ public final class SettingsFragment extends Fragment {
             sl.add(new ThemeSingleChoiceSetting(SettingsFile.KEY_DESIGN, Settings.SECTION_INTERFACE, R.string.design, 0, R.array.designNamesOld, R.array.designValuesOld, 0, design, this));
         }
 
-        String[] textureFilterNames = NativeLibrary.GetTextureFilterNames();
-        Setting textureFilterName = interfaceSection.getSetting(SettingsFile.KEY_TEXTURE_FILTER_NAME);
-        sl.add(new StringSingleChoiceSetting(SettingsFile.KEY_TEXTURE_FILTER_NAME, Settings.SECTION_INTERFACE, R.string.texture_filter_name, R.string.texture_filter_description, textureFilterNames, textureFilterNames, "none", textureFilterName));
+        // TODO(Gamer64): Useless with Post-Processing.
+        // String[] textureFilterNames = NativeLibrary.GetTextureFilterNames();
+        // Setting textureFilterName = interfaceSection.getSetting(SettingsFile.KEY_TEXTURE_FILTER_NAME);
+        // sl.add(new StringSingleChoiceSetting(SettingsFile.KEY_TEXTURE_FILTER_NAME, Settings.SECTION_INTERFACE, R.string.texture_filter_name, R.string.texture_filter_description, textureFilterNames, textureFilterNames, "none", textureFilterName));
     }
 
     private void addGeneralSettings(ArrayList<SettingsItem> sl) {

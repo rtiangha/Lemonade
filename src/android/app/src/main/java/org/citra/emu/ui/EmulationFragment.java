@@ -1,9 +1,12 @@
 package org.citra.emu.ui;
 
+import static android.os.Looper.getMainLooper;
+
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.Choreographer;
 import android.view.LayoutInflater;
@@ -13,6 +16,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,6 +31,9 @@ import org.citra.emu.utils.DirectoryInitialization.DirectoryInitializationState;
 import org.citra.emu.utils.DirectoryInitialization.DirectoryStateReceiver;
 import org.citra.emu.utils.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class EmulationFragment extends Fragment implements SurfaceHolder.Callback, Choreographer.FrameCallback {
     private static final String KEY_GAMEPATH = "gamepath";
 
@@ -39,6 +46,12 @@ public final class EmulationFragment extends Fragment implements SurfaceHolder.C
     private DirectoryStateReceiver directoryStateReceiver;
 
     private EmulationActivity mActivity;
+
+    private TextView mNetPlayMessage;
+
+    private List<String> mMessageList;
+
+    private Handler mTaskHandler;
 
     public static EmulationFragment newInstance(String gamePath) {
         Bundle args = new Bundle();
@@ -92,6 +105,7 @@ public final class EmulationFragment extends Fragment implements SurfaceHolder.C
         surfaceView.getHolder().addCallback(this);
 
         mInputOverlay = contents.findViewById(R.id.surface_input_overlay);
+        mNetPlayMessage = contents.findViewById(R.id.netplay_message);
 
         Button doneButton = contents.findViewById(R.id.done_control_config);
         if (doneButton != null) {
@@ -212,6 +226,36 @@ public final class EmulationFragment extends Fragment implements SurfaceHolder.C
     public void stopConfiguringControls() {
         getView().findViewById(R.id.done_control_config).setVisibility(View.GONE);
         mInputOverlay.setIsInEditMode(false);
+    }
+
+    public void addNetPlayMessage(String msg) {
+        if (msg.isEmpty()) {
+            return;
+        }
+
+        if (mMessageList == null) {
+            mMessageList = new ArrayList<>();
+            mTaskHandler = new Handler(getMainLooper());
+        }
+        mMessageList.add(msg);
+        if (mMessageList.size() > 10) {
+            mMessageList.remove(0);
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mMessageList.size(); ++i) {
+            sb.append(mMessageList.get(i));
+            sb.append(System.lineSeparator());
+        }
+        mNetPlayMessage.setText(sb.toString());
+        mNetPlayMessage.setVisibility(View.VISIBLE);
+
+        mTaskHandler.removeCallbacksAndMessages(null);
+        mTaskHandler.postDelayed(() -> {
+            mNetPlayMessage.setVisibility(View.INVISIBLE);
+            if (mMessageList != null) {
+                mMessageList.clear();
+            }
+        }, 6 * 1000);
     }
 
     public boolean isConfiguringControls() {

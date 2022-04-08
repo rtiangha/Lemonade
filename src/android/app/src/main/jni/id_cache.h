@@ -27,6 +27,7 @@ jmethodID GetExitEmulationActivity();
 jmethodID GetRequestCameraPermission();
 jmethodID GetRequestMicPermission();
 jmethodID GetDiskCacheLoadProgress();
+jmethodID GetAddNetplayMessage();
 
 jobject GetJavaLoadCallbackStage(VideoCore::LoadCallbackStage stage);
 

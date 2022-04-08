@@ -41,6 +41,8 @@
 #include "video_core/renderer_base.h"
 #include "video_core/renderer_opengl/texture_filters/texture_filterer.h"
 
+#include "multiplayer.h"
+
 namespace {
 
 ANativeWindow* s_surf;
@@ -625,7 +627,6 @@ JNIEXPORT void JNICALL Java_org_citra_emu_NativeLibrary_setRunningSettings(JNIEn
 
     // Custom Layout
     Settings::values.custom_layout = settings[i++] > 0;
-    window->UpdateLayout();
 
     // Frame Limit
     Settings::values.frame_limit = settings[i++] * 2;
@@ -638,12 +639,60 @@ jstring ToJString(const std::string& str) {
     return jstr;
 }
 
+jobjectArray ToJStringArray(const std::vector<std::string>& strs) {
+    JNIEnv* env = IDCache::GetEnvForThread();
+    jobjectArray array =
+            env->NewObjectArray(strs.size(), env->FindClass("java/lang/String"), env->NewStringUTF(""));
+    for (int i = 0; i < strs.size(); ++i) {
+        env->SetObjectArrayElement(array, i, ToJString(strs[i]));
+    }
+    return array;
+}
+
 JNIEXPORT jstring JNICALL Java_org_citra_emu_NativeLibrary_GetAppId(JNIEnv* env, jclass obj,
                                                                     jstring jPath) {
     Loader::AppLoader* app_loader = GetAppLoader(GetJString(env, jPath));
     u64 programId;
     app_loader->ReadProgramId(programId);
     return ToJString(fmt::format("{:016X}", programId));
+}
+
+JNIEXPORT jint JNICALL
+Java_org_citra_emu_utils_NetPlayManager_NetPlayCreateRoom(JNIEnv *env, jclass clazz,
+                                                          jstring ipaddress, jint port, jstring username) {
+    return static_cast<jint>(NetPlayCreateRoom(GetJString(env, ipaddress), port, GetJString(env, username)));
+}
+
+JNIEXPORT jint JNICALL
+Java_org_citra_emu_utils_NetPlayManager_NetPlayJoinRoom(JNIEnv *env, jclass clazz,
+                                                        jstring ipaddress, jint port, jstring username) {
+    return static_cast<jint>(NetPlayJoinRoom(GetJString(env, ipaddress), port, GetJString(env, username)));
+}
+
+JNIEXPORT jobjectArray JNICALL
+Java_org_citra_emu_utils_NetPlayManager_NetPlayRoomInfo(JNIEnv *env, jclass clazz) {
+    return ToJStringArray(NetPlayRoomInfo());
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_citra_emu_utils_NetPlayManager_NetPlayIsHostedRoom(JNIEnv *env, jclass clazz) {
+    return NetPlayIsHostedRoom();
+}
+
+JNIEXPORT void JNICALL
+Java_org_citra_emu_utils_NetPlayManager_NetPlaySendMessage(JNIEnv *env, jclass clazz, jstring msg) {
+    NetPlaySendMessage(GetJString(env, msg));
+}
+
+JNIEXPORT void JNICALL
+Java_org_citra_emu_utils_NetPlayManager_NetPlayKickUser(JNIEnv *env, jclass clazz,
+                                                        jstring username) {
+    NetPlayKickUser(GetJString(env, username));
+}
+
+JNIEXPORT void JNICALL
+Java_org_citra_emu_utils_NetPlayManager_NetPlayLeaveRoom(JNIEnv *env, jclass clazz) {
+    NetPlayLeaveRoom();
 }
 
 void Java_org_citra_emu_NativeLibrary_InitGameIni(JNIEnv* env, [[maybe_unused]] jclass clazz,
