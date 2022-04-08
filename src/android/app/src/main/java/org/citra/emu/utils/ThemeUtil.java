@@ -7,7 +7,7 @@ import android.preference.PreferenceManager;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import org.citra.emu.CitraApplication;
-import org.citra.emu.features.settings.ui.SettingsFile;
+import org.citra.emu.settings.SettingsFile;
 
 public class ThemeUtil {
     private static SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(CitraApplication.getAppContext());

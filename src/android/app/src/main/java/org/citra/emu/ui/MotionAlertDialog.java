@@ -8,7 +8,7 @@ import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
-import org.citra.emu.features.settings.model.view.InputBindingSetting;
+import org.citra.emu.settings.view.InputBindingSetting;
 import org.citra.emu.utils.Log;
 
 import java.util.ArrayList;

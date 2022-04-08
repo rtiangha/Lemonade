@@ -15,11 +15,11 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.citra.emu.R;
-import org.citra.emu.features.settings.model.IntSetting;
-import org.citra.emu.features.settings.ui.SettingsFile;
+import org.citra.emu.settings.model.IntSetting;
+import org.citra.emu.settings.SettingsFile;
 import org.citra.emu.model.UpdaterData;
 import org.citra.emu.ui.UpdaterDialog;
-import org.citra.emu.features.settings.model.Settings;
+import org.citra.emu.settings.model.Settings;
 
 public class UpdaterUtils {
     public static final String URL =

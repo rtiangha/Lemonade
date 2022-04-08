@@ -21,7 +21,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import org.citra.emu.NativeLibrary;
 import org.citra.emu.R;
-import org.citra.emu.features.settings.model.view.InputBindingSetting;
+import org.citra.emu.settings.view.InputBindingSetting;
 import org.citra.emu.utils.StillImageCameraHelper;
 import org.citra.emu.utils.ControllerMappingHelper;
 import org.citra.emu.utils.EmulationMenuSettings;

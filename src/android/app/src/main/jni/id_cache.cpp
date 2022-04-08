@@ -155,9 +155,9 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     s_core_error_class = reinterpret_cast<jclass>(
         env->NewGlobalRef(env->FindClass("org/citra/emu/NativeLibrary$CoreError")));
     s_disk_cache_progress_class = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("org/citra/emu/ui/DiskShaderCacheProgress")));
+        env->FindClass("org/citra/emu/utils/DiskShaderCacheProgress")));
     s_load_callback_stage_class = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass(
-        "org/citra/emu/ui/DiskShaderCacheProgress$LoadCallbackStage")));
+        "org/citra/emu/utils/DiskShaderCacheProgress$LoadCallbackStage")));
 
     // Initialize Java methods
     s_on_core_error = env->GetStaticMethodID(
@@ -181,7 +181,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         env->GetStaticMethodID(s_native_library_class, "RequestMicPermission", "()Z");
     s_disk_cache_load_progress = env->GetStaticMethodID(
         s_disk_cache_progress_class, "loadProgress",
-        "(Lorg/citra/emu/ui/DiskShaderCacheProgress$LoadCallbackStage;II)V");
+        "(Lorg/citra/emu/utils/DiskShaderCacheProgress$LoadCallbackStage;II)V");
 
     // Initialize LoadCallbackStage map
     const auto to_java_load_callback_stage = [env](const std::string& stage) {
@@ -189,7 +189,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         return env->NewGlobalRef(env->GetStaticObjectField(
             load_callback_stage_class,
             env->GetStaticFieldID(load_callback_stage_class, stage.c_str(),
-                                  "Lorg/citra/emu/ui/"
+                                  "Lorg/citra/emu/utils/"
                                   "DiskShaderCacheProgress$LoadCallbackStage;")));
     };
 
