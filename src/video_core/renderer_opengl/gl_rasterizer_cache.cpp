@@ -24,7 +24,6 @@
 #include "common/math_util.h"
 #include "common/microprofile.h"
 #include "common/scope_exit.h"
-#include "common/texture.h"
 #include "common/vector_math.h"
 #include "core/core.h"
 #include "core/custom_tex_cache.h"
@@ -453,8 +452,8 @@ static bool FillSurface(const Surface& surface, const u8* fill_data,
 
 CachedSurface::~CachedSurface() {
     if (texture.handle) {
-        auto tag = is_custom ? HostTextureTag{GetFormatTuple(PixelFormat::RGBA8),
-                                              custom_tex_info.width, custom_tex_info.height}
+        auto tag = custom_tex_info ? HostTextureTag{GetFormatTuple(PixelFormat::RGBA8),
+                                              custom_tex_info->width, custom_tex_info->height}
                              : HostTextureTag{GetFormatTuple(pixel_format), GetScaledWidth(),
                                               GetScaledHeight()};
 
@@ -675,95 +674,33 @@ void CachedSurface::FlushGLBuffer(PAddr flush_start, PAddr flush_end) {
     }
 }
 
-bool CachedSurface::LoadCustomTexture(u64 tex_hash) {
+const Core::CustomTexInfo* CachedSurface::LoadCustomTexture(u64 tex_hash, Common::Rectangle<u32>& custom_rect) {
+    const Core::CustomTexInfo* tex_info = nullptr;
     auto& custom_tex_cache = Core::System::GetInstance().CustomTexCache();
-    const auto& image_interface = Core::System::GetInstance().GetImageInterface();
 
     if (custom_tex_cache.IsTextureCached(tex_hash)) {
-        custom_tex_info = custom_tex_cache.LookupTexture(tex_hash);
-        return true;
+        tex_info = &custom_tex_cache.LookupTexture(tex_hash);
+    } else {
+        if (custom_tex_cache.CustomTextureExists(tex_hash)) {
+            const auto& path_info = custom_tex_cache.LookupTexturePathInfo(tex_hash);
+            custom_tex_cache.LoadTexture(path_info);
+            if (custom_tex_cache.IsTextureCached(tex_hash)) {
+                tex_info = &custom_tex_cache.LookupTexture(tex_hash);
+            }
+        }
     }
 
-    if (!custom_tex_cache.CustomTextureExists(tex_hash)) {
-        return false;
+    if (tex_info) {
+        custom_rect.left = (custom_rect.left * tex_info->width) / width;
+        custom_rect.top = (custom_rect.top * tex_info->height) / height;
+        custom_rect.right = (custom_rect.right * tex_info->width) / width;
+        custom_rect.bottom = (custom_rect.bottom * tex_info->height) / height;
     }
 
-    const auto& path_info = custom_tex_cache.LookupTexturePathInfo(tex_hash);
-    if (!image_interface->DecodePNG(custom_tex_info.tex, custom_tex_info.width,
-                                    custom_tex_info.height, path_info.path)) {
-        LOG_ERROR(Render_OpenGL, "Failed to load custom texture {}", path_info.path);
-        return false;
-    }
-
-    const std::bitset<32> width_bits(custom_tex_info.width);
-    const std::bitset<32> height_bits(custom_tex_info.height);
-    if (width_bits.count() != 1 || height_bits.count() != 1) {
-        LOG_ERROR(Render_OpenGL, "Texture {} size is not a power of 2", path_info.path);
-        return false;
-    }
-
-    LOG_DEBUG(Render_OpenGL, "Loaded custom texture from {}", path_info.path);
-    Common::FlipRGBA8Texture(custom_tex_info.tex, custom_tex_info.width, custom_tex_info.height);
-    custom_tex_cache.CacheTexture(tex_hash, custom_tex_info.tex, custom_tex_info.width,
-                                  custom_tex_info.height);
-    return true;
+    return tex_info;
 }
 
 void CachedSurface::DumpTexture(GLuint target_tex, u64 tex_hash) {
-    // Make sure the texture size is a power of 2
-    // If not, the surface is actually a framebuffer
-    std::bitset<32> width_bits(width);
-    std::bitset<32> height_bits(height);
-    if (width_bits.count() != 1 || height_bits.count() != 1) {
-        LOG_WARNING(Render_OpenGL, "Not dumping {:016X} because size isn't a power of 2 ({}x{})",
-                    tex_hash, width, height);
-        return;
-    }
-
-    // Dump texture to RGBA8 and encode as PNG
-    const auto& image_interface = Core::System::GetInstance().GetImageInterface();
-    auto& custom_tex_cache = Core::System::GetInstance().CustomTexCache();
-    std::string dump_path =
-        fmt::format("{}textures/{:016X}/", FileUtil::GetUserPath(FileUtil::UserPath::DumpDir),
-                    Core::System::GetInstance().Kernel().GetCurrentProcess()->codeset->program_id);
-    if (!FileUtil::CreateFullPath(dump_path)) {
-        LOG_ERROR(Render, "Unable to create {}", dump_path);
-        return;
-    }
-
-    dump_path += fmt::format("tex1_{}x{}_{:016X}_{}.png", width, height, tex_hash, (u32)pixel_format);
-    if (!custom_tex_cache.IsTextureDumped(tex_hash) && !FileUtil::Exists(dump_path)) {
-        custom_tex_cache.SetTextureDumped(tex_hash);
-
-        LOG_INFO(Render_OpenGL, "Dumping texture to {}", dump_path);
-        std::vector<u8> decoded_texture;
-        decoded_texture.resize(width * height * 4);
-        OpenGLState state = OpenGLState::GetCurState();
-        GLuint old_texture = state.texture_units[0].texture_2d;
-        state.Apply();
-        /*
-           GetTexImageOES is used even if not using OpenGL ES to work around a small issue that
-           happens if using custom textures with texture dumping at the same.
-           Let's say there's 2 textures that are both 32x32 and one of them gets replaced with a
-           higher quality 256x256 texture. If the 256x256 texture is displayed first and the
-           32x32 texture gets uploaded to the same underlying OpenGL texture, the 32x32 texture
-           will appear in the corner of the 256x256 texture. If texture dumping is enabled and
-           the 32x32 is undumped, Citra will attempt to dump it. Since the underlying OpenGL
-           texture is still 256x256, Citra crashes because it thinks the texture is only 32x32.
-           GetTexImageOES conveniently only dumps the specified region, and works on both
-           desktop and ES.
-        */
-        // if the backend isn't OpenGL ES, this won't be initialized yet
-        if (!owner.texture_downloader_es)
-            owner.texture_downloader_es = std::make_unique<TextureDownloaderES>(false);
-        owner.texture_downloader_es->GetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                                                 height, width, &decoded_texture[0]);
-        state.texture_units[0].texture_2d = old_texture;
-        state.Apply();
-        Common::FlipRGBA8Texture(decoded_texture, width, height);
-        if (!image_interface->EncodePNG(dump_path, decoded_texture, width, height))
-            LOG_ERROR(Render_OpenGL, "Failed to save decoded texture");
-    }
 }
 
 MICROPROFILE_DEFINE(OpenGL_TextureUL, "OpenGL", "Texture Upload", MP_RGB(128, 192, 64));
@@ -774,6 +711,10 @@ void CachedSurface::UploadGLTexture(Common::Rectangle<u32> rect, GLuint read_fb_
 
     MICROPROFILE_SCOPE(OpenGL_TextureUL);
 
+    // color tools
+    Common::Rectangle custom_rect = rect;
+    PixelFormat custom_format = pixel_format;
+
     ASSERT(gl_buffer.size() == width * height * GetGLBytesPerPixel(pixel_format));
 
     u64 tex_hash = 0;
@@ -783,7 +724,13 @@ void CachedSurface::UploadGLTexture(Common::Rectangle<u32> rect, GLuint read_fb_
     }
 
     if (Settings::values.custom_textures) {
-        is_custom = LoadCustomTexture(tex_hash);
+        if (!custom_tex_info || custom_tex_info->hash != tex_hash) {
+            custom_tex_info = LoadCustomTexture(tex_hash, custom_rect);
+        }
+        if (custom_tex_info) {
+            // always going to be using rgba8
+            custom_format = PixelFormat::RGBA8;
+        }
     }
 
     // Load data from memory to the surface
@@ -801,9 +748,9 @@ void CachedSurface::UploadGLTexture(Common::Rectangle<u32> rect, GLuint read_fb_
         x0 = 0;
         y0 = 0;
 
-        if (is_custom) {
+        if (custom_tex_info) {
             unscaled_tex = owner.AllocateSurfaceTexture(
-                GetFormatTuple(PixelFormat::RGBA8), custom_tex_info.width, custom_tex_info.height);
+                GetFormatTuple(PixelFormat::RGBA8), custom_tex_info->width, custom_tex_info->height);
         } else {
             unscaled_tex = owner.AllocateSurfaceTexture(tuple, rect.GetWidth(), rect.GetHeight());
         }
@@ -818,19 +765,19 @@ void CachedSurface::UploadGLTexture(Common::Rectangle<u32> rect, GLuint read_fb_
 
     // Ensure no bad interactions with GL_UNPACK_ALIGNMENT
     ASSERT(stride * GetGLBytesPerPixel(pixel_format) % 4 == 0);
-    if (is_custom) {
+    if (custom_tex_info) {
         if (res_scale == 1) {
             texture = owner.AllocateSurfaceTexture(GetFormatTuple(PixelFormat::RGBA8),
-                                                   custom_tex_info.width, custom_tex_info.height);
+                                                   custom_tex_info->width, custom_tex_info->height);
             cur_state.texture_units[0].texture_2d = texture.handle;
             cur_state.Apply();
         }
         // always going to be using rgba8
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, static_cast<GLint>(custom_tex_info.width));
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, static_cast<GLint>(custom_tex_info->width));
 
         glActiveTexture(GL_TEXTURE0);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, x0, y0, custom_tex_info.width, custom_tex_info.height,
-                        GL_RGBA, GL_UNSIGNED_BYTE, custom_tex_info.tex.data());
+        glTexSubImage2D(GL_TEXTURE_2D, 0, x0, y0, custom_tex_info->width, custom_tex_info->height,
+                        GL_RGBA, GL_UNSIGNED_BYTE, custom_tex_info->tex.data());
     } else {
         glPixelStorei(GL_UNPACK_ROW_LENGTH, static_cast<GLint>(stride));
 
@@ -841,7 +788,7 @@ void CachedSurface::UploadGLTexture(Common::Rectangle<u32> rect, GLuint read_fb_
     }
 
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    if (Settings::values.dump_textures && !is_custom)
+    if (Settings::values.dump_textures && !custom_tex_info)
         DumpTexture(target_tex, tex_hash);
 
     cur_state.texture_units[0].texture_2d = old_tex;
@@ -854,7 +801,7 @@ void CachedSurface::UploadGLTexture(Common::Rectangle<u32> rect, GLuint read_fb_
         scaled_rect.right *= res_scale;
         scaled_rect.bottom *= res_scale;
         auto from_rect =
-            is_custom ? Common::Rectangle<u32>{0, custom_tex_info.height, custom_tex_info.width, 0}
+            custom_tex_info ? Common::Rectangle<u32>{0, custom_tex_info->height, custom_tex_info->width, 0}
                       : Common::Rectangle<u32>{0, rect.GetHeight(), rect.GetWidth(), 0};
         if (!owner.texture_filterer->Filter(unscaled_tex.handle, from_rect, texture.handle,
                                             scaled_rect, type, read_fb_handle, draw_fb_handle)) {
@@ -1304,9 +1251,9 @@ Surface RasterizerCacheOpenGL::GetTextureSurface(const Pica::Texture::TextureInf
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, max_level);
             u32 width;
             u32 height;
-            if (surface->is_custom) {
-                width = surface->custom_tex_info.width;
-                height = surface->custom_tex_info.height;
+            if (surface->custom_tex_info) {
+                width = surface->custom_tex_info->width;
+                height = surface->custom_tex_info->height;
             } else {
                 width = surface->GetScaledWidth();
                 height = surface->GetScaledHeight();
@@ -1320,7 +1267,7 @@ Surface RasterizerCacheOpenGL::GetTextureSurface(const Pica::Texture::TextureInf
                                  nullptr);
                 }
             }
-            if (surface->is_custom || !texture_filterer->IsNull()) {
+            if (surface->custom_tex_info || !texture_filterer->IsNull()) {
                 // TODO: proper mipmap support for custom textures
                 glGenerateMipmap(GL_TEXTURE_2D);
             }
@@ -1357,7 +1304,7 @@ Surface RasterizerCacheOpenGL::GetTextureSurface(const Pica::Texture::TextureInf
                 }
                 state.ResetTexture(level_surface->texture.handle);
                 state.Apply();
-                if (!surface->is_custom && texture_filterer->IsNull()) {
+                if (!surface->custom_tex_info && texture_filterer->IsNull()) {
                     glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                                            level_surface->texture.handle, 0);
                     glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
