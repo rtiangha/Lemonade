@@ -8,6 +8,10 @@
 #include <tuple>
 #include <utility>
 #include <glad/glad.h>
+#ifdef ARCHITECTURE_ARM64
+#include <arm_neon.h>
+
+#endif
 #include "common/alignment.h"
 #include "common/assert.h"
 #include "common/logging/log.h"
@@ -44,15 +48,6 @@ static bool IsVendorMali() {
     std::string gpu_vendor{reinterpret_cast<char const*>(glGetString(GL_VENDOR))};
     return gpu_vendor.find("ARM") != std::string::npos;
 }
-
-/*static bool IsVendorAmd() {
-    const std::string_view gpu_vendor{reinterpret_cast<char const*>(glGetString(GL_VENDOR))};
-    return gpu_vendor == "ATI Technologies Inc." || gpu_vendor == "Advanced Micro Devices, Inc.";
-}
-static bool IsVendorIntel() {
-    std::string gpu_vendor{reinterpret_cast<char const*>(glGetString(GL_VENDOR))};
-    return gpu_vendor == "Intel Inc.";
-}*/
 
 RasterizerOpenGL::RasterizerOpenGL(Frontend::EmuWindow& emu_window)
     : is_mali_gpu(IsVendorMali()), shader_dirty(true),
@@ -269,10 +264,19 @@ void RasterizerOpenGL::SyncEntireState() {
  * these issues, making this basic implementation actually more accurate to the hardware.
  */
 static bool AreQuaternionsOpposite(Common::Vec4<Pica::float24> qa, Common::Vec4<Pica::float24> qb) {
+#ifdef ARCHITECTURE_ARM64
+        const float32_t a[4] = {qa.x.ToFloat32(), qa.y.ToFloat32(), qa.z.ToFloat32(), qa.w.ToFloat32()};
+        const float32_t b[4] = {qb.x.ToFloat32(), qb.y.ToFloat32(), qb.z.ToFloat32(), qb.w.ToFloat32()};
+        const float32x4_t aa = vld1q_f32(a);
+        const float32x4_t bb = vld1q_f32(b);
+        const float32x4_t mm = vmulq_f32(aa, bb);
+        const float32x2_t s2 = vadd_f32(vget_high_f32(mm), vget_low_f32(mm));
+        return (vget_lane_f32(vpadd_f32(s2, s2), 0) < 0.f);
+#else
     Common::Vec4f a{qa.x.ToFloat32(), qa.y.ToFloat32(), qa.z.ToFloat32(), qa.w.ToFloat32()};
     Common::Vec4f b{qb.x.ToFloat32(), qb.y.ToFloat32(), qb.z.ToFloat32(), qb.w.ToFloat32()};
-
     return (Common::Dot(a, b) < 0.f);
+#endif
 }
 
 void RasterizerOpenGL::AddTriangle(const Pica::Shader::OutputVertex& v0,
@@ -290,12 +294,6 @@ static constexpr std::array<GLenum, 4> vs_attrib_types{
     GL_FLOAT          // VertexAttributeFormat::FLOAT
 };
 
-struct VertexArrayInfo {
-    u32 vs_input_index_min;
-    u32 vs_input_index_max;
-    u32 vs_input_size;
-};
-
 RasterizerOpenGL::VertexArrayInfo RasterizerOpenGL::AnalyzeVertexArray(bool is_indexed) {
     const auto& regs = Pica::g_state.regs;
     const auto& vertex_attributes = regs.pipeline.vertex_attributes;
@@ -311,10 +309,10 @@ RasterizerOpenGL::VertexArrayInfo RasterizerOpenGL::AnalyzeVertexArray(bool is_i
 
         vertex_min = 0xFFFF;
         vertex_max = 0;
-        const u32 size = regs.pipeline.num_vertices * (index_u16 ? 2 : 1);
-#ifndef ANDROID
-        res_cache.FlushRegion(address, size, nullptr);
-#endif
+        //const u32 size = regs.pipeline.num_vertices * (index_u16 ? 2 : 1);
+//#ifndef ANDROID
+//        res_cache.FlushRegion(address, size, nullptr);
+//#endif
         for (u32 index = 0; index < regs.pipeline.num_vertices; ++index) {
             const u32 vertex = index_u16 ? index_address_16[index] : index_address_8[index];
             vertex_min = std::min(vertex_min, vertex);
@@ -386,9 +384,9 @@ void RasterizerOpenGL::SetupVertexArray(u8* array_ptr, GLintptr buffer_offset,
 
         u32 vertex_num = vs_input_index_max - vs_input_index_min + 1;
         u32 data_size = loader.byte_count * vertex_num;
-#ifndef ANDROID
-        res_cache.FlushRegion(data_addr, data_size, nullptr);
-#endif
+//#ifndef ANDROID
+//        res_cache.FlushRegion(data_addr, data_size, nullptr);
+//#endif
         std::memcpy(array_ptr, VideoCore::g_memory->GetPhysicalPointer(data_addr), data_size);
 
         array_ptr += data_size;
@@ -456,18 +454,8 @@ bool RasterizerOpenGL::AccelerateDrawBatch(bool is_indexed) {
 }
 
 static GLenum GetCurrentPrimitiveMode() {
-    const auto& regs = Pica::g_state.regs;
-    switch (regs.pipeline.triangle_topology) {
-    case Pica::PipelineRegs::TriangleTopology::Shader:
-    case Pica::PipelineRegs::TriangleTopology::List:
-        return GL_TRIANGLES;
-    case Pica::PipelineRegs::TriangleTopology::Fan:
-        return GL_TRIANGLE_FAN;
-    case Pica::PipelineRegs::TriangleTopology::Strip:
-        return GL_TRIANGLE_STRIP;
-    default:
-        UNREACHABLE();
-    }
+    const GLenum prims[] = {GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLES};
+    return prims[static_cast<u32>(Pica::g_state.regs.pipeline.triangle_topology.Value())];
 }
 
 bool RasterizerOpenGL::AccelerateDrawBatchInternal(bool is_indexed) {
@@ -528,6 +516,10 @@ void RasterizerOpenGL::DrawTriangles() {
 bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
     const auto& regs = Pica::g_state.regs;
     const bool shadow_rendering = regs.framebuffer.IsShadowRendering();
+    if (shadow_rendering && !allow_shadow) {
+        return true;
+    }
+
     const bool has_stencil = regs.framebuffer.HasStencil();
 
     const bool write_color_fb = shadow_rendering || state.color_mask.red_enabled == GL_TRUE ||
@@ -581,7 +573,6 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
                 case TextureType::Shadow2D: {
                     if (!allow_shadow)
                         continue;
-
                     Surface surface = res_cache.GetTextureSurface(texture);
                     if (surface != nullptr) {
                         CheckBarrier(state.image_shadow_texture_px = surface->texture.handle);
@@ -863,7 +854,6 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
     state.scissor.y = draw_rect.bottom;
     state.scissor.width = draw_rect.GetWidth();
     state.scissor.height = draw_rect.GetHeight();
-    state.Apply();
 
     // Draw the vertex batch
     bool succeeded = true;

@@ -3,28 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/button_file_menu"
-        android:icon="@drawable/ic_folder"
+        android:id="@+id/button_add_directory"
+        android:icon="@drawable/ic_add"
         android:title="@string/select_game_folder"
-        app:showAsAction="ifRoom">
-        <menu>
-            <item
-                android:id="@+id/button_add_directory"
-                android:icon="@drawable/ic_folder"
-                android:title="@string/select_game_folder"
-                app:showAsAction="ifRoom" />
-            <item
-                android:id="@+id/button_install_cia"
-                android:icon="@drawable/ic_cia_install"
-                android:title="@string/install_cia_title"
-                app:showAsAction="ifRoom" />
-        </menu>
-    </item>
+        app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/menu_settings_core"
         android:icon="@drawable/ic_settings_core"
         android:title="@string/grid_menu_core_settings"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/button_install_cia"
+        android:icon="@drawable/ic_cia_install"
+        android:title="@string/install_cia_title"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/button_updater"
