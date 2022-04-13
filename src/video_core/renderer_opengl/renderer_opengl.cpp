@@ -387,12 +387,7 @@ void RendererOpenGL::SwapBuffers() {
     RenderScreenshot();
 
     const auto& layout = render_window.GetFramebufferLayout();
-    if (Settings::values.use_present_thread) {
-        RenderToMailbox(layout, render_window.mailbox, false);
-    } else {
-        DrawScreens(layout, false);
-        render_window.PollEvents();
-    }
+    RenderToMailbox(layout, render_window.mailbox, false);
 
     if (frame_dumper.IsDumping()) {
         try {

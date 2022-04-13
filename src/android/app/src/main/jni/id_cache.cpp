@@ -238,6 +238,7 @@ void JNI_OnUnload(JavaVM* vm, void* reserved) {
     MiiSelector::CleanupJNI(env);
     SoftwareKeyboard::CleanupJNI(env);
     Camera::StillImage::CleanupJNI(env);
+    NetworkShutdown();
 }
 
 #ifdef __cplusplus

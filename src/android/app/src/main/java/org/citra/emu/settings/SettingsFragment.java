@@ -467,13 +467,11 @@ public final class SettingsFragment extends Fragment {
         SettingSection rendererSection = mSettings.getSection(Settings.SECTION_RENDERER);
         SettingSection systemSection = mSettings.getSection(Settings.SECTION_SYSTEM);
 
-        Setting presentThread = rendererSection.getSetting(SettingsFile.KEY_USE_PRESENT_THREAD);
         Setting new3ds = systemSection.getSetting(SettingsFile.KEY_IS_NEW_3DS);
         Setting resolutionFactor = rendererSection.getSetting(SettingsFile.KEY_RESOLUTION_FACTOR);
         Setting showFps = rendererSection.getSetting(SettingsFile.KEY_SHOW_FPS);
         Setting cpuUsageLimit = rendererSection.getSetting(SettingsFile.KEY_CPU_USAGE_LIMIT);
         Setting textureLoadHack = rendererSection.getSetting(SettingsFile.KEY_TEXTURE_LOAD_HACK);
-        // Setting filterMode = rendererSection.getSetting(SettingsFile.KEY_FILTER_MODE);
         Setting useAsynchronousGpuEmulation = rendererSection.getSetting(SettingsFile.KEY_USE_ASYNCHRONOUS_GPU_EMULATION);
         Setting shadersAccurateMul = rendererSection.getSetting(SettingsFile.KEY_SHADERS_ACCURATE_MUL);
         Setting shader = rendererSection.getSetting(SettingsFile.KEY_PP_SHADER_NAME);
@@ -487,14 +485,12 @@ public final class SettingsFragment extends Fragment {
         Setting cardboardYShift = layoutSection.getSetting(SettingsFile.KEY_CARDBOARD_Y_SHIFT);
 
         sl.add(new HeaderSetting(null, null, R.string.renderer, 0));
-        sl.add(new CheckBoxSetting(SettingsFile.KEY_USE_PRESENT_THREAD, Settings.SECTION_RENDERER, R.string.setting_use_present_thread, R.string.setting_use_present_thread_description, true, presentThread));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_IS_NEW_3DS, Settings.SECTION_SYSTEM, R.string.setting_is_new_3ds, R.string.setting_is_new_3ds_description, false, new3ds));
         sl.add(new SliderSetting(SettingsFile.KEY_RESOLUTION_FACTOR, Settings.SECTION_RENDERER, R.string.internal_resolution, R.string.internal_resolution_description, 1, 4, "x", 1, resolutionFactor));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_SHOW_FPS, Settings.SECTION_RENDERER, R.string.emulation_show_fps, 0, false, showFps));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_CPU_USAGE_LIMIT, Settings.SECTION_RENDERER, R.string.cpu_usage_limit, R.string.cpu_usage_limit_description, false, cpuUsageLimit));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_TEXTURE_LOAD_HACK, Settings.SECTION_RENDERER, R.string.setting_texture_load_hack, R.string.setting_texture_load_hack_description, false, textureLoadHack));
-        // TODO(Gamer64): hide custom textures for now, crashes like official.
-        // sl.add(new SubmenuSetting(null, null, R.string.setting_custom_textures_title, 0, Settings.SECTION_CUSTOM_TEXTURES));
+        sl.add(new SubmenuSetting(null, null, R.string.setting_custom_textures_title, R.string.setting_custom_textures_title_description, Settings.SECTION_CUSTOM_TEXTURES));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_USE_ASYNCHRONOUS_GPU_EMULATION, Settings.SECTION_RENDERER, R.string.asynchronous_gpu, R.string.asynchronous_gpu_description, true, useAsynchronousGpuEmulation));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_SHADERS_ACCURATE_MUL, Settings.SECTION_RENDERER, R.string.shaders_accurate_mul, R.string.shaders_accurate_mul_description, false, shadersAccurateMul));
 

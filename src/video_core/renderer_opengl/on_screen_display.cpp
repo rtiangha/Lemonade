@@ -1,3 +1,7 @@
+// Copyright 2019 Citra MMJ Project
+// Licensed under GPLv2 or any later version
+// Refer to the license.txt file included.
+
 #include "video_core/renderer_opengl/on_screen_display.h"
 
 #include <memory>
@@ -61,7 +65,7 @@ static const int CHARACTER_HEIGHT = 13;
 static const int CHARACTER_OFFSET = 32;
 static const int CHARACTER_COUNT = 95;
 
-static const u8 rasters[CHARACTER_COUNT][CHARACTER_HEIGHT] = {
+static const u8 rasters[CHARACTER_COUNT][CHARACTER_HEIGHT] = { // font style
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
     {0x00, 0x00, 0x18, 0x18, 0x00, 0x00, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18},
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x36, 0x36, 0x36},
@@ -158,7 +162,8 @@ static const u8 rasters[CHARACTER_COUNT][CHARACTER_HEIGHT] = {
     {0x00, 0x00, 0xf0, 0x18, 0x18, 0x18, 0x1c, 0x0f, 0x1c, 0x18, 0x18, 0x18, 0xf0},
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x8f, 0xf1, 0x60, 0x00, 0x00, 0x00}};
 
-static const char* s_vertexShaderSrc = R"(uniform vec2 charSize;
+static const char* s_vertexShaderSrc = R"(
+uniform vec2 charSize;
 uniform vec2 offset;
 in vec2 rawpos;
 in vec2 rawtex0;
@@ -168,7 +173,8 @@ void main() {
     uv0 = rawtex0 * charSize;
 })";
 
-static const char* s_fragmentShaderSrc = R"(uniform sampler2D samp0;
+static const char* s_fragmentShaderSrc = R"(
+uniform sampler2D samp0;
 uniform vec4 color;
 in vec2 uv0;
 out vec4 ocol0;
@@ -348,17 +354,6 @@ void RasterFont::UpdateDebugInfo() {
     std::string text = fmt::format(
         "FPS:{:>2} - VPS:{:>2} - SPD:{:>2}", static_cast<int>(stats.game_fps),
         static_cast<int>(stats.system_fps), static_cast<int>(stats.emulation_speed * 100.0));
-
-    /// Preview of FPS counter:
-    // ---------------------------------------------
-    // | FPS:60 - VPS:60 - SPD:100                 |
-    // |                                           |
-    // |                                           |
-    // | º                                         |
-    // |                                           |
-    // |                                           |
-    // |                                           |
-    // ---------------------------------------------
 
     AddMessage(text, MessageType::FPS, Duration::FOREVER, Color::BLUE);
 }

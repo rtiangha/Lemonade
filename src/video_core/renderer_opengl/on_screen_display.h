@@ -1,3 +1,7 @@
+// Copyright 2019 Citra MMJ Project
+// Licensed under GPLv2 or any later version
+// Refer to the license.txt file included.
+
 #pragma once
 
 #include <string>
@@ -12,8 +16,6 @@ namespace OSD {
 
 enum class MessageType {
     FPS,
-    D24S8,
-    ShaderCache,
     Typeless,
     HWShader,
     CPUJit,

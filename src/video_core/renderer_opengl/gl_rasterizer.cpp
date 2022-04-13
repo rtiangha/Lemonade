@@ -309,6 +309,7 @@ RasterizerOpenGL::VertexArrayInfo RasterizerOpenGL::AnalyzeVertexArray(bool is_i
 
         vertex_min = 0xFFFF;
         vertex_max = 0;
+        // hide for now, makes some games slow
         //const u32 size = regs.pipeline.num_vertices * (index_u16 ? 2 : 1);
 //#ifndef ANDROID
 //        res_cache.FlushRegion(address, size, nullptr);
@@ -384,6 +385,7 @@ void RasterizerOpenGL::SetupVertexArray(u8* array_ptr, GLintptr buffer_offset,
 
         u32 vertex_num = vs_input_index_max - vs_input_index_min + 1;
         u32 data_size = loader.byte_count * vertex_num;
+        // hide for now, makes some games slow
 //#ifndef ANDROID
 //        res_cache.FlushRegion(data_addr, data_size, nullptr);
 //#endif

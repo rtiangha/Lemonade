@@ -36,8 +36,6 @@ public final class SettingsFile {
 
     public static final String KEY_DESIGN = "design";
 
-    public static final String KEY_USE_PRESENT_THREAD = "use_present_thread";
-
     public static final String KEY_HW_RENDERER = "use_hw_renderer";
     public static final String KEY_HW_SHADER = "use_hw_shader";
     public static final String KEY_CPU_CLOCK_SPEED = "cpu_clock_percentage";

@@ -90,9 +90,6 @@
     <string name="asynchronous_gpu_description">Uses a separate thread to emulate the GPU asynchronously. When enabled, performance will be improved.</string>
     <string name="frame_limit_enable">Enable limit speed</string>
     <string name="frame_limit_enable_description">When enabled, emulation speed will be limited to a specified percentage of normal speed.</string>
-    <string name="use_custom_ticks">Use Custom Ticks</string>
-    <string name="custom_ticks_description">Uses a custom core ticks level, very useful for some games like Luigi Mansion 2.</string>
-    <string name="ticks">Ticks</string>
     <string name="cpu_clock_speed">Emulated CPU Clock Speed</string>
     <string name="frame_limit_slider">Limit speed percent</string>
     <string name="frame_limit_slider_description">Specifies the percentage to limit emulation speed. With the default of 100% emulation will be limited to normal speed. Values higher or lower will increase or decrease the speed limit.</string>
@@ -165,14 +162,13 @@
     <string name="setting_texture_load_hack">Texture Load Hack</string>
     <string name="setting_texture_load_hack_description">Turn it on to improves performance, but many games have texture errors</string>
     <string name="setting_custom_textures_title">Custom Textures</string>
+    <string name="setting_custom_textures_title_description">Unstable, maybe crash!</string>
     <string name="setting_custom_textures">Use Custom Textures</string>
     <string name="setting_preload_textures">Preload Custom Textures</string>
     <string name="setting_preload_textures_description">The start up time is getting longer if enabled.</string>
     <string name="setting_dump_textures">Dump Textures</string>
     <string name="setting_is_new_3ds">New 3DS Mode</string>
     <string name="setting_is_new_3ds_description">The New 3DS has different memory and processor, and some games can only start on the New 3DS.</string>
-    <string name="setting_use_present_thread">Use Dual Core</string>
-    <string name="setting_use_present_thread_description">Most games can improve performance by using dual core.</string>
     <string name="fmv_hack" translatable="false">FMV Hack</string>
     <string name="setting_skip_slow_draw">Skip Slow Draw</string>
     <string name="setting_skip_cpu_write">Skip CPU Access</string>

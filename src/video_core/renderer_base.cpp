@@ -13,7 +13,7 @@ namespace VideoCore {
 
 RendererBase::RendererBase(Frontend::EmuWindow& window) : render_window{window} {}
 RendererBase::~RendererBase() = default;
-void RendererBase::UpdateCurrentFramebufferLayout(bool is_portrait_mode) {
+void RendererBase::UpdateCurrentFramebufferLayout(bool is_portrait_mode) { // refresh layout
     const Layout::FramebufferLayout& layout = render_window.GetFramebufferLayout();
     render_window.UpdateCurrentFramebufferLayout(layout.width, layout.height, is_portrait_mode);
 }
@@ -23,7 +23,7 @@ void RendererBase::RefreshRasterizerSetting() {
     if (rasterizer == nullptr || opengl_rasterizer_active != hw_renderer_enabled) {
         opengl_rasterizer_active = hw_renderer_enabled;
 
-        if (hw_renderer_enabled) {
+        if (hw_renderer_enabled) { // init window
             rasterizer = std::make_unique<OpenGL::RasterizerOpenGL>(render_window);
         } else {
             rasterizer = std::make_unique<VideoCore::SWRasterizer>();
