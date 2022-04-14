@@ -133,6 +133,8 @@ jobject ToJavaValidationError(Frontend::ValidationError error) {
                               "Lorg/citra/emu/ui/SoftwareKeyboard$ValidationError;"));
 }
 
+extern "C" {
+
 jobject Java_org_citra_emu_ui_SoftwareKeyboard_ValidateFilters(JNIEnv* env,
                                                                            jclass clazz,
                                                                            jstring text) {
@@ -149,3 +151,5 @@ jobject Java_org_citra_emu_ui_SoftwareKeyboard_ValidateInput(JNIEnv* env, jclass
         Core::System::GetInstance().GetSoftwareKeyboard()->ValidateInput(GetJString(env, text));
     return ToJavaValidationError(ret);
 }
+
+} // extern "C"

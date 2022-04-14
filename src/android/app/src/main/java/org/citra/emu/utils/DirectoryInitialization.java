@@ -210,6 +210,10 @@ public final class DirectoryInitialization {
     }
 
     public static class DirectoryStateReceiver extends BroadcastReceiver {
+        public interface Action1<T> {
+            void call(T t);
+        }
+
         Action1<DirectoryInitializationState> callback;
 
         public DirectoryStateReceiver(Action1<DirectoryInitializationState> callback) {
