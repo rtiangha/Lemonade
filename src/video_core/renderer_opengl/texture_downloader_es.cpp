@@ -116,7 +116,7 @@ out highp float color;
 uniform highp sampler2D depth;
 uniform int lod;
 
-void main(){
+void main() {
     color = texelFetch(depth, ivec2(gl_FragCoord.xy), lod).x;
 }
 )");

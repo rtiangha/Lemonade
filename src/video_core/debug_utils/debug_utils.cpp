@@ -80,8 +80,6 @@ void DebugContext::Resume() {
     resume_from_breakpoint.notify_one();
 }
 
-std::shared_ptr<DebugContext> g_debug_context; // TODO: Get rid of this global
-
 namespace DebugUtils {
 
 void DumpShader(const std::string& filename, const ShaderRegs& config,

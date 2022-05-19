@@ -387,12 +387,7 @@ void RendererOpenGL::SwapBuffers() {
     RenderScreenshot();
 
     const auto& layout = render_window.GetFramebufferLayout();
-    if (Settings::values.use_present_thread) {
-        RenderToMailbox(layout, render_window.mailbox, false);
-    } else {
-        DrawScreens(layout, false);
-        render_window.PollEvents();
-    }
+    RenderToMailbox(layout, render_window.mailbox, false);
 
     if (frame_dumper.IsDumping()) {
         try {
@@ -414,10 +409,6 @@ void RendererOpenGL::SwapBuffers() {
 
     prev_state.Apply();
     RefreshRasterizerSetting();
-
-    if (Pica::g_debug_context && Pica::g_debug_context->recorder) {
-        Pica::g_debug_context->recorder->FrameFinished();
-    }
 }
 
 void RendererOpenGL::RenderScreenshot() {
@@ -673,7 +664,7 @@ void RendererOpenGL::InitOpenGLObjects() {
         screen_info.display_texture = screen_info.texture.resource.handle;
     }
 
-    // init
+    /// init raster font
     OSD::Initialize();
     if (Settings::values.is_new_3ds) {
         OSD::AddMessage("New 3DS Model", OSD::MessageType::New3DS, OSD::Duration::NORMAL,
@@ -1148,10 +1139,9 @@ void RendererOpenGL::DrawScreens(const Layout::FramebufferLayout& layout, bool f
                                        (float)bottom_screen.GetHeight());
             }
         }
-
-        // draw on screen display
-        OSD::DrawMessage(render_window, layout);
     }
+    // draw on screen display
+    OSD::DrawMessage(layout);
 }
 
 void RendererOpenGL::TryPresent(int timeout_ms) {
@@ -1326,6 +1316,8 @@ VideoCore::ResultStatus RendererOpenGL::Init() {
 }
 
 /// Shutdown the renderer
-void RendererOpenGL::ShutDown() {}
+void RendererOpenGL::ShutDown() {
+    OSD::Shutdown();
+}
 
 } // namespace OpenGL

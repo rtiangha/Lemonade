@@ -16,7 +16,7 @@
 
 namespace VideoCore::GPUThread {
 
-/// Runs the GPU thread
+/// Runs the GPU thread if async gpu enabled
 static void RunThread(VideoCore::RendererBase& renderer, SynchState& state, Core::System& system) {
 
     MicroProfileOnThreadCreate("GpuThread");

@@ -37,6 +37,11 @@
     <string name="generic_buttons">Buttons</string>
 
     <!-- Interface settings strings -->
+    <string name="interface_text">Interface</string>
+    <string name="expand_to_cutout_area">Expand To Cutout Area</string>
+    <string name="expand_to_cutout_area_description">Expands the display area to include the cutout (or notch) area.</string>
+    <string name="updater_check_startup">Check for updates at startup</string>
+    <string name="updater_check_startup_description">If allowed, Citra Enhanced will check for updates when opened. A pop-up will appear when a new version is available. An internet connection is required.</string>
     <string name="design">Change Theme (Light, Dark)</string>
     <string name="design_updated">Theme will update when exiting Settings</string>
 
@@ -85,9 +90,6 @@
     <string name="asynchronous_gpu_description">Uses a separate thread to emulate the GPU asynchronously. When enabled, performance will be improved.</string>
     <string name="frame_limit_enable">Enable limit speed</string>
     <string name="frame_limit_enable_description">When enabled, emulation speed will be limited to a specified percentage of normal speed.</string>
-    <string name="use_custom_ticks">Use Custom Ticks</string>
-    <string name="custom_ticks_description">Uses a custom core ticks level, very useful for some games like Luigi Mansion 2.</string>
-    <string name="ticks">Ticks</string>
     <string name="cpu_clock_speed">Emulated CPU Clock Speed</string>
     <string name="frame_limit_slider">Limit speed percent</string>
     <string name="frame_limit_slider_description">Specifies the percentage to limit emulation speed. With the default of 100% emulation will be limited to normal speed. Values higher or lower will increase or decrease the speed limit.</string>
@@ -110,21 +112,22 @@
     <string name="use_disk_shader_cache">Use disk shader cache</string>
     <string name="use_disk_shader_cache_description">Reduce stuttering by storing and loading generated shaders to disk. It cannot be used without Enabling Hardware Shader.</string>
 
-    <!-- Interface strings -->
-    <string name="interface_text">Interface</string>
-
     <!-- Audio settings strings -->
     <string name="audio_stretch">Enable audio stretching</string>
     <string name="audio_stretch_description">Stretches audio to reduce stuttering. When enabled, increases audio latency and slightly reduces performance.</string>
     <string name="audio_input_type">Audio Input Device</string>
 
     <!-- Miscellaneous -->
+    <string name="off">Off</string>
     <string name="clear">Clear</string>
     <string name="slider_default">Default</string>
     <string name="ini_saved">Saved settings</string>
     <string name="gameid_saved">Saved settings for %1$s</string>
     <string name="error_saving">Error saving %1$s.ini: %2$s</string>
     <string name="loading">Loading...</string>
+    <string name="current_directory">Current Directory</string>
+    <string name="game_details">Game Details</string>
+    <string name="reset_setting">Reset Setting</string>
 
     <!-- Game Grid Screen-->
     <string name="grid_menu_core_settings">Settings</string>
@@ -159,14 +162,13 @@
     <string name="setting_texture_load_hack">Texture Load Hack</string>
     <string name="setting_texture_load_hack_description">Turn it on to improves performance, but many games have texture errors</string>
     <string name="setting_custom_textures_title">Custom Textures</string>
+    <string name="setting_custom_textures_title_description">Unstable, maybe crash!</string>
     <string name="setting_custom_textures">Use Custom Textures</string>
     <string name="setting_preload_textures">Preload Custom Textures</string>
     <string name="setting_preload_textures_description">The start up time is getting longer if enabled.</string>
     <string name="setting_dump_textures">Dump Textures</string>
     <string name="setting_is_new_3ds">New 3DS Mode</string>
     <string name="setting_is_new_3ds_description">The New 3DS has different memory and processor, and some games can only start on the New 3DS.</string>
-    <string name="setting_use_present_thread">Use Dual Core</string>
-    <string name="setting_use_present_thread_description">Most games can improve performance by using dual core.</string>
     <string name="fmv_hack" translatable="false">FMV Hack</string>
     <string name="setting_skip_slow_draw">Skip Slow Draw</string>
     <string name="setting_skip_cpu_write">Skip CPU Access</string>
@@ -194,11 +196,17 @@
     <string name="emulation_close_game">Close Game</string>
     <string name="emulation_close_game_message">Are you sure that you would like to close the current game?</string>
     <string name="menu_emulation_amiibo">Amiibo</string>
-    <string name="menu_emulation_amiibo_load">Load</string>
-    <string name="menu_emulation_amiibo_remove">Remove</string>
+    <string name="menu_emulation_amiibo_load">Load Amiibo</string>
+    <string name="menu_emulation_amiibo_remove">Remove Amiibo</string>
     <string name="select_amiibo">Select Amiibo file</string>
     <string name="amiibo_load_error">Error loading Amiibo</string>
     <string name="amiibo_load_error_message">While loading the specified Amiibo file, an error occurred. Please check that the file is correct.</string>
+    <string name="use_custom_layout">Use Custom Layout</string>
+    <string name="running_layout">Layout</string>
+    <string name="default_value">Default</string>
+    <string name="single_screen_option">Single</string>
+    <string name="large_screen_option">Large</string>
+    <string name="side_screen_option">Side</string>
 
     <string name="write_permission_needed">You need to allow write access to external storage for the emulator to work</string>
     <string name="load_settings">Loading Settings...</string>
@@ -247,13 +255,112 @@
     <string name="preparing_shaders">Preparing shaders</string>
     <string name="building_shaders">Building shaders</string>
 
-    <!-- Credits -->
-    <string name="credits_title">Credits</string>
-
     <!-- Keyboard -->
     <string name="keyboard_please_input">Please Input:</string>
     <string name="input_text_max_length">Max input length: %1$d.</string>
 
+    <!-- Updater Window -->
+    <string name="grid_menu_open_updater">Updater</string>
+    <string name="updater_title">Updater</string>
+    <string name="updater_error">An error has occurred. Please check your internet connection.</string>
+    <string name="updater_uptodate">Up to date!</string>
+    <string name="updater_newavailable">New version available</string>
+    <string name="button_download">Download</string>
+    <string name="button_install">Install</string>
+    <string name="version_description">Latest: %1$s</string>
+    <string name="current_version">Current version: %1$s</string>
+    <string name="download_size">Size: %1$.2f MB</string>
+    <string name="button_view_changelog">View changelog</string>
+    <string name="changelog_section">Version %1$s\nDate: %2$s\nChanges:\n%3$s\n\n</string>
+    <string name="error">Error</string>
+
+    <!-- Update available dialog -->
+    <string name="updates_alert">Update available</string>
+    <string name="updater_alert_body">A new version of Citra Enhanced is available, do you want to update?</string>
+    <string name="not_now">Not now</string>
+    <string name="skip_version">Skip this version</string>
+
+    <!-- Changelog Window -->
+    <string name="changelog_error">An error has occurred. Please check your internet connection.</string>
+    <string name="grid_menu_open_changelog">Changelog</string>
+    <string name="changelog_title">Changelog</string>
+
     <!-- Cheat Manager -->
     <string name="cheat_code">Cheat Code</string>
+    <string name="cheat_list">Cheat List</string>
+    <string name="edit_cheat">Edit Cheat</string>
+    <string name="open_app_archive">Open Archive Directory</string>
+    <string name="delete_app_sdmc">Delete Archive Directory</string>
+    <string name="delete_shader_cache">Delete Shader Cache</string>
+    <string name="delete_confirm_notice">Are you sure to delete the game archive directory?</string>
+    <string name="delete_success">Delete Success!</string>
+
+    <!-- Shortcut Manager -->
+    <string name="create_shortcut">Create Shortcut On Home Screen</string>
+    <string name="create">Create</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="create_success">Create Success!</string>
+    <string name="create_failed">Create Failed!</string>
+
+    <!-- Game details Manager -->
+    <string name="launch_game">Launch Game</string>
+    <string name="cheats">Cheats</string>
+    <string name="shortcut">Shortcut</string>
+
+    <!-- Multiplayer -->
+    <string name="multiplayer">Multiplayer</string>
+    <string name="multiplayer_room_title">Room: %1$s</string>
+    <string name="multiplayer_create_room">Create Room</string>
+    <string name="multiplayer_join_room">Join Room</string>
+    <string name="multiplayer_username">Username</string>
+    <string name="multiplayer_ip_address">IP Address</string>
+    <string name="multiplayer_ip_port">Port</string>
+    <string name="multiplayer_create_room_success">Room created successfully!</string>
+    <string name="multiplayer_join_room_success">Join the room successfully!</string>
+    <string name="multiplayer_create_room_failed">Failed to create room!</string>
+    <string name="multiplayer_join_room_failed">Failed to join room!</string>
+    <string name="multiplayer_input_invalid">Invalid address or name is too short!</string>
+    <string name="multiplayer_port_invalid">Invalid port!</string>
+    <string name="multiplayer_exit_room">Exit Room</string>
+    <string name="multiplayer_network_error">Network error</string>
+    <string name="multiplayer_lost_connection">Lost connection</string>
+    <string name="multiplayer_name_collision">Name collison</string>
+    <string name="multiplayer_mac_collision">Mac collision</string>
+    <string name="multiplayer_console_id_collision">Console ID collision</string>
+    <string name="multiplayer_wrong_version">Wroing version</string>
+    <string name="multiplayer_wrong_password">Wrong password</string>
+    <string name="multiplayer_could_not_connect">Could not connect</string>
+    <string name="multiplayer_room_is_full">Room is full</string>
+    <string name="multiplayer_host_banned">Host banned</string>
+    <string name="multiplayer_permission_denied">Permission denied</string>
+    <string name="multiplayer_no_such_user">No such user</string>
+    <string name="multiplayer_already_in_room">Already in room</string>
+    <string name="multiplayer_create_room_error">Create room error</string>
+    <string name="multiplayer_host_kicked">Host kicked</string>
+    <string name="multiplayer_unknown_error">unknown error</string>
+    <string name="multiplayer_room_uninitialized">Room uninitialized</string>
+    <string name="multiplayer_room_idle">Room idle</string>
+    <string name="multiplayer_room_joining">Room joining</string>
+    <string name="multiplayer_room_joined">Room joined</string>
+    <string name="multiplayer_room_moderator">Room moderator</string>
+    <string name="multiplayer_member_join">%1$s join</string>
+    <string name="multiplayer_member_leave">%1$s leave</string>
+    <string name="multiplayer_member_kicked">%1$s kicked</string>
+    <string name="multiplayer_member_banned">%1$s banned</string>
+    <string name="multiplayer_address_unbanned">address unbanned</string>
+    <string name="multiplayer_kick_member">Kick Out</string>
+    <string name="multiplayer_network_delay">Network Delay: %1$s, %2$s ms</string>
+
+    <string name="nnf_new_folder">New folder</string>
+    <string name="nnf_create_folder_error">Failed to create folder</string>
+    <string name="nnf_name">Name</string>
+    <string name="nnf_select_something_first">Please select something first</string>
+    <string name="nnf_need_valid_filename">Please enter or select a valid filename</string>
+    <string name="nnf_permission_external_write_denied">Permission to access filesystem denied</string>
+    <string name="nnf_filename">Filename</string>
+    <string name="nnf_list_ok">@android:string/ok</string>
+    <string name="nnf_list_cancel">@android:string/cancel</string>
+    <string name="nnf_new_folder_ok">@android:string/ok</string>
+    <string name="nnf_new_folder_cancel">@android:string/cancel</string>
+
 </resources>

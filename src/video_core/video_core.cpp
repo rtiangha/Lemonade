@@ -22,7 +22,7 @@
 namespace VideoCore {
 
 std::unique_ptr<RendererBase> g_renderer; ///< Renderer plugin
-std::unique_ptr<GPUBackend> g_gpu;
+std::unique_ptr<GPUBackend> g_gpu; // async gpu
 
 std::atomic<bool> g_hw_renderer_enabled;
 std::atomic<bool> g_shader_jit_enabled;
@@ -76,7 +76,7 @@ void Shutdown() {
     g_gpu.reset();
     g_renderer.reset();
 
-    LOG_DEBUG(Render, "shutdown OK");
+    LOG_DEBUG(Render, "Shutdown OK");
 }
 
 void RequestScreenshot(void* data, std::function<void()> callback,

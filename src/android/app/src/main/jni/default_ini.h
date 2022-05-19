@@ -160,6 +160,10 @@ preload_custom_textures =
 # 0: Off (default), 1: On
 dump_textures =
 
+# Unaccurate emulation, can cause a lot of crashes/glitches!
+# 0: Off (default), 1: On
+inaccurate_emulation =
+
 # Whether to enable V-Sync (caps the framerate at 60FPS) or not.
 # 0 (default): Off, 1: On
 vsync_enabled =

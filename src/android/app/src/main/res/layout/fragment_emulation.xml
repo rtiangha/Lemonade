@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
-    tools:context="org.citra.citra_emu.fragments.EmulationFragment">
+    tools:context="org.citra.emu.ui.EmulationFragment">
 
     <!-- This is what everything is rendered to during emulation -->
     <SurfaceView
@@ -14,7 +14,7 @@
         android:focusableInTouchMode="false" />
 
     <!-- This is the onscreen input overlay -->
-    <org.citra.citra_emu.overlay.InputOverlay
+    <org.citra.emu.overlay.InputOverlay
         android:id="@+id/surface_input_overlay"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
@@ -22,11 +22,12 @@
         android:focusableInTouchMode="true" />
 
     <TextView
-        android:id="@+id/show_fps_text"
+        android:id="@+id/netplay_message"
         android:layout_marginStart="8dp"
         android:layout_marginTop="2dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="invisible"
         android:clickable="false"
         android:linksClickable="false"
         android:longClickable="false"

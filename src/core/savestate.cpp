@@ -11,6 +11,7 @@
 #include "common/zstd_compression.h"
 #include "core/cheats/cheats.h"
 #include "core/core.h"
+#include "core/movie.h"
 #include "core/savestate.h"
 #include "network/network.h"
 #include "video_core/video_core.h"
@@ -37,8 +38,15 @@ static_assert(sizeof(CSTHeader) == 256, "CSTHeader should be 256 bytes");
 constexpr std::array<u8, 4> header_magic_bytes{{'C', 'S', 'T', 0x1B}};
 
 std::string GetSaveStatePath(u64 program_id, u32 slot) {
-    return fmt::format("{}{:016X}.{:02d}.cst", FileUtil::GetUserPath(FileUtil::UserPath::StatesDir),
-                       program_id, slot);
+    const u64 movie_id = Movie::GetInstance().GetCurrentMovieID();
+    if (movie_id) {
+        return fmt::format("{}{:016X}.movie{:016X}.{:02d}.cst",
+                           FileUtil::GetUserPath(FileUtil::UserPath::StatesDir), program_id,
+                           movie_id, slot);
+    } else {
+        return fmt::format("{}{:016X}.{:02d}.cst",
+                           FileUtil::GetUserPath(FileUtil::UserPath::StatesDir), program_id, slot);
+    }
 }
 
 std::vector<SaveStateInfo> ListSaveStates(u64 program_id) {
@@ -76,11 +84,12 @@ std::vector<SaveStateInfo> ListSaveStates(u64 program_id) {
             LOG_WARNING(Core, "Save state file isn't for the current game {}", path);
             continue;
         }
-        std::string revision = fmt::format("{:02x}", fmt::join(header.revision, ""));
+        const std::string revision = fmt::format("{:02x}", fmt::join(header.revision, ""));
         if (revision == Common::g_scm_rev) {
             info.status = SaveStateInfo::ValidationStatus::OK;
         } else {
-            LOG_WARNING(Core, "Save state file created from a different revision {}", path);
+            LOG_WARNING(Core, "Save state file {} created from a different revision {}", path,
+                        revision);
             info.status = SaveStateInfo::ValidationStatus::RevisionDismatch;
         }
         result.emplace_back(std::move(info));

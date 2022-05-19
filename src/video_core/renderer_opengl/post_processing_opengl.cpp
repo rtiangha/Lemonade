@@ -50,69 +50,58 @@ uniform sampler2D color_texture;
 uniform sampler2D color_texture_r;
 
 // Interfacing functions
-float4 Sample()
-{
+float4 Sample() {
+  return texture(color_texture, frag_tex_coord);
+}
+
+float4 SampleLocation(float2 location) {
+  return texture(color_texture, location);
+}
+
+float4 SampleLayer(int layer) {
+  if (layer == 0)
     return texture(color_texture, frag_tex_coord);
-}
-
-float4 SampleLocation(float2 location)
-{
-    return texture(color_texture, location);
-}
-
-float4 SampleLayer(int layer)
-{
-    if(layer == 0)
-        return texture(color_texture, frag_tex_coord);
-    else
-        return texture(color_texture_r, frag_tex_coord);
+  else
+    return texture(color_texture_r, frag_tex_coord);
 }
 
 #define SampleOffset(offset) textureOffset(color_texture, frag_tex_coord, offset)
 
-float2 GetResolution()
-{
-    return i_resolution.xy;
+float2 GetResolution() {
+  return i_resolution.xy;
 }
 
-float2 GetInvResolution()
-{
-    return i_resolution.zw;
+float2 GetInvResolution() {
+  return i_resolution.zw;
 }
 
-float2 GetIResolution()
-{
-    return i_resolution.xy;
+float2 GetIResolution() {
+  return i_resolution.xy;
 }
 
-float2 GetIInvResolution()
-{
-    return i_resolution.zw;
+float2 GetIInvResolution() {
+  return i_resolution.zw;
 }
 
-float2 GetOResolution()
-{
-    return o_resolution.xy;
+float2 GetOResolution() {
+  return o_resolution.xy;
 }
 
-float2 GetOInvResolution()
-{
-    return o_resolution.zw;
+float2 GetOInvResolution() {
+  return o_resolution.zw;
 }
 
-float2 GetCoordinates()
-{
-    return frag_tex_coord;
+float2 GetCoordinates() {
+  return frag_tex_coord;
 }
 
-void SetOutput(float4 color_in)
-{
-    color = color_in;
+void SetOutput(float4 color_in) {
+  color = color_in;
 }
 
 )";
 
-std::vector<std::string> GetPostProcessingShaderList(bool anaglyph) {
+std::vector<std::string> GetPostProcessingShaderList(bool anaglyph) { // stereo list
     std::string shader_dir = FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir);
     std::vector<std::string> shader_names;
 
@@ -150,7 +139,7 @@ std::vector<std::string> GetPostProcessingShaderList(bool anaglyph) {
     return shader_names;
 }
 
-std::string GetPostProcessingShaderCode(bool anaglyph, std::string_view shader) {
+std::string GetPostProcessingShaderCode(bool anaglyph, std::string_view shader) { // stereo init
     std::string shader_dir = FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir);
     std::string shader_path;
 

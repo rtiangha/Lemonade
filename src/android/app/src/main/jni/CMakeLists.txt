@@ -22,6 +22,8 @@ add_library(main SHARED
     id_cache.h
     mic.cpp
     mic.h
+    multiplayer.cpp
+    multiplayer.h
     native.cpp
     native.h
     ndk_motion.cpp

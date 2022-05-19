@@ -114,7 +114,6 @@ void Config::ReadValues() {
 
     // Renderer
     Settings::values.use_gles = sdl2_config->GetBoolean("Renderer", "use_gles", true);
-    Settings::values.use_present_thread = sdl2_config->GetBoolean("Renderer", "use_present_thread", true);
     Settings::values.use_hw_renderer = sdl2_config->GetBoolean("Renderer", "use_hw_renderer", true);
     Settings::values.use_hw_shader = sdl2_config->GetBoolean("Renderer", "use_hw_shader", true);
     Settings::values.shaders_accurate_mul =
@@ -166,7 +165,7 @@ void Config::ReadValues() {
 
     // Layout
     Settings::values.layout_option = static_cast<Settings::LayoutOption>(sdl2_config->GetInteger(
-        "Layout", "layout_option", static_cast<int>(Settings::LayoutOption::MobileLandscape)));
+        "Layout", "layout_option", static_cast<int>(Settings::LayoutOption::LargeScreen)));
     Settings::values.custom_layout = sdl2_config->GetBoolean("Layout", "custom_layout", false);
     Settings::values.custom_top_left =
         static_cast<u16>(sdl2_config->GetInteger("Layout", "custom_top_left", 0));

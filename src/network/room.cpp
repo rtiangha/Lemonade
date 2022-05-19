@@ -251,7 +251,7 @@ public:
 void Room::RoomImpl::ServerLoop() {
     while (state != State::Closed) {
         ENetEvent event;
-        if (enet_host_service(server, &event, 50) > 0) {
+        if (enet_host_service(server, &event, 16) > 0) {
             switch (event.type) {
             case ENET_EVENT_TYPE_RECEIVE:
                 switch (event.packet->data[0]) {
@@ -1029,6 +1029,10 @@ bool Room::Create(const std::string& name, const std::string& description,
         return false;
     }
     room_impl->state = State::Open;
+
+    if (!verify_backend) {
+        verify_backend = std::make_unique<Network::VerifyUser::NullBackend>();
+    }
 
     room_impl->room_information.name = name;
     room_impl->room_information.description = description;
