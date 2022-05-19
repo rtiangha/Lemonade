@@ -77,10 +77,6 @@ inline void Write(u32 addr, const T data) {
 
     case GPU_REG_INDEX(display_transfer_config.trigger): {
         if (g_regs.display_transfer_config.trigger & 1) {
-
-            if (Pica::g_debug_context)
-                Pica::g_debug_context->OnEvent(Pica::DebugContext::Event::IncomingDisplayTransfer,
-                                               nullptr);
             VideoCore::DisplayTransfer(&g_regs.display_transfer_config);
         }
         break;
@@ -96,14 +92,6 @@ inline void Write(u32 addr, const T data) {
     }
     default:
         break;
-    }
-
-    // Notify tracer about the register write
-    // This is happening *after* handling the write to make sure we properly catch all memory reads.
-    if (Pica::g_debug_context && Pica::g_debug_context->recorder) {
-        // addr + GPU VBase - IO VBase + IO PBase
-        Pica::g_debug_context->recorder->RegisterWritten<T>(
-            addr + 0x1EF00000 - 0x1EC00000 + 0x10100000, data);
     }
 }
 

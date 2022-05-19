@@ -8,7 +8,7 @@
 #include "video_core/gpu_thread.h"
 #include "video_core/renderer_base.h"
 
-namespace VideoCore {
+namespace VideoCore { // async gpu processes
 GPUBackend::GPUBackend(VideoCore::RendererBase& renderer) : renderer{renderer} {}
 
 GPUBackend::~GPUBackend() = default;

@@ -77,6 +77,10 @@ static void UpdateLandscapeScreenLayout() {
             IDCache::GetNativeLibraryClass(), IDCache::GetLandscapeScreenLayout()));
 }
 
+void EmuWindow_Android::UpdateLayout() {
+    UpdateCurrentFramebufferLayout(window_width, window_height);
+}
+
 void EmuWindow_Android::OnSurfaceChanged(ANativeWindow* surface) {
     render_window = surface;
     StopPresenting();

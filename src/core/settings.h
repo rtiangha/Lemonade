@@ -251,7 +251,10 @@ struct Values {
     bool skip_texture_copy;
     bool use_linear_filter;
     bool texture_load_hack;
-    bool use_present_thread;
+    bool disable_clip_coef;
+    bool display_transfer_hack;
+    bool y2r_perform_hack;
+    bool y2r_event_delay;
 
     // Citra Valentin ports
     bool skip_format_reinterpretation;

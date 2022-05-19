@@ -11,7 +11,7 @@
 
 namespace Pica {
 
-static const std::pair<u16, const char*> register_names[] = {
+static const std::pair<u16, const char*> register_names[] = { // init regs
     {0x010, "GPUREG_FINALIZE"},
 
     {0x040, "GPUREG_FACECULLING_CONFIG"},

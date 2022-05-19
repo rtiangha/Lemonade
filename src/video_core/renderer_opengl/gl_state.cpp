@@ -357,6 +357,78 @@ void OpenGLState::Apply() const {
     cur_state = *this;
 }
 
+GLuint OpenGLState::BindVertexArray(GLuint array) {
+    GLuint previous = cur_state.draw.vertex_array;
+    glBindVertexArray(array);
+    cur_state.draw.vertex_array = array;
+    return previous;
+}
+
+GLuint OpenGLState::BindVertexBuffer(GLuint buffer) {
+    GLuint previous = cur_state.draw.vertex_buffer;
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    cur_state.draw.vertex_buffer = buffer;
+    return previous;
+}
+
+GLuint OpenGLState::BindUniformBuffer(GLuint buffer) {
+    GLuint previous = cur_state.draw.uniform_buffer;
+    glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+    cur_state.draw.uniform_buffer = buffer;
+    return previous;
+}
+
+GLuint OpenGLState::BindTexture2D(int index, GLuint texture) {
+    GLuint previous = cur_state.texture_units[index].texture_2d;
+    glActiveTexture(TextureUnits::PicaTexture(index).Enum());
+    glBindTexture(GL_TEXTURE_2D, texture);
+    cur_state.texture_units[index].texture_2d = texture;
+    return previous;
+}
+
+GLuint OpenGLState::BindSampler(int index, GLuint sampler) {
+    GLuint previous = cur_state.texture_units[index].sampler;
+    glBindSampler(index, sampler);
+    cur_state.texture_units[index].sampler = sampler;
+    return previous;
+}
+
+GLuint OpenGLState::BindTextureCube(GLuint texture_cube) {
+    GLuint previous = cur_state.texture_cube_unit.texture_cube;
+    glActiveTexture(TextureUnits::TextureCube.Enum());
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture_cube);
+    cur_state.texture_cube_unit.texture_cube = texture_cube;
+    return previous;
+}
+
+GLuint OpenGLState::BindReadFramebuffer(GLuint framebuffer) {
+    GLuint previous = cur_state.draw.read_framebuffer;
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+    cur_state.draw.read_framebuffer = framebuffer;
+    return previous;
+}
+
+GLuint OpenGLState::BindDrawFramebuffer(GLuint framebuffer) {
+    GLuint previous = cur_state.draw.draw_framebuffer;
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+    cur_state.draw.draw_framebuffer = framebuffer;
+    return previous;
+}
+
+GLuint OpenGLState::BindRenderbuffer(GLuint buffer) {
+    GLuint previous = cur_state.renderbuffer;
+    glBindRenderbuffer(GL_RENDERBUFFER, buffer);
+    cur_state.renderbuffer = buffer;
+    return previous;
+}
+
+GLuint OpenGLState::BindShaderProgram(GLuint shader) {
+    GLuint previous_shader = cur_state.draw.shader_program;
+    glUseProgram(shader);
+    cur_state.draw.shader_program = shader;
+    return previous_shader;
+}
+
 OpenGLState& OpenGLState::ResetTexture(GLuint handle) {
     for (auto& unit : texture_units) {
         if (unit.texture_2d == handle) {

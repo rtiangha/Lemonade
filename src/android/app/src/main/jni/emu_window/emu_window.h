@@ -40,6 +40,8 @@ public:
     /// Called by the onSurfaceChanges() method to change the surface
     void OnSurfaceChanged(ANativeWindow* surface);
 
+    void UpdateLayout();
+
     /// Handles touch event that occur.(Touched or released)
     bool OnTouchEvent(int x, int y, bool pressed);
 

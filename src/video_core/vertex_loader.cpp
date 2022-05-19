@@ -82,18 +82,6 @@ void VertexLoader::LoadVertex(u32 base_address, int index, int vertex,
             u32 source_addr =
                 base_address + vertex_attribute_sources[i] + vertex_attribute_strides[i] * vertex;
 
-            if (g_debug_context && Pica::g_debug_context->recorder) {
-                memory_accesses.AddAccess(
-                    source_addr,
-                    vertex_attribute_elements[i] *
-                        ((vertex_attribute_formats[i] == PipelineRegs::VertexAttributeFormat::FLOAT)
-                             ? 4
-                             : (vertex_attribute_formats[i] ==
-                                PipelineRegs::VertexAttributeFormat::SHORT)
-                                   ? 2
-                                   : 1));
-            }
-
             switch (vertex_attribute_formats[i]) {
             case PipelineRegs::VertexAttributeFormat::BYTE: {
                 const s8* srcdata = reinterpret_cast<const s8*>(

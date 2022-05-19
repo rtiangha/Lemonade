@@ -20,6 +20,7 @@
 #include "common/bit_field.h"
 #include "common/color.h"
 #include "common/logging/log.h"
+#include "common/hash.h"
 #include "common/math_util.h"
 #include "common/microprofile.h"
 #include "common/scope_exit.h"
@@ -119,6 +120,17 @@ static void MortonCopyTile(u32 stride, u8* tile_buffer, u8* gl_buffer) {
                 if constexpr (format == PixelFormat::D24S8) {
                     std::memcpy(tile_ptr, gl_ptr + 1, 3);
                     tile_ptr[3] = gl_ptr[0];
+                } else if (format == PixelFormat::RGBA8 && GLES) {
+                    // because GLES does not have ABGR format
+                    // so we will do byteswapping here
+                    tile_ptr[0] = gl_ptr[3];
+                    tile_ptr[1] = gl_ptr[2];
+                    tile_ptr[2] = gl_ptr[1];
+                    tile_ptr[3] = gl_ptr[0];
+                } else if (format == PixelFormat::RGB8 && GLES) {
+                    tile_ptr[0] = gl_ptr[2];
+                    tile_ptr[1] = gl_ptr[1];
+                    tile_ptr[2] = gl_ptr[0];
                 } else {
                     std::memcpy(tile_ptr, gl_ptr, bytes_per_pixel);
                 }
@@ -640,7 +652,23 @@ void CachedSurface::FlushGLBuffer(PAddr flush_start, PAddr flush_end) {
             std::memcpy(&dst_buffer[coarse_start_offset], &backup_data[0], backup_bytes);
     } else if (!is_tiled) {
         ASSERT(type == SurfaceType::Color);
-        std::memcpy(dst_buffer + start_offset, &gl_buffer[start_offset], flush_end - flush_start);
+        if (pixel_format == PixelFormat::RGBA8 && GLES) {
+            for (std::size_t i = start_offset; i < flush_end - addr; i += 4) {
+                dst_buffer[i] = gl_buffer[i + 3];
+                dst_buffer[i + 1] = gl_buffer[i + 2];
+                dst_buffer[i + 2] = gl_buffer[i + 1];
+                dst_buffer[i + 3] = gl_buffer[i];
+            }
+        } else if (pixel_format == PixelFormat::RGB8 && GLES) {
+            for (std::size_t i = start_offset; i < flush_end - addr; i += 3) {
+                dst_buffer[i] = gl_buffer[i + 2];
+                dst_buffer[i + 1] = gl_buffer[i + 1];
+                dst_buffer[i + 2] = gl_buffer[i];
+            }
+        } else {
+            std::memcpy(dst_buffer + start_offset, &gl_buffer[start_offset],
+                        flush_end - flush_start);
+        }
     } else {
         gl_to_morton_fns[static_cast<std::size_t>(pixel_format)](stride, height, &gl_buffer[0],
                                                                  addr, flush_start, flush_end);
@@ -703,7 +731,7 @@ void CachedSurface::DumpTexture(GLuint target_tex, u64 tex_hash) {
         return;
     }
 
-    dump_path += fmt::format("tex1_{}x{}_{:016X}_{}.png", width, height, tex_hash, pixel_format);
+    dump_path += fmt::format("tex1_{}x{}_{:016X}_{}.png", width, height, tex_hash, (u32)pixel_format);
     if (!custom_tex_cache.IsTextureDumped(tex_hash) && !FileUtil::Exists(dump_path)) {
         custom_tex_cache.SetTextureDumped(tex_hash);
 
@@ -761,7 +789,7 @@ void CachedSurface::UploadGLTexture(Common::Rectangle<u32> rect, GLuint read_fb_
     // Load data from memory to the surface
     GLint x0 = static_cast<GLint>(rect.left);
     GLint y0 = static_cast<GLint>(rect.bottom);
-    std::size_t buffer_offset = (y0 * stride + x0) * GetGLBytesPerPixel(pixel_format);
+    std::size_t buffer_offset = (rect.bottom * stride + rect.left) * GetGLBytesPerPixel(pixel_format);
 
     const FormatTuple& tuple = GetFormatTuple(pixel_format);
     GLuint target_tex = texture.handle;
@@ -1218,7 +1246,7 @@ Surface RasterizerCacheOpenGL::GetTextureSurface(const Pica::Texture::TextureInf
     params.is_tiled = true;
     params.pixel_format = SurfaceParams::PixelFormatFromTextureFormat(info.format);
     params.is_texture = g_texture_load_hack &&
-                        (params.addr < 0x181FFFFF || params.pixel_format > PixelFormat::RGBA4);
+            (params.addr < 0x181FFFFF || params.pixel_format > PixelFormat::RGBA4);
     params.res_scale = texture_filterer->IsNull() ? 1 : resolution_scale_factor;
     params.UpdateParams();
 
@@ -1355,7 +1383,8 @@ Surface RasterizerCacheOpenGL::GetTextureSurface(const Pica::Texture::TextureInf
 }
 
 const CachedTextureCube& RasterizerCacheOpenGL::GetTextureCube(const TextureCubeConfig& config) {
-    auto& cube = texture_cube_cache[config];
+    auto hash_key = Common::ComputeHash64(&config, sizeof(config));
+    auto& cube = texture_cube_cache[hash_key];
 
     struct Face {
         Face(std::shared_ptr<SurfaceWatcher>& watcher, PAddr address, GLenum gl_face)
@@ -1478,48 +1507,50 @@ SurfaceSurfaceRect_Tuple RasterizerCacheOpenGL::GetFramebufferSurfaces(
     color_params.height = config.GetHeight();
     SurfaceParams depth_params = color_params;
 
-    color_params.addr = config.GetColorBufferPhysicalAddress();
-    color_params.pixel_format = SurfaceParams::PixelFormatFromColorFormat(config.color_format);
-    color_params.UpdateParams();
-
-    depth_params.addr = config.GetDepthBufferPhysicalAddress();
-    depth_params.pixel_format = SurfaceParams::PixelFormatFromDepthFormat(config.depth_format);
-    depth_params.UpdateParams();
-
-    auto color_vp_interval = color_params.GetSubRectInterval(viewport_clamped);
-    auto depth_vp_interval = depth_params.GetSubRectInterval(viewport_clamped);
-
-    // Make sure that framebuffers don't overlap if both color and depth are being used
-    if (using_color_fb && using_depth_fb &&
-        boost::icl::length(color_vp_interval & depth_vp_interval)) {
-        LOG_CRITICAL(Render_OpenGL, "Color and depth framebuffer memory regions overlap; "
-                                    "overlapping framebuffers not supported!");
-        using_depth_fb = false;
-    }
+    SurfaceInterval color_vp_interval;
+    SurfaceInterval depth_vp_interval;
 
     if (!using_depth_fb && g_texture_load_hack &&
         color_params.addr > 0x18000000 && color_params.addr < 0x181FFFFF) {
         color_params.is_texture = true;
     }
 
+    Common::Rectangle<u32> depth_rect{};
+    Surface depth_surface = nullptr;
+    if (using_depth_fb) {
+        depth_params.addr = config.GetDepthBufferPhysicalAddress();
+        depth_params.pixel_format = SurfaceParams::PixelFormatFromDepthFormat(config.depth_format);
+        depth_params.UpdateParams();
+        depth_vp_interval = depth_params.GetSubRectInterval(viewport_clamped);
+
+        std::tie(depth_surface, depth_rect) =
+                GetSurfaceSubRect(depth_params, ScaleMatch::Exact, false);
+    }
+
     Common::Rectangle<u32> color_rect{};
     Surface color_surface = nullptr;
     if (using_color_fb)
+        color_params.addr = config.GetColorBufferPhysicalAddress();
+    color_params.pixel_format = SurfaceParams::PixelFormatFromColorFormat(config.color_format);
+    color_params.UpdateParams();
+    color_vp_interval = color_params.GetSubRectInterval(viewport_clamped);
+    if (depth_surface && depth_rect.bottom > 0) {
+        SurfaceParams new_params = color_params;
+        new_params.height = depth_rect.top;
+        new_params.UpdateParams();
         std::tie(color_surface, color_rect) =
-            GetSurfaceSubRect(color_params, ScaleMatch::Exact, false);
-
-    Common::Rectangle<u32> depth_rect{};
-    Surface depth_surface = nullptr;
-    if (using_depth_fb)
-        std::tie(depth_surface, depth_rect) =
-            GetSurfaceSubRect(depth_params, ScaleMatch::Exact, false);
+                GetSurfaceSubRect(new_params, ScaleMatch::Exact, false);
+        color_rect.bottom += depth_rect.bottom;
+    } else {
+        std::tie(color_surface, color_rect) =
+                GetSurfaceSubRect(color_params, ScaleMatch::Exact, false);
+    }
 
     Common::Rectangle<u32> fb_rect{};
     if (color_surface != nullptr && depth_surface != nullptr) {
         fb_rect = color_rect;
         // Color and Depth surfaces must have the same dimensions and offsets
-        if (color_rect.bottom != depth_rect.bottom || color_rect.top != depth_rect.top ||
-            color_rect.left != depth_rect.left || color_rect.right != depth_rect.right) {
+        if (color_rect != depth_rect) {
             color_surface = GetSurface(color_params, ScaleMatch::Exact, false);
             depth_surface = GetSurface(depth_params, ScaleMatch::Exact, false);
             fb_rect = color_surface->GetScaledRect();
@@ -1843,13 +1874,14 @@ void RasterizerCacheOpenGL::FlushRegion(PAddr addr, u32 size, Surface flush_surf
 
         if (surface->is_texture && !surface->gl_buffer.empty()) {
             // skip texture
+        } else if (!GLES || surface->pixel_format < PixelFormat::D16) {
+            if (surface->type != SurfaceType::Fill) {
+                SurfaceParams params = surface->FromInterval(interval);
+                surface->DownloadGLTexture(surface->GetSubRect(params), read_framebuffer.handle,
+                                           draw_framebuffer.handle);
+            }
+            surface->FlushGLBuffer(boost::icl::first(interval), boost::icl::last_next(interval));
         }
-        if (surface->type != SurfaceType::Fill) {
-            SurfaceParams params = surface->FromInterval(interval);
-            surface->DownloadGLTexture(surface->GetSubRect(params), read_framebuffer.handle,
-                                       draw_framebuffer.handle);
-        }
-        surface->FlushGLBuffer(boost::icl::first(interval), boost::icl::last_next(interval));
         flushed_intervals += interval;
     }
     // Reset dirty regions

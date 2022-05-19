@@ -249,7 +249,7 @@ public:
 
 private:
     bool separable;
-    std::unordered_map<KeyConfigType, OGLShaderStage> shaders;
+    std::unordered_map<KeyConfigType, OGLShaderStage> shaders{};
 };
 
 // This is a cache designed for shaders translated from PICA shaders. The first cache matches the
@@ -371,7 +371,7 @@ public:
     bool is_amd;
     bool separable;
 
-    ShaderTuple current;
+    ShaderTuple current{};
 
     ProgrammableVertexShaders programmable_vertex_shaders;
     TrivialVertexShader trivial_vertex_shader;

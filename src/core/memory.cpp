@@ -525,7 +525,8 @@ static std::vector<VAddr> PhysicalToVirtualAddressForRasterizer(PAddr addr) {
 }
 
 void MemorySystem::RasterizerMarkRegionCached(PAddr start, u32 size, bool cached) {
-    if (start == 0) {
+    if (start < VRAM_PADDR) {
+        LOG_ERROR(HW_Memory, "Using invalid physical address for rasterizer: {:08X}", start);
         return;
     }
 
@@ -674,7 +675,7 @@ void MemorySystem::ReadBlock(const Kernel::Process& process, const VAddr src_add
 
     while (remaining_size > 0) {
         const std::size_t copy_amount = std::min(PAGE_SIZE - page_offset, remaining_size);
-        const VAddr current_vaddr = static_cast<VAddr>((page_index << PAGE_BITS) + page_offset);
+        const auto current_vaddr = static_cast<VAddr>((page_index << PAGE_BITS) + page_offset);
 
         switch (page_table.attributes[page_index]) {
         case PageType::Unmapped: {
@@ -686,8 +687,6 @@ void MemorySystem::ReadBlock(const Kernel::Process& process, const VAddr src_add
             break;
         }
         case PageType::Memory: {
-            DEBUG_ASSERT(page_table.pointers[page_index]);
-
             const u8* src_ptr = page_table.pointers[page_index] + page_offset;
             std::memcpy(dest_buffer, src_ptr, copy_amount);
             break;
@@ -740,7 +739,7 @@ void MemorySystem::WriteBlock(const Kernel::Process& process, const VAddr dest_a
 
     while (remaining_size > 0) {
         const std::size_t copy_amount = std::min(PAGE_SIZE - page_offset, remaining_size);
-        const VAddr current_vaddr = static_cast<VAddr>((page_index << PAGE_BITS) + page_offset);
+        const auto current_vaddr = static_cast<VAddr>((page_index << PAGE_BITS) + page_offset);
 
         switch (page_table.attributes[page_index]) {
         case PageType::Unmapped: {
@@ -751,8 +750,6 @@ void MemorySystem::WriteBlock(const Kernel::Process& process, const VAddr dest_a
             break;
         }
         case PageType::Memory: {
-            DEBUG_ASSERT(page_table.pointers[page_index]);
-
             u8* dest_ptr = page_table.pointers[page_index] + page_offset;
             std::memcpy(dest_ptr, src_buffer, copy_amount);
             break;
@@ -791,7 +788,7 @@ void MemorySystem::ZeroBlock(const Kernel::Process& process, const VAddr dest_ad
 
     while (remaining_size > 0) {
         const std::size_t copy_amount = std::min(PAGE_SIZE - page_offset, remaining_size);
-        const VAddr current_vaddr = static_cast<VAddr>((page_index << PAGE_BITS) + page_offset);
+        const auto current_vaddr = static_cast<VAddr>((page_index << PAGE_BITS) + page_offset);
 
         switch (page_table.attributes[page_index]) {
         case PageType::Unmapped: {
@@ -802,8 +799,6 @@ void MemorySystem::ZeroBlock(const Kernel::Process& process, const VAddr dest_ad
             break;
         }
         case PageType::Memory: {
-            DEBUG_ASSERT(page_table.pointers[page_index]);
-
             u8* dest_ptr = page_table.pointers[page_index] + page_offset;
             std::memset(dest_ptr, 0, copy_amount);
             break;
@@ -845,7 +840,7 @@ void MemorySystem::CopyBlock(const Kernel::Process& dest_process,
 
     while (remaining_size > 0) {
         const std::size_t copy_amount = std::min(PAGE_SIZE - page_offset, remaining_size);
-        const VAddr current_vaddr = static_cast<VAddr>((page_index << PAGE_BITS) + page_offset);
+        const auto current_vaddr = static_cast<VAddr>((page_index << PAGE_BITS) + page_offset);
 
         switch (page_table.attributes[page_index]) {
         case PageType::Unmapped: {
@@ -857,7 +852,6 @@ void MemorySystem::CopyBlock(const Kernel::Process& dest_process,
             break;
         }
         case PageType::Memory: {
-            DEBUG_ASSERT(page_table.pointers[page_index]);
             const u8* src_ptr = page_table.pointers[page_index] + page_offset;
             WriteBlock(dest_process, dest_addr, src_ptr, copy_amount);
             break;

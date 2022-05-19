@@ -12,6 +12,8 @@
 #include "jni/camera/still_image_camera.h"
 #include "jni/id_cache.h"
 
+#include "multiplayer.h"
+
 #include <jni.h>
 
 static constexpr jint JNI_VERSION = JNI_VERSION_1_6;
@@ -33,6 +35,7 @@ static jmethodID s_exit_emulation_activity;
 static jmethodID s_request_camera_permission;
 static jmethodID s_request_mic_permission;
 static jmethodID s_disk_cache_load_progress;
+static jmethodID s_add_netplay_message;
 
 static std::unordered_map<VideoCore::LoadCallbackStage, jobject> s_java_load_callback_stages;
 
@@ -117,6 +120,10 @@ jmethodID GetDiskCacheLoadProgress() {
     return s_disk_cache_load_progress;
 }
 
+jmethodID GetAddNetplayMessage() {
+    return s_add_netplay_message;
+}
+
 jobject GetJavaLoadCallbackStage(VideoCore::LoadCallbackStage stage) {
     const auto it = s_java_load_callback_stages.find(stage);
     ASSERT_MSG(it != s_java_load_callback_stages.end(), "Invalid LoadCallbackStage: {}", stage);
@@ -148,21 +155,21 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     LOG_INFO(Frontend, "Logging backend initialised");
 
     // Initialize Java classes
-    const jclass native_library_class = env->FindClass("org/citra/citra_emu/NativeLibrary");
+    const jclass native_library_class = env->FindClass("org/citra/emu/NativeLibrary");
     s_native_library_class = reinterpret_cast<jclass>(env->NewGlobalRef(native_library_class));
     s_savestate_info_class = reinterpret_cast<jclass>(
-        env->NewGlobalRef(env->FindClass("org/citra/citra_emu/NativeLibrary$SavestateInfo")));
+        env->NewGlobalRef(env->FindClass("org/citra/emu/NativeLibrary$SavestateInfo")));
     s_core_error_class = reinterpret_cast<jclass>(
-        env->NewGlobalRef(env->FindClass("org/citra/citra_emu/NativeLibrary$CoreError")));
+        env->NewGlobalRef(env->FindClass("org/citra/emu/NativeLibrary$CoreError")));
     s_disk_cache_progress_class = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("org/citra/citra_emu/disk_shader_cache/DiskShaderCacheProgress")));
+        env->FindClass("org/citra/emu/utils/DiskShaderCacheProgress")));
     s_load_callback_stage_class = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass(
-        "org/citra/citra_emu/disk_shader_cache/DiskShaderCacheProgress$LoadCallbackStage")));
+        "org/citra/emu/utils/DiskShaderCacheProgress$LoadCallbackStage")));
 
     // Initialize Java methods
     s_on_core_error = env->GetStaticMethodID(
         s_native_library_class, "OnCoreError",
-        "(Lorg/citra/citra_emu/NativeLibrary$CoreError;Ljava/lang/String;)Z");
+        "(Lorg/citra/emu/NativeLibrary$CoreError;Ljava/lang/String;)Z");
     s_display_alert_msg = env->GetStaticMethodID(s_native_library_class, "displayAlertMsg",
                                                  "(Ljava/lang/String;Ljava/lang/String;Z)Z");
     s_display_alert_prompt =
@@ -181,7 +188,9 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         env->GetStaticMethodID(s_native_library_class, "RequestMicPermission", "()Z");
     s_disk_cache_load_progress = env->GetStaticMethodID(
         s_disk_cache_progress_class, "loadProgress",
-        "(Lorg/citra/citra_emu/disk_shader_cache/DiskShaderCacheProgress$LoadCallbackStage;II)V");
+        "(Lorg/citra/emu/utils/DiskShaderCacheProgress$LoadCallbackStage;II)V");
+    s_add_netplay_message =
+            env->GetStaticMethodID(s_native_library_class, "AddNetPlayMessage", "(ILjava/lang/String;)V");
 
     // Initialize LoadCallbackStage map
     const auto to_java_load_callback_stage = [env](const std::string& stage) {
@@ -189,7 +198,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         return env->NewGlobalRef(env->GetStaticObjectField(
             load_callback_stage_class,
             env->GetStaticFieldID(load_callback_stage_class, stage.c_str(),
-                                  "Lorg/citra/citra_emu/disk_shader_cache/"
+                                  "Lorg/citra/emu/utils/"
                                   "DiskShaderCacheProgress$LoadCallbackStage;")));
     };
 
@@ -205,6 +214,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     MiiSelector::InitJNI(env);
     SoftwareKeyboard::InitJNI(env);
     Camera::StillImage::InitJNI(env);
+    NetworkInit();
 
     return JNI_VERSION;
 }
@@ -228,6 +238,7 @@ void JNI_OnUnload(JavaVM* vm, void* reserved) {
     MiiSelector::CleanupJNI(env);
     SoftwareKeyboard::CleanupJNI(env);
     Camera::StillImage::CleanupJNI(env);
+    NetworkShutdown();
 }
 
 #ifdef __cplusplus
