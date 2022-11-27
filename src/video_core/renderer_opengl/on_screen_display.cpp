@@ -408,7 +408,7 @@ static std::unique_ptr<RasterFont> s_raster_font;
 
 void Initialize() {
     s_raster_font = std::make_unique<RasterFont>();
-    s_raster_font->Initialize(1.8f);
+    s_raster_font->Initialize(Settings::values.osd_size);
     // fps placeholder
     AddMessage("", MessageType::FPS, Duration::FOREVER, Color::BLUE);
 }

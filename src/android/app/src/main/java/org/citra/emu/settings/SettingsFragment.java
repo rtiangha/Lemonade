@@ -17,7 +17,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.citra.emu.NativeLibrary;
 import org.citra.emu.R;
 import org.citra.emu.settings.model.Setting;
 import org.citra.emu.settings.model.SettingSection;
@@ -467,6 +466,7 @@ public final class SettingsFragment extends Fragment {
         Setting new3ds = systemSection.getSetting(SettingsFile.KEY_IS_NEW_3DS);
         Setting resolutionFactor = rendererSection.getSetting(SettingsFile.KEY_RESOLUTION_FACTOR);
         Setting showFps = rendererSection.getSetting(SettingsFile.KEY_SHOW_FPS);
+        Setting osdSize = rendererSection.getSetting(SettingsFile.KEY_OSD_SIZE);
         Setting cpuUsageLimit = rendererSection.getSetting(SettingsFile.KEY_CPU_USAGE_LIMIT);
         Setting textureLoadHack = rendererSection.getSetting(SettingsFile.KEY_TEXTURE_LOAD_HACK);
         Setting useAsynchronousGpuEmulation = rendererSection.getSetting(SettingsFile.KEY_USE_ASYNCHRONOUS_GPU_EMULATION);
@@ -489,6 +489,7 @@ public final class SettingsFragment extends Fragment {
         sl.add(new CheckBoxSetting(SettingsFile.KEY_IS_NEW_3DS, Settings.SECTION_SYSTEM, R.string.is_new_3ds, R.string.is_new_3ds_description, false, new3ds));
         sl.add(new SliderSetting(SettingsFile.KEY_RESOLUTION_FACTOR, Settings.SECTION_RENDERER, R.string.internal_resolution, R.string.internal_resolution_description, 1, 4, "x", 1, resolutionFactor));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_SHOW_FPS, Settings.SECTION_RENDERER, R.string.emulation_show_fps, 0, false, showFps));
+        sl.add(new SliderSetting(SettingsFile.KEY_OSD_SIZE, Settings.SECTION_RENDERER, R.string.emulation_osd_size, R.string.emulation_osd_size_description, 2, 4, "x", 2, osdSize));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_CPU_USAGE_LIMIT, Settings.SECTION_RENDERER, R.string.cpu_usage_limit, R.string.cpu_usage_limit_description, false, cpuUsageLimit));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_TEXTURE_LOAD_HACK, Settings.SECTION_RENDERER, R.string.setting_texture_load_hack, R.string.setting_texture_load_hack_description, false, textureLoadHack));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_USE_ASYNCHRONOUS_GPU_EMULATION, Settings.SECTION_RENDERER, R.string.asynchronous_gpu, R.string.asynchronous_gpu_description, true, useAsynchronousGpuEmulation));

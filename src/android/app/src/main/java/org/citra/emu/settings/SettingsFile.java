@@ -45,6 +45,7 @@ public final class SettingsFile {
     public static final String KEY_USE_VSYNC = "use_vsync_new";
     public static final String KEY_RESOLUTION_FACTOR = "resolution_factor";
     public static final String KEY_SHOW_FPS = "show_fps";
+    public static final String KEY_OSD_SIZE = "osd_size";
     public static final String KEY_CPU_USAGE_LIMIT = "cpu_usage_limit";
     public static final String KEY_TEXTURE_LOAD_HACK = "texture_load_hack";
     public static final String KEY_UPDATER_CHECK_AT_STARTUP = "check_updates_at_startup";

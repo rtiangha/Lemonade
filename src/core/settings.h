@@ -193,6 +193,7 @@ struct Values {
     bool use_shader_jit;
     u16 resolution_factor;
     bool show_fps;
+    float osd_size;
     bool use_frame_limit_alternate;
     u16 frame_limit;
     u16 frame_limit_alternate;

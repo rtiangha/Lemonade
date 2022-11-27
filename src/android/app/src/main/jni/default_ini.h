@@ -140,9 +140,14 @@ use_disk_shader_cache =
 # factor for the 3DS resolution
 resolution_factor =
 
-# Show On-Screen Display messages, FPS, VPS and Speed.
+# Show On-Screen Display messages, including FPS, VPS and Speed.
 # 0: Off (default), 1: On
 show_fps =
+
+# Adjust On-Screen Display messages size, including FPS counter.
+# 2: Default OSD scale, 3: duplicated OSD scale, 4: bigger scale
+# You can put more accurate values here.
+osd_size =
 
 # Enable limit usage for CPU, improve perfomance a little on some games
 # 0: Off (default), 1: On

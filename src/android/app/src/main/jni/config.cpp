@@ -124,6 +124,7 @@ void Config::ReadValues() {
     Settings::values.resolution_factor =
         static_cast<u16>(sdl2_config->GetInteger("Renderer", "resolution_factor", 1));
     Settings::values.show_fps = sdl2_config->GetBoolean("Renderer", "show_fps", false);
+    Settings::values.osd_size = static_cast<float>(sdl2_config->GetReal("Renderer", "osd_size", 2.0f));
     Settings::values.core_downcount_hack = sdl2_config->GetBoolean("Renderer", "cpu_usage_limit", false);
     Settings::values.texture_load_hack = sdl2_config->GetBoolean("Renderer", "texture_load_hack", false);
 
