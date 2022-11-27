@@ -71,6 +71,25 @@ void LoadOverrides(u64 program_id) {
         Settings::values.skip_texture_copy = true;
     }
 
+    const std::array<u64, 10> core_ticks_hack_ids = {
+        0x0004000000030500, // Super Street Fighter IV: 3D Edition
+        0x0004000000032D00, // Super Street Fighter IV: 3D Edition
+        0x0004000000033C00, // Super Street Fighter IV: 3D Edition
+        0x0004000000060200, // Resident Evil: Revelations
+        0x000400000005EE00, // Resident Evil: Revelations
+        0x0004000000035900, // Resident Evil: The Mercenaries 3D
+        0x0004000000038B00, // Resident Evil: The Mercenaries 3D
+        0x00040000000C8100, // Paper Mario: Sticker Star
+        0x00040000000A5E00, // Paper Mario: Sticker Star
+        0x00040000000A5F00, // Paper Mario: Sticker Star
+    };
+    for (auto id : core_ticks_hack_ids) {
+        if (program_id == id) {
+            Settings::SetFMVHack(true);
+            break;
+        }
+    }
+
     const std::array<u64, 7> cpu_limit_ids = {
         0x000400000007C700, // Mario Tennis Open
         0x000400000007C800, // Mario Tennis Open

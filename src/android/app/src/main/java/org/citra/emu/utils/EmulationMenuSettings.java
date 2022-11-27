@@ -14,7 +14,7 @@ public class EmulationMenuSettings {
     }
 
     public static boolean getDpadSlideEnable() {
-        return mPreferences.getBoolean("EmulationMenuSettings_DpadSlideEnable", true);
+        return mPreferences.getBoolean(InputOverlay.PREF_DPAD_SLIDE, true);
     }
 
     public static int getLandscapeScreenLayout() {
@@ -22,13 +22,7 @@ public class EmulationMenuSettings {
     }
 
     public static boolean getSwapScreens() {
-        return mPreferences.getBoolean("EmulationMenuSettings_SwapScreens", false);
-    }
-
-    public static void setSwapScreens(boolean value) {
-        final SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putBoolean("EmulationMenuSettings_SwapScreens", value);
-        editor.apply();
+        return mPreferences.getBoolean(InputOverlay.PREF_SWAP_SCREENS, false);
     }
 
     public static boolean getShowOverlay() {

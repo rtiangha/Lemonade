@@ -64,10 +64,12 @@ public class RunningSettingDialog extends DialogFragment {
     @Override
     public void onStop() {
         super.onStop();
-        // Update framebuffer layout when closing the settings
+        // Update screen layout when closing settings
         Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         int rotation = display.getRotation();
         NativeLibrary.NotifyOrientationChange(EmulationMenuSettings.getLandscapeScreenLayout(),
+                rotation);
+        NativeLibrary.SwapScreens(EmulationMenuSettings.getSwapScreens(),
                 rotation);
     }
 
@@ -145,10 +147,12 @@ public class RunningSettingDialog extends DialogFragment {
         // pref
         public static final int SETTING_HAPTIC_FEEDBACK = 100;
         public static final int SETTING_JOYSTICK_RELATIVE = 101;
-        public static final int SETTING_SHOW_OVERLAY = 102;
-        public static final int SETTING_CONTROLLER_SCALE = 103;
-        public static final int SETTING_CONTROLLER_ALPHA = 104;
-        public static final int SETTING_SCREEN_LAYOUT = 105;
+        public static final int SETTING_DPAD_SLIDE = 102;
+        public static final int SETTING_SWAP_SCREENS = 103;
+        public static final int SETTING_SHOW_OVERLAY = 104;
+        public static final int SETTING_CONTROLLER_SCALE = 105;
+        public static final int SETTING_CONTROLLER_ALPHA = 106;
+        public static final int SETTING_SCREEN_LAYOUT = 107;
 
         // func
         public static final int SETTING_LOAD_SUBMENU = 200;
@@ -252,7 +256,7 @@ public class RunningSettingDialog extends DialogFragment {
 
         @Override
         public void onClick(View clicked) {
-            EmulationActivity activity = (EmulationActivity) NativeLibrary.sEmulationActivity.get();
+            EmulationActivity activity = NativeLibrary.sEmulationActivity.get();
             switch (mItem.getSetting()) {
                 case SettingsItem.SETTING_LOAD_SUBMENU:
                     loadSubMenu(mItem.getValue());
@@ -519,6 +523,8 @@ public class RunningSettingDialog extends DialogFragment {
         private int[] mRunningSettings;
         private int mHapticFeedback;
         private int mJoystickRelative;
+        private int mDpadSlide;
+        private int mSwapScreens;
         private int mShowOverlay;
         private int mControllerScale;
         private int mControllerAlpha;
@@ -531,12 +537,12 @@ public class RunningSettingDialog extends DialogFragment {
             mSettings.add(new SettingsItem(SettingsItem.SETTING_EDIT_BUTTONS, R.string.emulation_edit_layout, SettingsItem.TYPE_TEXT, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_SAVE_STATE, R.string.emulation_save_state, SettingsItem.TYPE_TEXT, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_LOAD_STATE, R.string.emulation_load_state, SettingsItem.TYPE_TEXT, 0));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_ROTATE_SCREEN, R.string.emulation_rotate_screen, SettingsItem.TYPE_TEXT, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_LOAD_AMIIBO, R.string.menu_emulation_amiibo_load, SettingsItem.TYPE_TEXT, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_REMOVE_AMIIBO, R.string.menu_emulation_amiibo_remove, SettingsItem.TYPE_TEXT, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_TOGGLE_CONTROLS, R.string.emulation_toggle_controls, SettingsItem.TYPE_TEXT, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_RESET_OVERLAY, R.string.emulation_touch_overlay_reset, SettingsItem.TYPE_TEXT, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_LOAD_SUBMENU, R.string.multiplayer, SettingsItem.TYPE_TEXT, MENU_MULTIPLAYER));
-            mSettings.add(new SettingsItem(SettingsItem.SETTING_ROTATE_SCREEN, R.string.emulation_rotate_screen, SettingsItem.TYPE_TEXT, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_CHEAT_CODE, R.string.cheats, SettingsItem.TYPE_TEXT, 0));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_EXIT_GAME, R.string.emulation_close_game, SettingsItem.TYPE_TEXT, 0));
             notifyDataSetChanged();
@@ -582,6 +588,16 @@ public class RunningSettingDialog extends DialogFragment {
             mSettings.add(new SettingsItem(SettingsItem.SETTING_JOYSTICK_RELATIVE,
                     R.string.emulation_control_joystick_rel_center,
                     SettingsItem.TYPE_CHECKBOX, mJoystickRelative));
+
+            mDpadSlide = InputOverlay.sDpadSlide ? 1 : 0;
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_DPAD_SLIDE,
+                    R.string.emulation_control_dpad_slide,
+                    SettingsItem.TYPE_CHECKBOX, mDpadSlide));
+
+            mSwapScreens = InputOverlay.sSwapScreens ? 1 : 0;
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_SWAP_SCREENS,
+                    R.string.emulation_swap_screens,
+                    SettingsItem.TYPE_CHECKBOX, mSwapScreens));
 
             mShowOverlay = InputOverlay.sShowInputOverlay ? 1 : 0;
             mSettings.add(new SettingsItem(SettingsItem.SETTING_SHOW_OVERLAY,
@@ -707,6 +723,20 @@ public class RunningSettingDialog extends DialogFragment {
             if (mJoystickRelative != relative) {
                 editor.putBoolean(InputOverlay.PREF_JOYSTICK_RELATIVE, relative > 0);
                 InputOverlay.sJoystickRelative = relative > 0;
+            }
+            mSettings.remove(0);
+
+            int slide = mSettings.get(0).getValue();
+            if (mDpadSlide != slide) {
+                editor.putBoolean(InputOverlay.PREF_DPAD_SLIDE, slide > 0);
+                InputOverlay.sDpadSlide = slide > 0;
+            }
+            mSettings.remove(0);
+
+            int swap = mSettings.get(0).getValue();
+            if (mSwapScreens != swap) {
+                editor.putBoolean(InputOverlay.PREF_SWAP_SCREENS, swap > 0);
+                InputOverlay.sSwapScreens = swap > 0;
             }
             mSettings.remove(0);
 

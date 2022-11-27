@@ -47,16 +47,20 @@ public final class InputOverlay extends SurfaceView implements OnTouchListener {
 
     public static final String PREF_HAPTIC_FEEDBACK = "HapticFeedback";
     public static final String PREF_JOYSTICK_RELATIVE = "JoystickRelative";
+    public static final String PREF_DPAD_SLIDE = "DpadSlide";
     public static final String PREF_SHOW_OVERLAY = "ShowOverlay";
     public static final String PREF_CONTROLLER_SCALE = "ControllerScale";
     public static final String PREF_CONTROLLER_ALPHA = "ControllerAlpha";
 
     // emulation
     public static final String PREF_SCREEN_LAYOUT = "ScreenLayout";
+    public static final String PREF_SWAP_SCREENS = "SwapScreens";
     public static int sScreenLayout = 0;
+    public static boolean sSwapScreens = false;
 
     public static boolean sUseHapticFeedback = false;
     public static boolean sJoystickRelative = true;
+    public static boolean sDpadSlide = true;
     public static boolean sShowInputOverlay = true;
     public static int sControllerScale = 50;
     public static int sControllerAlpha = 100;
