@@ -22,6 +22,8 @@ add_library(main SHARED
     game_settings.h
     id_cache.cpp
     id_cache.h
+    lodepng_image_interface.cpp
+    lodepng_image_interface.h
     mic.cpp
     mic.h
     multiplayer.cpp
@@ -33,6 +35,6 @@ add_library(main SHARED
 )
 
 target_link_libraries(main PRIVATE audio_core common core input_common network)
-target_link_libraries(main PRIVATE android camera2ndk mediandk jnigraphics EGL glad inih log yuv)
+target_link_libraries(main PRIVATE android camera2ndk mediandk jnigraphics lodepng EGL glad inih log yuv)
 
 set(CPACK_PACKAGE_EXECUTABLES ${CPACK_PACKAGE_EXECUTABLES} main)

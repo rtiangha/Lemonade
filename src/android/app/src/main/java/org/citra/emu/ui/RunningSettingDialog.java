@@ -155,11 +155,11 @@ public class RunningSettingDialog extends DialogFragment {
         public static final int SETTING_EDIT_BUTTONS = 201;
         public static final int SETTING_SAVE_STATE = 202;
         public static final int SETTING_LOAD_STATE = 203;
-        public static final int SETTING_LOAD_AMIIBO = 204;
-        public static final int SETTING_REMOVE_AMIIBO = 205;
-        public static final int SETTING_TOGGLE_CONTROLS = 206;
-        public static final int SETTING_RESET_OVERLAY = 207;
-        public static final int SETTING_ROTATE_SCREEN = 208;
+        public static final int SETTING_ROTATE_SCREEN = 204;
+        public static final int SETTING_LOAD_AMIIBO = 205;
+        public static final int SETTING_REMOVE_AMIIBO = 206;
+        public static final int SETTING_TOGGLE_CONTROLS = 207;
+        public static final int SETTING_RESET_OVERLAY = 208;
         public static final int SETTING_CHEAT_CODE = 209;
         public static final int SETTING_EXIT_GAME = 210;
 
@@ -269,6 +269,10 @@ public class RunningSettingDialog extends DialogFragment {
                     NativeLibrary.LoadState(1);
                     dismiss();
                     break;
+                case SettingsItem.SETTING_ROTATE_SCREEN:
+                    activity.rotateScreen();
+                    dismiss();
+                    break;
                 case SettingsItem.SETTING_LOAD_AMIIBO:
                     activity.loadAmiibo();
                     dismiss();
@@ -283,10 +287,6 @@ public class RunningSettingDialog extends DialogFragment {
                     break;
                 case SettingsItem.SETTING_RESET_OVERLAY:
                     activity.resetOverlay();
-                    dismiss();
-                    break;
-                case SettingsItem.SETTING_ROTATE_SCREEN:
-                    activity.rotateScreen();
                     dismiss();
                     break;
                 case SettingsItem.SETTING_CHEAT_CODE:

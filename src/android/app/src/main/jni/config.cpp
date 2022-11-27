@@ -127,11 +127,11 @@ void Config::ReadValues() {
     Settings::values.core_downcount_hack = sdl2_config->GetBoolean("Renderer", "cpu_usage_limit", false);
     Settings::values.texture_load_hack = sdl2_config->GetBoolean("Renderer", "texture_load_hack", false);
 
-    // custom textures
-    Settings::values.custom_textures = sdl2_config->GetBoolean("Renderer", "custom_textures", false);
-    Settings::values.preload_textures = sdl2_config->GetBoolean("Renderer", "preload_textures", false);
-    // dump textures don't works for now
-    // Settings::values.dump_textures = sdl2_config->GetBoolean("Renderer", "dump_textures", false);
+    // Utility
+    Settings::values.dump_textures = sdl2_config->GetBoolean("Utility", "dump_textures", false);
+    Settings::values.custom_textures = sdl2_config->GetBoolean("Utility", "custom_textures", false);
+    Settings::values.preload_textures =
+        sdl2_config->GetBoolean("Utility", "preload_textures", false);
 
     Settings::values.use_disk_shader_cache =
         sdl2_config->GetBoolean("Renderer", "use_disk_shader_cache", true);

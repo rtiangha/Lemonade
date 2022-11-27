@@ -148,22 +148,6 @@ show_fps =
 # 0: Off (default), 1: On
 cpu_usage_limit =
 
-# Enable custom textures
-# 0: Off (default), 1: On
-custom_textures =
-
-# Preload custom textures, not recommended
-# 0: Off (default), 1: On
-preload_custom_textures =
-
-# Dump game textures
-# 0: Off (default), 1: On
-dump_textures =
-
-# Unaccurate emulation, can cause a lot of crashes/glitches!
-# 0: Off (default), 1: On
-inaccurate_emulation =
-
 # Whether to enable V-Sync (caps the framerate at 60FPS) or not.
 # 0 (default): Off, 1: On
 vsync_enabled =
@@ -232,6 +216,17 @@ cardboard_screen_size =
 cardboard_x_shift =
 # -100 - 100: Screen Y-Coordinate shift as a percentage of empty space. 0 (default)
 cardboard_y_shift =
+
+[Utility]
+# Dumps textures as PNG to dump/textures/[Title ID]/.
+# 0 (default): Off, 1: On
+dump_textures =
+# Reads PNG files from load/textures/[Title ID]/ and replaces textures.
+# 0 (default): Off, 1: On
+custom_textures =
+# Loads all custom textures into memory before booting.
+# 0 (default): Off, 1: On
+preload_textures =
 
 [Audio]
 # Whether or not to enable DSP LLE

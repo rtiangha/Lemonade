@@ -51,9 +51,9 @@ public final class SettingsFile {
     public static final String KEY_EXPAND_TO_CUTOUT_AREA = "expand_to_cutout_area";
 
     // custom textures
+    public static final String KEY_DUMP_TEXTURES = "dump_textures";
     public static final String KEY_CUSTOM_TEXTURES = "custom_textures";
     public static final String KEY_PRELOAD_TEXTURES = "preload_textures";
-    public static final String KEY_DUMP_TEXTURES = "dump_textures";
 
     public static final String KEY_FRAME_LIMIT_ENABLED = "use_frame_limit";
     public static final String KEY_FRAME_LIMIT = "frame_limit";

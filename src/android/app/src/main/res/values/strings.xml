@@ -161,14 +161,15 @@
     <string name="cpu_usage_limit_description">When enabled, emulation cpu usage will be limited to a smaller time slice.</string>
     <string name="setting_texture_load_hack">Texture Load Hack</string>
     <string name="setting_texture_load_hack_description">Turn it on to improves performance, but many games have texture errors</string>
-    <string name="setting_custom_textures_title">Custom Textures</string>
-    <string name="setting_custom_textures_title_description">Unstable, maybe crash!</string>
-    <string name="setting_custom_textures">Use Custom Textures</string>
-    <string name="setting_preload_textures">Preload Custom Textures</string>
-    <string name="setting_preload_textures_description">The start up time is getting longer if enabled.</string>
-    <string name="setting_dump_textures">Dump Textures</string>
-    <string name="setting_is_new_3ds">New 3DS Mode</string>
-    <string name="setting_is_new_3ds_description">The New 3DS has different memory and processor, and some games can only start on the New 3DS.</string>
+    <string name="utility">Utility</string>
+    <string name="dump_textures">Dump textures</string>
+    <string name="dump_textures_description">Dumps textures to dump/textures/[GAME ID]</string>
+    <string name="custom_textures">Use custom textures</string>
+    <string name="custom_textures_description">Uses custom textures found in load/textures/[GAME ID]</string>
+    <string name="preload_textures">Preload custom textures</string>
+    <string name="preload_textures_description">Loads all custom textures into memory. This feature can use a lot of memory.</string>
+    <string name="is_new_3ds">New 3DS Mode</string>
+    <string name="is_new_3ds_description">The New 3DS has different memory and processor, and some games can only start on the New 3DS.</string>
     <string name="fmv_hack" translatable="false">FMV Hack</string>
     <string name="setting_skip_slow_draw">Skip Slow Draw</string>
     <string name="setting_skip_cpu_write">Skip CPU Access</string>

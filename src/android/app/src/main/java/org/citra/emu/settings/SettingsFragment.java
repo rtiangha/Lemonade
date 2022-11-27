@@ -214,9 +214,6 @@ public final class SettingsFragment extends Fragment {
             case Settings.SECTION_CORE:
                 addGeneralSettings(sl);
                 break;
-            case Settings.SECTION_CUSTOM_TEXTURES:
-                addCustomTexturesSettings(sl);
-                break;
             case Settings.SECTION_SYSTEM:
                 addSystemSettings(sl);
                 break;
@@ -483,14 +480,17 @@ public final class SettingsFragment extends Fragment {
         Setting cardboardScreenSize = layoutSection.getSetting(SettingsFile.KEY_CARDBOARD_SCREEN_SIZE);
         Setting cardboardXShift = layoutSection.getSetting(SettingsFile.KEY_CARDBOARD_X_SHIFT);
         Setting cardboardYShift = layoutSection.getSetting(SettingsFile.KEY_CARDBOARD_Y_SHIFT);
+        SettingSection utilitySection = mSettings.getSection(Settings.SECTION_UTILITY);
+        Setting dumpTextures = utilitySection.getSetting(SettingsFile.KEY_DUMP_TEXTURES);
+        Setting customTextures = utilitySection.getSetting(SettingsFile.KEY_CUSTOM_TEXTURES);
+        // Setting preloadTextures = utilitySection.getSetting(SettingsFile.KEY_PRELOAD_TEXTURES);
 
         sl.add(new HeaderSetting(null, null, R.string.renderer, 0));
-        sl.add(new CheckBoxSetting(SettingsFile.KEY_IS_NEW_3DS, Settings.SECTION_SYSTEM, R.string.setting_is_new_3ds, R.string.setting_is_new_3ds_description, false, new3ds));
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_IS_NEW_3DS, Settings.SECTION_SYSTEM, R.string.is_new_3ds, R.string.is_new_3ds_description, false, new3ds));
         sl.add(new SliderSetting(SettingsFile.KEY_RESOLUTION_FACTOR, Settings.SECTION_RENDERER, R.string.internal_resolution, R.string.internal_resolution_description, 1, 4, "x", 1, resolutionFactor));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_SHOW_FPS, Settings.SECTION_RENDERER, R.string.emulation_show_fps, 0, false, showFps));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_CPU_USAGE_LIMIT, Settings.SECTION_RENDERER, R.string.cpu_usage_limit, R.string.cpu_usage_limit_description, false, cpuUsageLimit));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_TEXTURE_LOAD_HACK, Settings.SECTION_RENDERER, R.string.setting_texture_load_hack, R.string.setting_texture_load_hack_description, false, textureLoadHack));
-        sl.add(new SubmenuSetting(null, null, R.string.setting_custom_textures_title, R.string.setting_custom_textures_title_description, Settings.SECTION_CUSTOM_TEXTURES));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_USE_ASYNCHRONOUS_GPU_EMULATION, Settings.SECTION_RENDERER, R.string.asynchronous_gpu, R.string.asynchronous_gpu_description, true, useAsynchronousGpuEmulation));
         sl.add(new CheckBoxSetting(SettingsFile.KEY_SHADERS_ACCURATE_MUL, Settings.SECTION_RENDERER, R.string.shaders_accurate_mul, R.string.shaders_accurate_mul_description, false, shadersAccurateMul));
 
@@ -513,20 +513,12 @@ public final class SettingsFragment extends Fragment {
         sl.add(new SliderSetting(SettingsFile.KEY_CARDBOARD_SCREEN_SIZE, Settings.SECTION_LAYOUT, R.string.cardboard_screen_size, R.string.cardboard_screen_size_description, 30, 100, "%", 85, cardboardScreenSize));
         sl.add(new SliderSetting(SettingsFile.KEY_CARDBOARD_X_SHIFT, Settings.SECTION_LAYOUT, R.string.cardboard_x_shift, R.string.cardboard_x_shift_description, -100, 100, "%", 0, cardboardXShift));
         sl.add(new SliderSetting(SettingsFile.KEY_CARDBOARD_Y_SHIFT, Settings.SECTION_LAYOUT, R.string.cardboard_y_shift, R.string.cardboard_y_shift_description, -100, 100, "%", 0, cardboardYShift));
-    }
 
-    private void addCustomTexturesSettings(ArrayList<SettingsItem> sl) {
-        getActivity().setTitle(R.string.setting_custom_textures_title);
-
-        SettingSection rendererSection = mSettings.getSection(Settings.SECTION_RENDERER);
-        Setting customTextures = rendererSection.getSetting(SettingsFile.KEY_CUSTOM_TEXTURES);
-        Setting preloadTextures = rendererSection.getSetting(SettingsFile.KEY_PRELOAD_TEXTURES);
-        // Setting dumpTextures = rendererSection.getSetting(SettingsFile.KEY_DUMP_TEXTURES);
-
-        sl.add(new CheckBoxSetting(SettingsFile.KEY_CUSTOM_TEXTURES, Settings.SECTION_RENDERER, R.string.setting_custom_textures, 0, false, customTextures));
-        sl.add(new CheckBoxSetting(SettingsFile.KEY_PRELOAD_TEXTURES, Settings.SECTION_RENDERER, R.string.setting_preload_textures, R.string.setting_preload_textures_description, false, preloadTextures));
-        // TODO(Gamer64): dump textures don't works for now
-        // sl.add(new CheckBoxSetting(SettingsFile.KEY_DUMP_TEXTURES, Settings.SECTION_RENDERER, R.string.setting_dump_textures, 0, false, dumpTextures));
+        sl.add(new HeaderSetting(null, null, R.string.utility, 0));
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_DUMP_TEXTURES, Settings.SECTION_UTILITY, R.string.dump_textures, R.string.dump_textures_description, false, dumpTextures));
+        sl.add(new CheckBoxSetting(SettingsFile.KEY_CUSTOM_TEXTURES, Settings.SECTION_UTILITY, R.string.custom_textures, R.string.custom_textures_description, false, customTextures));
+        //Disabled until custom texture implementation gets rewrite, current one overloads RAM and crashes Citra.
+        //sl.add(new CheckBoxSetting(SettingsFile.KEY_PRELOAD_TEXTURES, Settings.SECTION_UTILITY, R.string.preload_textures, R.string.preload_textures_description, false, preloadTextures));
     }
 
     private void addAudioSettings(ArrayList<SettingsItem> sl) {
