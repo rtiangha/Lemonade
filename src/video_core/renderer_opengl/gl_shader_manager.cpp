@@ -371,7 +371,7 @@ public:
     bool is_amd;
     bool separable;
 
-    ShaderTuple current{};
+    ShaderTuple current;
 
     ProgrammableVertexShaders programmable_vertex_shaders;
     TrivialVertexShader trivial_vertex_shader;

@@ -25,6 +25,7 @@
 #include "core/hle/service/nfc/nfc.h"
 #include "core/savestate.h"
 #include "core/settings.h"
+#include "jni/android_common/android_common.h"
 #include "jni/applets/mii_selector.h"
 #include "jni/applets/swkbd.h"
 #include "jni/camera/ndk_camera.h"
@@ -60,17 +61,6 @@ static std::map<std::string, std::unique_ptr<Loader::AppLoader>> s_app_loaders;
 
 } // Anonymous namespace
 
-static std::string GetJString(JNIEnv* env, jstring jstr) {
-    if (!jstr) {
-        return {};
-    }
-
-    const char* s = env->GetStringUTFChars(jstr, nullptr);
-    std::string result = s;
-    env->ReleaseStringUTFChars(jstr, s);
-    return result;
-}
-
 static Loader::AppLoader* GetAppLoader(const std::string& path) {
     auto iter = s_app_loaders.find(path);
     if (iter != s_app_loaders.end()) {
@@ -86,8 +76,8 @@ static bool DisplayAlertMessage(const char* caption, const char* text, bool yes_
 
     // Execute the Java method.
     jboolean result = env->CallStaticBooleanMethod(
-        IDCache::GetNativeLibraryClass(), IDCache::GetDisplayAlertMsg(), env->NewStringUTF(caption),
-        env->NewStringUTF(text), yes_no ? JNI_TRUE : JNI_FALSE);
+        IDCache::GetNativeLibraryClass(), IDCache::GetDisplayAlertMsg(), ToJString(env, caption),
+        ToJString(env, text), yes_no ? JNI_TRUE : JNI_FALSE);
 
     return result != JNI_FALSE;
 }
@@ -96,8 +86,8 @@ static std::string DisplayAlertPrompt(const char* caption, const char* text, int
     JNIEnv* env = IDCache::GetEnvForThread();
 
     jstring value = reinterpret_cast<jstring>(env->CallStaticObjectMethod(
-        IDCache::GetNativeLibraryClass(), IDCache::GetDisplayAlertPrompt(),
-        env->NewStringUTF(caption), env->NewStringUTF(text), buttonConfig));
+        IDCache::GetNativeLibraryClass(), IDCache::GetDisplayAlertPrompt(), ToJString(env, caption),
+        ToJString(env, text), buttonConfig));
 
     return GetJString(env, value);
 }
@@ -569,7 +559,7 @@ void Java_org_citra_emu_NativeLibrary_SetUserSetting(JNIEnv* env,
 
 JNIEXPORT jintArray JNICALL Java_org_citra_emu_NativeLibrary_getRunningSettings(JNIEnv* env, jclass clazz) {
     int i = 0;
-    int settings[12];
+    int settings[13];
 
     // get settings
     settings[i++] = Settings::values.core_ticks_hack > 0;
@@ -579,6 +569,7 @@ JNIEXPORT jintArray JNICALL Java_org_citra_emu_NativeLibrary_getRunningSettings(
     settings[i++] = Settings::values.skip_cpu_write;
     settings[i++] = Settings::values.skip_texture_copy;
     settings[i++] = Settings::values.skip_format_reinterpretation;
+    settings[i++] = Settings::values.sharper_distant_objects;
     settings[i++] = Settings::values.use_linear_filter;
     settings[i++] = Settings::values.texture_load_hack;
     settings[i++] = Settings::values.shaders_accurate_mul;
@@ -615,6 +606,9 @@ JNIEXPORT void JNICALL Java_org_citra_emu_NativeLibrary_setRunningSettings(JNIEn
 
     // Skip Format Reinterpretation
     Settings::values.skip_format_reinterpretation = settings[i++] > 0;
+
+    // Sharper Distant Objects
+    Settings::values.sharper_distant_objects = settings[i++] > 0;
 
     // Use Linear Filter
     Settings::values.use_linear_filter = settings[i++] > 0;

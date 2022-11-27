@@ -57,7 +57,8 @@ public class UpdaterUtils {
         makeDataRequest(new LoadCallback<UpdaterData>() {
             @Override
             public void onLoad(UpdaterData data) {
-                {
+                VersionCode version = getBuildVersion();
+                if (version.compareTo(data.version) < 0) {
                     showUpdateMessage(context, data);
                 }
             }

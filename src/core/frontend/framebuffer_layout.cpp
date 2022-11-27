@@ -184,8 +184,8 @@ FramebufferLayout MobileLandscapeFrameLayout(u32 width, u32 height, bool swapped
     // Shift the small screen to the bottom right corner
     small_screen = small_screen.TranslateX(large_screen.right);
     if (center_vertical) {
-        small_screen.TranslateY(large_screen.GetHeight() + large_screen.top -
-                                small_screen.GetHeight());
+        small_screen = small_screen.TranslateY(large_screen.GetHeight() + large_screen.top -
+                                               small_screen.GetHeight());
     }
 
     res.top_screen = swapped ? small_screen : large_screen;
@@ -459,7 +459,7 @@ FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale) {
 }
 
 FramebufferLayout GetCardboardSettings(FramebufferLayout layout) {
-    FramebufferLayout newLayout = layout;
+    FramebufferLayout new_layout = layout;
     float top_screen_left = 0;
     float top_screen_top = 0;
     float bottom_screen_left = 0;
@@ -516,26 +516,26 @@ FramebufferLayout GetCardboardSettings(FramebufferLayout layout) {
     float cardboardUserYShift = (Settings::values.cardboard_y_shift / 100.0f) * cardboardMaxYShift;
 
     // Center the screens and apply user Y shift
-    newLayout.top_screen.left = top_screen_left + cardboardMaxXShift;
-    newLayout.top_screen.top = top_screen_top + cardboardMaxYShift + cardboardUserYShift;
-    newLayout.bottom_screen.left = bottom_screen_left + cardboardMaxXShift;
-    newLayout.bottom_screen.top = bottom_screen_top + cardboardMaxYShift + cardboardUserYShift;
+    new_layout.top_screen.left = top_screen_left + cardboardMaxXShift;
+    new_layout.top_screen.top = top_screen_top + cardboardMaxYShift + cardboardUserYShift;
+    new_layout.bottom_screen.left = bottom_screen_left + cardboardMaxXShift;
+    new_layout.bottom_screen.top = bottom_screen_top + cardboardMaxYShift + cardboardUserYShift;
 
     // Set the X coordinates for the right eye and apply user X shift
-    newLayout.cardboard.top_screen_right_eye = newLayout.top_screen.left - cardboardUserXShift;
-    newLayout.top_screen.left += cardboardUserXShift;
-    newLayout.cardboard.bottom_screen_right_eye =
-        newLayout.bottom_screen.left - cardboardUserXShift;
-    newLayout.bottom_screen.left += cardboardUserXShift;
-    newLayout.cardboard.user_x_shift = cardboardUserXShift;
+    new_layout.cardboard.top_screen_right_eye = new_layout.top_screen.left - cardboardUserXShift;
+    new_layout.top_screen.left += cardboardUserXShift;
+    new_layout.cardboard.bottom_screen_right_eye =
+        new_layout.bottom_screen.left - cardboardUserXShift;
+    new_layout.bottom_screen.left += cardboardUserXShift;
+    new_layout.cardboard.user_x_shift = cardboardUserXShift;
 
     // Update right/bottom instead of passing new variables for width/height
-    newLayout.top_screen.right = newLayout.top_screen.left + top_screen_width;
-    newLayout.top_screen.bottom = newLayout.top_screen.top + top_screen_height;
-    newLayout.bottom_screen.right = newLayout.bottom_screen.left + bottom_screen_width;
-    newLayout.bottom_screen.bottom = newLayout.bottom_screen.top + bottom_screen_height;
+    new_layout.top_screen.right = new_layout.top_screen.left + top_screen_width;
+    new_layout.top_screen.bottom = new_layout.top_screen.top + top_screen_height;
+    new_layout.bottom_screen.right = new_layout.bottom_screen.left + bottom_screen_width;
+    new_layout.bottom_screen.bottom = new_layout.bottom_screen.top + bottom_screen_height;
 
-    return newLayout;
+    return new_layout;
 }
 
 std::pair<unsigned, unsigned> GetMinimumSizeFromLayout(Settings::LayoutOption layout,

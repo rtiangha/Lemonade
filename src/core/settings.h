@@ -161,7 +161,7 @@ struct TouchFromButtonMap {
 };
 
 struct Values {
-    // CheckNew3DS
+    // Check New 3DS
     bool is_new_3ds;
 
     // Controls
@@ -176,8 +176,6 @@ struct Values {
 
     // Data Storage
     bool use_virtual_sd;
-    std::string nand_dir;
-    std::string sdmc_dir;
 
     // System
     int region_value;
@@ -190,6 +188,7 @@ struct Values {
     bool use_hw_shader;
     bool separable_shader;
     bool use_disk_shader_cache;
+    bool sharper_distant_objects;
     bool shaders_accurate_mul;
     bool use_shader_jit;
     u16 resolution_factor;

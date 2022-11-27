@@ -1,18 +1,22 @@
-// Copyright 2018 Citra Emulator Project
+// Copyright 2018 Citra Enhanced/MMJ Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
 package org.citra.emu.ui;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,8 +35,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
-
-import com.nononsenseapps.filepicker.DividerItemDecoration;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -187,7 +189,41 @@ public final class EditorActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                int length = s.length();
+                int line_begin = -1;
+                int line_status = 0;
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < length; ++i) {
+                    char c = s.charAt(i);
+                    if (line_begin == -1) {
+                        if (c == '*') {
+                            line_status = 1;
+                        } else if (c == '[') {
+                            line_status = 2;
+                        } else if (c == '/') {
+                            line_status = 3;
+                        }
+                        line_begin = i;
+                    }
+                    if (c == '\n' || c == '\r') {
+                        if (line_status == 1) {
+                            int color = Color.GRAY;
+                            if (sb.length() == CHEAT_ENABLED_TEXT.length() && sb.toString().equals(CHEAT_ENABLED_TEXT)) {
+                                color = Color.MAGENTA;
+                            }
+                            s.setSpan(new ForegroundColorSpan(color), line_begin, i, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        } else if (line_status == 2) {
+                            s.setSpan(new ForegroundColorSpan(Color.BLUE), line_begin, i, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        } else if (line_status == 3) {
+                            s.setSpan(new ForegroundColorSpan(Color.GRAY), line_begin, i, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        }
+                        line_status = 0;
+                        line_begin = -1;
+                        sb.setLength(0);
+                    } else {
+                        sb.append(c);
+                    }
+                }
             }
         });
 
@@ -244,7 +280,6 @@ public final class EditorActivity extends AppCompatActivity {
                 deleteShaderCache();
                 return true;
         }
-
         return false;
     }
 
@@ -322,8 +357,13 @@ public final class EditorActivity extends AppCompatActivity {
     }
 
     private void deleteShaderCache() {
-        File cache = DirectoryInitialization.getShaderCacheFile(mProgramId);
+        String dir = DirectoryInitialization.getUserDirectory() + "/Cache/";
+        File cache = new File(dir + mProgramId + ".cache");
+        File shader = new File(dir + mProgramId + ".shader");
+        File meta = new File(dir + mProgramId + ".shader.meta");
         if (cache.exists()) {
+            shader.delete();
+            meta.delete();
             if (cache.delete()) {
                 Toast.makeText(this, R.string.delete_success, Toast.LENGTH_SHORT).show();
             }

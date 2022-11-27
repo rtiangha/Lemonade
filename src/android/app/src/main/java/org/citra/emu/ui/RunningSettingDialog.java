@@ -109,7 +109,7 @@ public class RunningSettingDialog extends DialogFragment {
 
     private void loadSubMenu(int menu) {
         if (menu == MENU_MAIN) {
-            EmulationActivity activity = (EmulationActivity) NativeLibrary.sEmulationActivity.get();
+            EmulationActivity activity = NativeLibrary.sEmulationActivity.get();
             mTitle.setText(activity.getGameTitle());
             mAdapter.loadMainMenu();
         } else if (menu == MENU_SETTINGS) {
@@ -131,6 +131,7 @@ public class RunningSettingDialog extends DialogFragment {
         public static final int SETTING_FMV_HACK = 0;
         public static final int SETTING_SHOW_FPS = 1;
         public static final int SETTING_SCALE_FACTOR = 2;
+        public static final int SETTING_SHARPER_DISTANT_OBJECTS = 3;
         public static final int SETTING_LINEAR_FILTER = 4;
         public static final int SETTING_SKIP_SLOW_DRAW = 5;
         public static final int SETTING_SKIP_CPU_WRITE = 6;
@@ -488,7 +489,6 @@ public class RunningSettingDialog extends DialogFragment {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
                     if (seekBar.getMax() > 99) {
-                        progress = (progress / 5) * 5;
                         mTextSettingValue.setText(progress + "%");
                     } else {
                         mTextSettingValue.setText(String.valueOf(progress));
@@ -625,6 +625,9 @@ public class RunningSettingDialog extends DialogFragment {
             mSettings.add(new SettingsItem(SettingsItem.SETTING_SKIP_FORMAT_REINTERPRETATION,
                     R.string.setting_skip_format_reinterpretation, SettingsItem.TYPE_CHECKBOX,
                     mRunningSettings[i++]));
+            mSettings.add(new SettingsItem(SettingsItem.SETTING_SHARPER_DISTANT_OBJECTS,
+                    R.string.sharper_distant_objects, SettingsItem.TYPE_CHECKBOX,
+                    mRunningSettings[i++]));
             mSettings.add(new SettingsItem(SettingsItem.SETTING_LINEAR_FILTER,
                     R.string.linear_filtering, SettingsItem.TYPE_CHECKBOX,
                     mRunningSettings[i++]));
@@ -688,7 +691,7 @@ public class RunningSettingDialog extends DialogFragment {
                 return;
             }
 
-            EmulationActivity activity = (EmulationActivity) NativeLibrary.sEmulationActivity.get();
+            EmulationActivity activity = NativeLibrary.sEmulationActivity.get();
             // pref settings
             SharedPreferences.Editor editor =
                     PreferenceManager.getDefaultSharedPreferences(activity).edit();

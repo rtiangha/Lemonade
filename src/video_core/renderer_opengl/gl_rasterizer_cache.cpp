@@ -742,7 +742,9 @@ void CachedSurface::DumpTexture(GLuint target_tex, u64 tex_hash) {
         GLuint old_texture = state.texture_units[0].texture_2d;
         state.Apply();
         /*
-           GetTexImageOES is used even if not using OpenGL ES to work around a small issue that
+
+
+            is used even if not using OpenGL ES to work around a small issue that
            happens if using custom textures with texture dumping at the same.
            Let's say there's 2 textures that are both 32x32 and one of them gets replaced with a
            higher quality 256x256 texture. If the 256x256 texture is displayed first and the
@@ -1297,7 +1299,7 @@ Surface RasterizerCacheOpenGL::GetTextureSurface(const Pica::Texture::TextureInf
         auto format_tuple = GetFormatTuple(params.pixel_format);
 
         // Allocate more mipmap level if necessary
-        if (surface->max_level < max_level) {
+        if (!Settings::values.sharper_distant_objects && (surface->max_level < max_level)) {
             state.texture_units[0].texture_2d = surface->texture.handle;
             state.Apply();
             glActiveTexture(GL_TEXTURE0);
