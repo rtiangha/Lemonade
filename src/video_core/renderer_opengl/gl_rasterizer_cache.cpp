@@ -1189,8 +1189,11 @@ SurfaceRect_Tuple RasterizerCacheOpenGL::GetSurfaceSubRect(const SurfaceParams& 
         surface = FindMatch<MatchFlags::Expand | MatchFlags::Invalid>(surface_cache, aligned_params,
                                                                       match_res_scale);
         if (surface != nullptr) {
-            aligned_params.width = aligned_params.stride;
-            aligned_params.UpdateParams();
+            if (aligned_params.width != aligned_params.stride) {
+                // Can't have gaps in a surface
+                aligned_params.width = aligned_params.stride;
+                aligned_params.UpdateParams();
+            }
 
             SurfaceParams new_params = *surface;
             new_params.addr = std::min(aligned_params.addr, surface->addr);
@@ -1215,12 +1218,13 @@ SurfaceRect_Tuple RasterizerCacheOpenGL::GetSurfaceSubRect(const SurfaceParams& 
 
     // No subrect found - create and return a new surface
     if (surface == nullptr) {
-        SurfaceParams new_params = aligned_params;
-        // Can't have gaps in a surface
-        new_params.width = aligned_params.stride;
-        new_params.UpdateParams();
+        if (aligned_params.width != aligned_params.stride) {
+            // Can't have gaps in a surface
+            aligned_params.width = aligned_params.stride;
+            aligned_params.UpdateParams();
+        }
         // GetSurface will create the new surface and possibly adjust res_scale if necessary
-        surface = GetSurface(new_params, match_res_scale, load_if_create);
+        surface = GetSurface(aligned_params, match_res_scale, load_if_create);
     } else if (load_if_create) {
         ValidateSurface(surface, aligned_params.addr, aligned_params.size);
     }

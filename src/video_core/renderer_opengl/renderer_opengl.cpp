@@ -435,9 +435,6 @@ void RendererOpenGL::RenderScreenshot() {
                      VideoCore::g_screenshot_bits);
 
         screenshot_framebuffer.Release();
-        state.draw.read_framebuffer = old_read_fb;
-        state.draw.draw_framebuffer = old_draw_fb;
-        state.Apply();
         glDeleteRenderbuffers(1, &renderbuffer);
 
         VideoCore::g_screenshot_complete_callback();
