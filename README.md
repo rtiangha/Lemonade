@@ -6,7 +6,7 @@ As you can notice , there haven't been any new builds for a while now **becuase 
 
 ### Why?
 
-This frok was made becuase citra offcial wasn't receiving any updates at the time but now the project is alive and well so keeping this fork alive would be pointless and meaningless. 
+This fork was made becuase citra offcial wasn't receiving any updates at the time but now the project is alive and well so keeping this fork alive would be pointless and meaningless. 
 Also my android development ended since July 2023. I got a Steam deck and now I am no longer developing for android
 
 ### Thanks to everyone who used my fork. If you want you can join my telegram group (Steam Deck group)
