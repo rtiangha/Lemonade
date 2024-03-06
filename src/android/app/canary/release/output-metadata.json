@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "org.citra.citra_emu.canary",
+  "variantName": "canaryRelease",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 25815341,
+      "versionName": "63fc7c459",
+      "outputFile": "app-canary-release.apk"
+    }
+  ],
+  "elementType": "File"
+}

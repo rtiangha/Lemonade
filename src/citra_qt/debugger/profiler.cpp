@@ -24,17 +24,17 @@ public:
     MicroProfileWidget(QWidget* parent = nullptr);
 
 protected:
-    void paintEvent(QPaintEvent* ev) override;
-    void showEvent(QShowEvent* ev) override;
-    void hideEvent(QHideEvent* ev) override;
+    void paintEvent(QPaintEvent* event) override;
+    void showEvent(QShowEvent* event) override;
+    void hideEvent(QHideEvent* event) override;
 
-    void mouseMoveEvent(QMouseEvent* ev) override;
-    void mousePressEvent(QMouseEvent* ev) override;
-    void mouseReleaseEvent(QMouseEvent* ev) override;
-    void wheelEvent(QWheelEvent* ev) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
 
-    void keyPressEvent(QKeyEvent* ev) override;
-    void keyReleaseEvent(QKeyEvent* ev) override;
+    void keyPressEvent(QKeyEvent* event) override;
+    void keyReleaseEvent(QKeyEvent* event) override;
 
 private:
     /// This timer is used to redraw the widget's contents continuously. To save resources, it only
@@ -50,9 +50,8 @@ MicroProfileDialog::MicroProfileDialog(QWidget* parent) : QWidget(parent, Qt::Di
     setObjectName(QStringLiteral("MicroProfile"));
     setWindowTitle(tr("MicroProfile"));
     resize(1000, 600);
-    // Remove the "?" button from the titlebar and enable the maximize button
-    setWindowFlags((windowFlags() & ~Qt::WindowContextHelpButtonHint) |
-                   Qt::WindowMaximizeButtonHint);
+    // Enable the maximize button
+    setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
 
 #if MICROPROFILE_ENABLED
 
@@ -82,18 +81,18 @@ QAction* MicroProfileDialog::toggleViewAction() {
     return toggle_view_action;
 }
 
-void MicroProfileDialog::showEvent(QShowEvent* ev) {
+void MicroProfileDialog::showEvent(QShowEvent* event) {
     if (toggle_view_action) {
         toggle_view_action->setChecked(isVisible());
     }
-    QWidget::showEvent(ev);
+    QWidget::showEvent(event);
 }
 
-void MicroProfileDialog::hideEvent(QHideEvent* ev) {
+void MicroProfileDialog::hideEvent(QHideEvent* event) {
     if (toggle_view_action) {
         toggle_view_action->setChecked(isVisible());
     }
-    QWidget::hideEvent(ev);
+    QWidget::hideEvent(event);
 }
 
 #if MICROPROFILE_ENABLED
@@ -112,7 +111,7 @@ MicroProfileWidget::MicroProfileWidget(QWidget* parent) : QWidget(parent) {
     connect(&update_timer, &QTimer::timeout, this, qOverload<>(&MicroProfileWidget::update));
 }
 
-void MicroProfileWidget::paintEvent(QPaintEvent* ev) {
+void MicroProfileWidget::paintEvent([[maybe_unused]] QPaintEvent* event) {
     QPainter painter(this);
 
     // The units used by Microprofile for drawing are based in pixels on a 96 dpi display.
@@ -132,51 +131,56 @@ void MicroProfileWidget::paintEvent(QPaintEvent* ev) {
     mp_painter = nullptr;
 }
 
-void MicroProfileWidget::showEvent(QShowEvent* ev) {
+void MicroProfileWidget::showEvent(QShowEvent* event) {
     update_timer.start(15); // ~60 Hz
-    QWidget::showEvent(ev);
+    QWidget::showEvent(event);
 }
 
-void MicroProfileWidget::hideEvent(QHideEvent* ev) {
+void MicroProfileWidget::hideEvent(QHideEvent* event) {
     update_timer.stop();
-    QWidget::hideEvent(ev);
+    QWidget::hideEvent(event);
 }
 
-void MicroProfileWidget::mouseMoveEvent(QMouseEvent* ev) {
-    MicroProfileMousePosition(ev->x() / x_scale, ev->y() / y_scale, 0);
-    ev->accept();
+void MicroProfileWidget::mouseMoveEvent(QMouseEvent* event) {
+    const auto point = event->position().toPoint();
+    MicroProfileMousePosition(point.x() / x_scale, point.y() / y_scale, 0);
+    event->accept();
 }
 
-void MicroProfileWidget::mousePressEvent(QMouseEvent* ev) {
-    MicroProfileMousePosition(ev->x() / x_scale, ev->y() / y_scale, 0);
-    MicroProfileMouseButton(ev->buttons() & Qt::LeftButton, ev->buttons() & Qt::RightButton);
-    ev->accept();
+void MicroProfileWidget::mousePressEvent(QMouseEvent* event) {
+    const auto point = event->position().toPoint();
+    MicroProfileMousePosition(point.x() / x_scale, point.y() / y_scale, 0);
+    MicroProfileMouseButton(event->buttons() & Qt::LeftButton, event->buttons() & Qt::RightButton);
+    event->accept();
 }
 
-void MicroProfileWidget::mouseReleaseEvent(QMouseEvent* ev) {
-    MicroProfileMousePosition(ev->x() / x_scale, ev->y() / y_scale, 0);
-    MicroProfileMouseButton(ev->buttons() & Qt::LeftButton, ev->buttons() & Qt::RightButton);
-    ev->accept();
+void MicroProfileWidget::mouseReleaseEvent(QMouseEvent* event) {
+    const auto point = event->position().toPoint();
+    MicroProfileMousePosition(point.x() / x_scale, point.y() / y_scale, 0);
+    MicroProfileMouseButton(event->buttons() & Qt::LeftButton, event->buttons() & Qt::RightButton);
+    event->accept();
 }
 
-void MicroProfileWidget::wheelEvent(QWheelEvent* ev) {
-    MicroProfileMousePosition(ev->x() / x_scale, ev->y() / y_scale, ev->delta() / 120);
-    ev->accept();
+void MicroProfileWidget::wheelEvent(QWheelEvent* event) {
+    const auto point = event->position().toPoint();
+    MicroProfileMousePosition(point.x() / x_scale, point.y() / y_scale,
+                              event->angleDelta().y() / 120);
+    event->accept();
 }
 
-void MicroProfileWidget::keyPressEvent(QKeyEvent* ev) {
-    if (ev->key() == Qt::Key_Control) {
+void MicroProfileWidget::keyPressEvent(QKeyEvent* event) {
+    if (event->key() == Qt::Key_Control) {
         // Inform MicroProfile that the user is holding Ctrl.
         MicroProfileModKey(1);
     }
-    QWidget::keyPressEvent(ev);
+    QWidget::keyPressEvent(event);
 }
 
-void MicroProfileWidget::keyReleaseEvent(QKeyEvent* ev) {
-    if (ev->key() == Qt::Key_Control) {
+void MicroProfileWidget::keyReleaseEvent(QKeyEvent* event) {
+    if (event->key() == Qt::Key_Control) {
         MicroProfileModKey(0);
     }
-    QWidget::keyReleaseEvent(ev);
+    QWidget::keyReleaseEvent(event);
 }
 
 // These functions are called by MicroProfileDraw to draw the interface elements on the screen.
@@ -214,6 +218,7 @@ void MicroProfileDrawLine2D(u32 vertices_length, float* vertices, u32 hex_color)
     // the allocation across calls.
     static std::vector<QPointF> point_buf;
 
+    point_buf.reserve(vertices_length);
     for (u32 i = 0; i < vertices_length; ++i) {
         point_buf.emplace_back(vertices[i * 2 + 0], vertices[i * 2 + 1]);
     }

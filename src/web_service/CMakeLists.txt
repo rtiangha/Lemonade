@@ -1,6 +1,7 @@
 add_library(web_service STATIC
     announce_room_json.cpp
     announce_room_json.h
+    precompiled_headers.h
     telemetry_json.cpp
     telemetry_json.h
     verify_login.cpp
@@ -13,11 +14,13 @@ add_library(web_service STATIC
 
 create_target_directory_groups(web_service)
 
-get_directory_property(OPENSSL_LIBS
-        DIRECTORY ${PROJECT_SOURCE_DIR}/externals/libressl
-        DEFINITION OPENSSL_LIBS)
-target_compile_definitions(web_service PRIVATE -DCPPHTTPLIB_OPENSSL_SUPPORT)
-target_link_libraries(web_service PRIVATE common network json-headers ${OPENSSL_LIBS} httplib lurlparser cpp-jwt)
-if (ANDROID)
-    target_link_libraries(web_service PRIVATE ifaddrs)
+target_compile_definitions(web_service PUBLIC -DENABLE_WEB_SERVICE)
+target_link_libraries(web_service PRIVATE citra_common network json-headers httplib cpp-jwt)
+target_link_libraries(web_service PUBLIC ${OPENSSL_LIBS})
+if(WIN32)
+    target_link_libraries(web_service PRIVATE crypt32)
+endif()
+
+if (CITRA_USE_PRECOMPILED_HEADERS)
+    target_precompile_headers(web_service PRIVATE precompiled_headers.h)
 endif()

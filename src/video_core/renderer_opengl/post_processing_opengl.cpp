@@ -2,6 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -9,6 +10,9 @@
 #include "common/file_util.h"
 #include "common/string_util.h"
 #include "video_core/renderer_opengl/post_processing_opengl.h"
+
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
 
 namespace OpenGL {
 
@@ -37,9 +41,9 @@ constexpr char dolphin_shader_header[] = R"(
 #define lerp mix
 
 // Output variable
-out float4 color;
+layout (location = 0) out float4 color;
 // Input coordinates
-in float2 frag_tex_coord;
+layout (location = 0) in float2 frag_tex_coord;
 // Resolution
 uniform float4 i_resolution;
 uniform float4 o_resolution;
@@ -50,16 +54,19 @@ uniform sampler2D color_texture;
 uniform sampler2D color_texture_r;
 
 // Interfacing functions
-float4 Sample() {
+float4 Sample()
+{
     return texture(color_texture, frag_tex_coord);
 }
 
-float4 SampleLocation(float2 location) {
+float4 SampleLocation(float2 location)
+{
     return texture(color_texture, location);
 }
 
-float4 SampleLayer(int layer) {
-    if (layer == 0)
+float4 SampleLayer(int layer)
+{
+    if(layer == 0)
         return texture(color_texture, frag_tex_coord);
     else
         return texture(color_texture_r, frag_tex_coord);
@@ -67,41 +74,59 @@ float4 SampleLayer(int layer) {
 
 #define SampleOffset(offset) textureOffset(color_texture, frag_tex_coord, offset)
 
-float2 GetResolution() {
+float2 GetResolution()
+{
     return i_resolution.xy;
 }
 
-float2 GetInvResolution() {
+float2 GetInvResolution()
+{
     return i_resolution.zw;
 }
 
-float2 GetIResolution() {
+float2 GetIResolution()
+{
     return i_resolution.xy;
 }
 
-float2 GetIInvResolution() {
+float2 GetIInvResolution()
+{
     return i_resolution.zw;
 }
 
-float2 GetOResolution() {
+float2 GetWindowResolution()
+{
+  return o_resolution.xy;
+}
+
+float2 GetInvWindowResolution()
+{
+  return o_resolution.zw;
+}
+
+float2 GetOResolution()
+{
     return o_resolution.xy;
 }
 
-float2 GetOInvResolution() {
+float2 GetOInvResolution()
+{
     return o_resolution.zw;
 }
 
-float2 GetCoordinates() {
+float2 GetCoordinates()
+{
     return frag_tex_coord;
 }
 
-void SetOutput(float4 color_in) {
+void SetOutput(float4 color_in)
+{
     color = color_in;
 }
 
 )";
 
-std::vector<std::string> GetPostProcessingShaderList(bool anaglyph) { // stereo list
+std::vector<std::string> GetPostProcessingShaderList(bool anaglyph) {
     std::string shader_dir = FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir);
     std::vector<std::string> shader_names;
 
@@ -139,7 +164,7 @@ std::vector<std::string> GetPostProcessingShaderList(bool anaglyph) { // stereo 
     return shader_names;
 }
 
-std::string GetPostProcessingShaderCode(bool anaglyph, std::string_view shader) { // stereo init
+std::string GetPostProcessingShaderCode(bool anaglyph, std::string_view shader) {
     std::string shader_dir = FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir);
     std::string shader_path;
 
@@ -172,9 +197,9 @@ std::string GetPostProcessingShaderCode(bool anaglyph, std::string_view shader) 
         return "";
     }
 
-    std::ifstream file;
-    OpenFStream(file, shader_path, std::ios_base::in);
-    if (!file) {
+    boost::iostreams::stream<boost::iostreams::file_descriptor_source> file;
+    FileUtil::OpenFStream<std::ios_base::in>(file, shader_path);
+    if (!file.is_open()) {
         return "";
     }
 

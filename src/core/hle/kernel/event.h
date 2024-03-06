@@ -4,11 +4,9 @@
 
 #pragma once
 
-#include <boost/serialization/base_object.hpp>
 #include <boost/serialization/export.hpp>
-#include <boost/serialization/string.hpp>
-#include "common/common_types.h"
 #include "core/hle/kernel/object.h"
+#include "core/hle/kernel/resource_limit.h"
 #include "core/hle/kernel/wait_object.h"
 
 namespace Kernel {
@@ -24,8 +22,8 @@ public:
     std::string GetName() const override {
         return name;
     }
-    void SetName(const std::string& name) {
-        this->name = name;
+    void SetName(const std::string& name_) {
+        name = name_;
     }
 
     static constexpr HandleType HANDLE_TYPE = HandleType::Event;
@@ -45,6 +43,8 @@ public:
     void Signal();
     void Clear();
 
+    std::shared_ptr<ResourceLimit> resource_limit;
+
 private:
     ResetType reset_type; ///< Current ResetType
 
@@ -55,12 +55,7 @@ private:
 
     friend class boost::serialization::access;
     template <class Archive>
-    void serialize(Archive& ar, const unsigned int file_version) {
-        ar& boost::serialization::base_object<WaitObject>(*this);
-        ar& reset_type;
-        ar& signaled;
-        ar& name;
-    }
+    void serialize(Archive& ar, const unsigned int);
 };
 
 } // namespace Kernel

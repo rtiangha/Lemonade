@@ -94,7 +94,7 @@ static u32 TranslateAddr(u32 addr, const THREEloadinfo* loadinfo, u32* offsets) 
 
 using Kernel::CodeSet;
 
-static THREEDSX_Error Load3DSXFile(FileUtil::IOFile& file, u32 base_addr,
+static THREEDSX_Error Load3DSXFile(Core::System& system, FileUtil::IOFile& file, u32 base_addr,
                                    std::shared_ptr<CodeSet>* out_codeset) {
     if (!file.IsOpen())
         return ERROR_FILE;
@@ -111,6 +111,11 @@ static THREEDSX_Error Load3DSXFile(FileUtil::IOFile& file, u32 base_addr,
     loadinfo.seg_sizes[0] = (hdr.code_seg_size + 0xFFF) & ~0xFFF;
     loadinfo.seg_sizes[1] = (hdr.rodata_seg_size + 0xFFF) & ~0xFFF;
     loadinfo.seg_sizes[2] = (hdr.data_seg_size + 0xFFF) & ~0xFFF;
+    // prevent integer overflow leading to heap-buffer-overflow
+    if (loadinfo.seg_sizes[0] < hdr.code_seg_size || loadinfo.seg_sizes[1] < hdr.rodata_seg_size ||
+        loadinfo.seg_sizes[2] < hdr.data_seg_size) {
+        return ERROR_READ;
+    }
     u32 offsets[2] = {loadinfo.seg_sizes[0], loadinfo.seg_sizes[0] + loadinfo.seg_sizes[1]};
     u32 n_reloc_tables = hdr.reloc_hdr_size / sizeof(u32);
     std::vector<u8> program_image(loadinfo.seg_sizes[0] + loadinfo.seg_sizes[1] +
@@ -144,7 +149,7 @@ static THREEDSX_Error Load3DSXFile(FileUtil::IOFile& file, u32 base_addr,
         return ERROR_READ;
 
     // BSS clear
-    memset((char*)loadinfo.seg_ptrs[2] + hdr.data_seg_size - hdr.bss_size, 0, hdr.bss_size);
+    std::memset((char*)loadinfo.seg_ptrs[2] + hdr.data_seg_size - hdr.bss_size, 0, hdr.bss_size);
 
     // Relocate the segments
     for (unsigned int current_segment = 0; current_segment < NUM_SEGMENTS; ++current_segment) {
@@ -217,7 +222,7 @@ static THREEDSX_Error Load3DSXFile(FileUtil::IOFile& file, u32 base_addr,
     }
 
     // Create the CodeSet
-    std::shared_ptr<CodeSet> code_set = Core::System::GetInstance().Kernel().CreateCodeSet("", 0);
+    std::shared_ptr<CodeSet> code_set = system.Kernel().CreateCodeSet("", 0);
 
     code_set->CodeSegment().offset = loadinfo.seg_ptrs[0] - program_image.data();
     code_set->CodeSegment().addr = loadinfo.seg_addrs[0];
@@ -263,25 +268,24 @@ ResultStatus AppLoader_THREEDSX::Load(std::shared_ptr<Kernel::Process>& process)
         return ResultStatus::Error;
 
     std::shared_ptr<CodeSet> codeset;
-    if (Load3DSXFile(file, Memory::PROCESS_IMAGE_VADDR, &codeset) != ERROR_NONE)
+    if (Load3DSXFile(system, file, Memory::PROCESS_IMAGE_VADDR, &codeset) != ERROR_NONE)
         return ResultStatus::Error;
     codeset->name = filename;
 
-    process = Core::System::GetInstance().Kernel().CreateProcess(std::move(codeset));
+    process = system.Kernel().CreateProcess(std::move(codeset));
     process->Set3dsxKernelCaps();
 
     // Attach the default resource limit (APPLICATION) to the process
-    process->resource_limit = Core::System::GetInstance().Kernel().ResourceLimit().GetForCategory(
-        Kernel::ResourceLimitCategory::APPLICATION);
+    process->resource_limit =
+        system.Kernel().ResourceLimit().GetForCategory(Kernel::ResourceLimitCategory::Application);
 
     // On real HW this is done with FS:Reg, but we can be lazy
-    auto fs_user =
-        Core::System::GetInstance().ServiceManager().GetService<Service::FS::FS_USER>("fs:USER");
-    fs_user->Register(process->GetObjectId(), process->codeset->program_id, filepath);
+    auto fs_user = system.ServiceManager().GetService<Service::FS::FS_USER>("fs:USER");
+    fs_user->RegisterProgramInfo(process->GetObjectId(), process->codeset->program_id, filepath);
 
     process->Run(48, Kernel::DEFAULT_STACK_SIZE);
 
-    Core::System::GetInstance().ArchiveManager().RegisterSelfNCCH(*this);
+    system.ArchiveManager().RegisterSelfNCCH(*this);
 
     is_loaded = true;
     return ResultStatus::Success;
@@ -342,7 +346,7 @@ ResultStatus AppLoader_THREEDSX::ReadIcon(std::vector<u8>& buffer) {
         file.Seek(hdr.smdh_offset, SEEK_SET);
         buffer.resize(hdr.smdh_size);
 
-        if (file.ReadBytes(&buffer[0], hdr.smdh_size) != hdr.smdh_size)
+        if (file.ReadBytes(buffer.data(), hdr.smdh_size) != hdr.smdh_size)
             return ResultStatus::Error;
 
         return ResultStatus::Success;

@@ -4,9 +4,12 @@
 
 #pragma once
 
+#include "common/arch.h"
+#if CITRA_ARCH(x86_64)
+
 #include <bitset>
 #include <initializer_list>
-#include <xbyak.h>
+#include <xbyak/xbyak.h>
 #include "common/assert.h"
 
 namespace Common::X64 {
@@ -228,3 +231,5 @@ inline void ABI_PopRegistersAndAdjustStack(Xbyak::CodeGenerator& code, std::bits
 }
 
 } // namespace Common::X64
+
+#endif // CITRA_ARCH(x86_64)

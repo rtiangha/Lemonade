@@ -23,14 +23,13 @@ void AndroidMiiSelector::Setup(const Frontend::MiiSelectorConfig& config) {
     // Create the Java MiiSelectorConfig object
     jobject java_config = env->AllocObject(s_mii_selector_config_class);
     env->SetBooleanField(java_config,
-                         env->GetFieldID(s_mii_selector_config_class, "enable_cancel_button", "Z"),
+                         env->GetFieldID(s_mii_selector_config_class, "enableCancelButton", "Z"),
                          static_cast<jboolean>(config.enable_cancel_button));
     env->SetObjectField(java_config,
                         env->GetFieldID(s_mii_selector_config_class, "title", "Ljava/lang/String;"),
                         ToJString(env, config.title));
     env->SetLongField(
-        java_config,
-        env->GetFieldID(s_mii_selector_config_class, "initially_selected_mii_index", "J"),
+        java_config, env->GetFieldID(s_mii_selector_config_class, "initiallySelectedMiiIndex", "J"),
         static_cast<jlong>(config.initially_selected_mii_index));
 
     // List mii names
@@ -44,16 +43,16 @@ void AndroidMiiSelector::Setup(const Frontend::MiiSelectorConfig& config) {
     }
     env->SetObjectField(
         java_config,
-        env->GetFieldID(s_mii_selector_config_class, "mii_names", "[Ljava/lang/String;"), array);
+        env->GetFieldID(s_mii_selector_config_class, "miiNames", "[Ljava/lang/String;"), array);
 
     // Invoke backend Execute method
     jobject data =
         env->CallStaticObjectMethod(s_mii_selector_class, s_mii_selector_execute, java_config);
 
     const u32 return_code = static_cast<u32>(
-        env->GetLongField(data, env->GetFieldID(s_mii_selector_data_class, "return_code", "J")));
+        env->GetLongField(data, env->GetFieldID(s_mii_selector_data_class, "returnCode", "J")));
     if (return_code == 1) {
-        Finalize(return_code, HLE::Applets::MiiData{});
+        Finalize(return_code, Mii::MiiData{});
         return;
     }
 
@@ -67,16 +66,16 @@ void AndroidMiiSelector::Setup(const Frontend::MiiSelectorConfig& config) {
 
 void InitJNI(JNIEnv* env) {
     s_mii_selector_class = reinterpret_cast<jclass>(
-        env->NewGlobalRef(env->FindClass("org/citra/emu/ui/MiiSelector")));
+        env->NewGlobalRef(env->FindClass("org/citra/citra_emu/applets/MiiSelector")));
     s_mii_selector_config_class = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("org/citra/emu/ui/MiiSelector$MiiSelectorConfig")));
+        env->FindClass("org/citra/citra_emu/applets/MiiSelector$MiiSelectorConfig")));
     s_mii_selector_data_class = reinterpret_cast<jclass>(env->NewGlobalRef(
-        env->FindClass("org/citra/emu/ui/MiiSelector$MiiSelectorData")));
+        env->FindClass("org/citra/citra_emu/applets/MiiSelector$MiiSelectorData")));
 
     s_mii_selector_execute =
         env->GetStaticMethodID(s_mii_selector_class, "Execute",
-                               "(Lorg/citra/emu/ui/MiiSelector$MiiSelectorConfig;)Lorg/"
-                               "citra/emu/ui/MiiSelector$MiiSelectorData;");
+                               "(Lorg/citra/citra_emu/applets/MiiSelector$MiiSelectorConfig;)Lorg/"
+                               "citra/citra_emu/applets/MiiSelector$MiiSelectorData;");
 }
 
 void CleanupJNI(JNIEnv* env) {

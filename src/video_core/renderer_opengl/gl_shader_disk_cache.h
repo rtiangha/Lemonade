@@ -4,24 +4,16 @@
 
 #pragma once
 
-#include <algorithm>
-#include <array>
-#include <bitset>
 #include <optional>
 #include <string>
-#include <tuple>
 #include <unordered_map>
-#include <unordered_set>
-#include <utility>
 #include <vector>
-
 #include <glad/glad.h>
 
-#include "common/assert.h"
 #include "common/common_types.h"
-#include "video_core/regs.h"
-#include "video_core/renderer_opengl/gl_shader_decompiler.h"
-#include "video_core/renderer_opengl/gl_shader_gen.h"
+#include "common/file_util.h"
+#include "video_core/pica/regs_internal.h"
+#include "video_core/shader/generator/shader_gen.h"
 
 namespace Core {
 class System;
@@ -36,8 +28,9 @@ namespace OpenGL {
 struct ShaderDiskCacheDecompiled;
 struct ShaderDiskCacheDump;
 
-using RawShaderConfig = Pica::Regs;
+using RawShaderConfig = Pica::RegsInternal;
 using ProgramCode = std::vector<u32>;
+using ProgramType = Pica::Shader::Generator::ProgramType;
 using ShaderDecompiledMap = std::unordered_map<u64, ShaderDiskCacheDecompiled>;
 using ShaderDumpsMap = std::unordered_map<u64, ShaderDiskCacheDump>;
 
@@ -78,7 +71,7 @@ private:
 
 /// Contains decompiled data from a shader
 struct ShaderDiskCacheDecompiled {
-    ShaderDecompiler::ProgramResult result;
+    std::string code;
     bool sanitize_mul;
 };
 
@@ -109,8 +102,7 @@ public:
     void SaveRaw(const ShaderDiskCacheRaw& entry);
 
     /// Saves a decompiled entry to the precompiled file. Does not check for collisions.
-    void SaveDecompiled(u64 unique_identifier, const ShaderDecompiler::ProgramResult& code,
-                        bool sanitize_mul);
+    void SaveDecompiled(u64 unique_identifier, const std::string& code, bool sanitize_mul);
 
     /// Saves a dump entry to the precompiled file. Does not check for collisions.
     void SaveDump(u64 unique_identifier, GLuint program);
@@ -132,17 +124,19 @@ private:
 
     /// Saves a decompiled entry to the passed file. Does not check for collisions.
     void SaveDecompiledToFile(FileUtil::IOFile& file, u64 unique_identifier,
-                              const ShaderDecompiler::ProgramResult& code, bool sanitize_mul);
+                              const std::string& code, bool sanitize_mul);
 
     /// Saves a decompiled entry to the virtual precompiled cache. Does not check for collisions.
-    bool SaveDecompiledToCache(u64 unique_identifier, const ShaderDecompiler::ProgramResult& code,
-                               bool sanitize_mul);
+    bool SaveDecompiledToCache(u64 unique_identifier, const std::string& code, bool sanitize_mul);
 
     /// Returns if the cache can be used
     bool IsUsable() const;
 
-    /// Opens current game's transferable file and write it's header if it doesn't exist
+    /// Opens current game's transferable file and write it's header if it doesn't exist.
     FileUtil::IOFile AppendTransferableFile();
+
+    /// Opens current game's precompiled file and write it's header if it doesn't exist
+    FileUtil::IOFile AppendPrecompiledFile(bool write_header);
 
     /// Save precompiled header to precompiled_cache_in_memory
     void SavePrecompiledHeaderToVirtualPrecompiledCache();
@@ -223,7 +217,8 @@ private:
     u64 program_id{};
     std::string title_id;
 
-    FileUtil::IOFile AppendPrecompiledFile();
+    FileUtil::IOFile transferable_file;
+    FileUtil::IOFile precompiled_file;
 };
 
 } // namespace OpenGL

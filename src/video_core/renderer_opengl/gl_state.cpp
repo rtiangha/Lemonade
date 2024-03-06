@@ -2,9 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <glad/glad.h>
-#include "common/common_funcs.h"
-#include "common/logging/log.h"
+#include "common/common_types.h"
 #include "video_core/renderer_opengl/gl_state.h"
 #include "video_core/renderer_opengl/gl_vars.h"
 
@@ -52,12 +50,13 @@ OpenGLState::OpenGLState() {
 
     for (auto& texture_unit : texture_units) {
         texture_unit.texture_2d = 0;
+        texture_unit.target = GL_TEXTURE_2D;
         texture_unit.sampler = 0;
     }
 
-    texture_cube_unit.texture_cube = 0;
-    texture_cube_unit.sampler = 0;
+    color_buffer.texture_2d = 0;
 
+    texture_buffer_lut_lf.texture_buffer = 0;
     texture_buffer_lut_rg.texture_buffer = 0;
     texture_buffer_lut_rgba.texture_buffer = 0;
 
@@ -214,19 +213,11 @@ void OpenGLState::Apply() const {
     for (u32 i = 0; i < texture_units.size(); ++i) {
         if (texture_units[i].texture_2d != cur_state.texture_units[i].texture_2d) {
             glActiveTexture(TextureUnits::PicaTexture(i).Enum());
-            glBindTexture(GL_TEXTURE_2D, texture_units[i].texture_2d);
+            glBindTexture(texture_units[i].target, texture_units[i].texture_2d);
         }
         if (texture_units[i].sampler != cur_state.texture_units[i].sampler) {
             glBindSampler(i, texture_units[i].sampler);
         }
-    }
-
-    if (texture_cube_unit.texture_cube != cur_state.texture_cube_unit.texture_cube) {
-        glActiveTexture(TextureUnits::TextureCube.Enum());
-        glBindTexture(GL_TEXTURE_CUBE_MAP, texture_cube_unit.texture_cube);
-    }
-    if (texture_cube_unit.sampler != cur_state.texture_cube_unit.sampler) {
-        glBindSampler(TextureUnits::TextureCube.id, texture_cube_unit.sampler);
     }
 
     // Texture buffer LUTs
@@ -246,6 +237,12 @@ void OpenGLState::Apply() const {
         cur_state.texture_buffer_lut_rgba.texture_buffer) {
         glActiveTexture(TextureUnits::TextureBufferLUT_RGBA.Enum());
         glBindTexture(GL_TEXTURE_BUFFER, texture_buffer_lut_rgba.texture_buffer);
+    }
+
+    // Color buffer
+    if (color_buffer.texture_2d != cur_state.color_buffer.texture_2d) {
+        glActiveTexture(TextureUnits::TextureColorBuffer.Enum());
+        glBindTexture(GL_TEXTURE_2D, color_buffer.texture_2d);
     }
 
     // Shadow Images
@@ -339,7 +336,7 @@ void OpenGLState::Apply() const {
 
     // Clip distance
     if (!GLES || GLAD_GL_EXT_clip_cull_distance) {
-        for (size_t i = 0; i < clip_distance.size(); ++i) {
+        for (std::size_t i = 0; i < clip_distance.size(); ++i) {
             if (clip_distance[i] != cur_state.clip_distance[i]) {
                 if (clip_distance[i]) {
                     glEnable(GL_CLIP_DISTANCE0 + static_cast<GLenum>(i));
@@ -357,86 +354,14 @@ void OpenGLState::Apply() const {
     cur_state = *this;
 }
 
-GLuint OpenGLState::BindVertexArray(GLuint array) {
-    GLuint previous = cur_state.draw.vertex_array;
-    glBindVertexArray(array);
-    cur_state.draw.vertex_array = array;
-    return previous;
-}
-
-GLuint OpenGLState::BindVertexBuffer(GLuint buffer) {
-    GLuint previous = cur_state.draw.vertex_buffer;
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    cur_state.draw.vertex_buffer = buffer;
-    return previous;
-}
-
-GLuint OpenGLState::BindUniformBuffer(GLuint buffer) {
-    GLuint previous = cur_state.draw.uniform_buffer;
-    glBindBuffer(GL_UNIFORM_BUFFER, buffer);
-    cur_state.draw.uniform_buffer = buffer;
-    return previous;
-}
-
-GLuint OpenGLState::BindTexture2D(int index, GLuint texture) {
-    GLuint previous = cur_state.texture_units[index].texture_2d;
-    glActiveTexture(TextureUnits::PicaTexture(index).Enum());
-    glBindTexture(GL_TEXTURE_2D, texture);
-    cur_state.texture_units[index].texture_2d = texture;
-    return previous;
-}
-
-GLuint OpenGLState::BindSampler(int index, GLuint sampler) {
-    GLuint previous = cur_state.texture_units[index].sampler;
-    glBindSampler(index, sampler);
-    cur_state.texture_units[index].sampler = sampler;
-    return previous;
-}
-
-GLuint OpenGLState::BindTextureCube(GLuint texture_cube) {
-    GLuint previous = cur_state.texture_cube_unit.texture_cube;
-    glActiveTexture(TextureUnits::TextureCube.Enum());
-    glBindTexture(GL_TEXTURE_CUBE_MAP, texture_cube);
-    cur_state.texture_cube_unit.texture_cube = texture_cube;
-    return previous;
-}
-
-GLuint OpenGLState::BindReadFramebuffer(GLuint framebuffer) {
-    GLuint previous = cur_state.draw.read_framebuffer;
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
-    cur_state.draw.read_framebuffer = framebuffer;
-    return previous;
-}
-
-GLuint OpenGLState::BindDrawFramebuffer(GLuint framebuffer) {
-    GLuint previous = cur_state.draw.draw_framebuffer;
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
-    cur_state.draw.draw_framebuffer = framebuffer;
-    return previous;
-}
-
-GLuint OpenGLState::BindRenderbuffer(GLuint buffer) {
-    GLuint previous = cur_state.renderbuffer;
-    glBindRenderbuffer(GL_RENDERBUFFER, buffer);
-    cur_state.renderbuffer = buffer;
-    return previous;
-}
-
-GLuint OpenGLState::BindShaderProgram(GLuint shader) {
-    GLuint previous_shader = cur_state.draw.shader_program;
-    glUseProgram(shader);
-    cur_state.draw.shader_program = shader;
-    return previous_shader;
-}
-
 OpenGLState& OpenGLState::ResetTexture(GLuint handle) {
     for (auto& unit : texture_units) {
         if (unit.texture_2d == handle) {
             unit.texture_2d = 0;
         }
     }
-    if (texture_cube_unit.texture_cube == handle)
-        texture_cube_unit.texture_cube = 0;
+    if (texture_buffer_lut_lf.texture_buffer == handle)
+        texture_buffer_lut_lf.texture_buffer = 0;
     if (texture_buffer_lut_rg.texture_buffer == handle)
         texture_buffer_lut_rg.texture_buffer = 0;
     if (texture_buffer_lut_rgba.texture_buffer == handle)
@@ -463,9 +388,6 @@ OpenGLState& OpenGLState::ResetSampler(GLuint handle) {
         if (unit.sampler == handle) {
             unit.sampler = 0;
         }
-    }
-    if (texture_cube_unit.sampler == handle) {
-        texture_cube_unit.sampler = 0;
     }
     return *this;
 }

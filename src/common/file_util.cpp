@@ -3,21 +3,29 @@
 // Refer to the license.txt file included.
 
 #include <array>
+#include <fstream>
 #include <limits>
 #include <memory>
 #include <sstream>
 #include <unordered_map>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <fmt/format.h>
 #include "common/assert.h"
 #include "common/common_funcs.h"
 #include "common/common_paths.h"
+#include "common/error.h"
 #include "common/file_util.h"
 #include "common/logging/log.h"
+#include "common/scope_exit.h"
+#include "common/string_util.h"
 
 #ifdef _WIN32
 #include <windows.h>
 // windows.h needs to be included before other windows headers
 #include <direct.h> // getcwd
 #include <io.h>
+#include <share.h>
 #include <shellapi.h>
 #include <shlobj.h> // for SHGetFolderPath
 #include <tchar.h>
@@ -31,8 +39,10 @@
 #endif
 
 // 64 bit offsets for MSVC and MinGW. MinGW also needs this for using _wstat64
+#ifndef __MINGW64__
 #define stat _stat64
 #define fstat _fstat64
+#endif
 
 #else
 #ifdef __APPLE__
@@ -64,6 +74,11 @@
 
 #endif
 
+#ifdef ANDROID
+#include "common/android_storage.h"
+#include "common/string_util.h"
+#endif
+
 #include <algorithm>
 #include <sys/stat.h>
 
@@ -75,6 +90,8 @@
 // The code still needs a ton of cleanup.
 // REMEMBER: strdup considered harmful!
 namespace FileUtil {
+
+using Common::GetLastErrorMsg;
 
 // Remove any ending forward slashes from directory paths
 // Modifies argument.
@@ -91,18 +108,20 @@ static void StripTailDirSlashes(std::string& fname) {
 }
 
 bool Exists(const std::string& filename) {
-    struct stat file_info;
-
     std::string copy(filename);
     StripTailDirSlashes(copy);
 
 #ifdef _WIN32
+    struct stat file_info;
     // Windows needs a slash to identify a driver root
     if (copy.size() != 0 && copy.back() == ':')
         copy += DIR_SEP_CHR;
 
     int result = _wstat64(Common::UTF8ToUTF16W(copy).c_str(), &file_info);
+#elif ANDROID
+    int result = AndroidStorage::FileExists(filename) ? 0 : -1;
 #else
+    struct stat file_info;
     int result = stat(copy.c_str(), &file_info);
 #endif
 
@@ -110,6 +129,10 @@ bool Exists(const std::string& filename) {
 }
 
 bool IsDirectory(const std::string& filename) {
+#ifdef ANDROID
+    return AndroidStorage::IsDirectory(filename);
+#endif
+
     struct stat file_info;
 
     std::string copy(filename);
@@ -154,6 +177,11 @@ bool Delete(const std::string& filename) {
         LOG_ERROR(Common_Filesystem, "DeleteFile failed on {}: {}", filename, GetLastErrorMsg());
         return false;
     }
+#elif ANDROID
+    if (!AndroidStorage::DeleteDocument(filename)) {
+        LOG_ERROR(Common_Filesystem, "unlink failed on {}", filename);
+        return false;
+    }
 #else
     if (unlink(filename.c_str()) == -1) {
         LOG_ERROR(Common_Filesystem, "unlink failed on {}: {}", filename, GetLastErrorMsg());
@@ -176,6 +204,24 @@ bool CreateDir(const std::string& path) {
     }
     LOG_ERROR(Common_Filesystem, "CreateDirectory failed on {}: {}", path, error);
     return false;
+#elif ANDROID
+    std::string directory = path;
+    std::string filename = path;
+    if (Common::EndsWith(path, "/")) {
+        directory = GetParentPath(path);
+        filename = GetParentPath(path);
+    }
+    directory = GetParentPath(directory);
+    filename = GetFilename(filename);
+    // If directory path is empty, set it to root.
+    if (directory.empty()) {
+        directory = "/";
+    }
+    if (!AndroidStorage::CreateDir(directory, filename)) {
+        LOG_ERROR(Common_Filesystem, "mkdir failed on {}", path);
+        return false;
+    };
+    return true;
 #else
     if (mkdir(path.c_str(), 0755) == 0)
         return true;
@@ -239,6 +285,9 @@ bool DeleteDir(const std::string& filename) {
 #ifdef _WIN32
     if (::RemoveDirectoryW(Common::UTF8ToUTF16W(filename).c_str()))
         return true;
+#elif ANDROID
+    if (AndroidStorage::DeleteDocument(filename))
+        return true;
 #else
     if (rmdir(filename.c_str()) == 0)
         return true;
@@ -253,6 +302,9 @@ bool Rename(const std::string& srcFilename, const std::string& destFilename) {
 #ifdef _WIN32
     if (_wrename(Common::UTF8ToUTF16W(srcFilename).c_str(),
                  Common::UTF8ToUTF16W(destFilename).c_str()) == 0)
+        return true;
+#elif ANDROID
+    if (AndroidStorage::RenameFile(srcFilename, std::string(GetFilename(destFilename))))
         return true;
 #else
     if (rename(srcFilename.c_str(), destFilename.c_str()) == 0)
@@ -273,32 +325,36 @@ bool Copy(const std::string& srcFilename, const std::string& destFilename) {
     LOG_ERROR(Common_Filesystem, "failed {} --> {}: {}", srcFilename, destFilename,
               GetLastErrorMsg());
     return false;
+#elif ANDROID
+    return AndroidStorage::CopyFile(srcFilename, std::string(GetParentPath(destFilename)),
+                                    std::string(GetFilename(destFilename)));
 #else
-    using CFilePointer = std::unique_ptr<FILE, decltype(&std::fclose)>;
 
     // Open input file
-    CFilePointer input{fopen(srcFilename.c_str(), "rb"), std::fclose};
+    FILE* input = fopen(srcFilename.c_str(), "rb");
     if (!input) {
         LOG_ERROR(Common_Filesystem, "opening input failed {} --> {}: {}", srcFilename,
                   destFilename, GetLastErrorMsg());
         return false;
     }
+    SCOPE_EXIT({ fclose(input); });
 
     // open output file
-    CFilePointer output{fopen(destFilename.c_str(), "wb"), std::fclose};
+    FILE* output = fopen(destFilename.c_str(), "wb");
     if (!output) {
         LOG_ERROR(Common_Filesystem, "opening output failed {} --> {}: {}", srcFilename,
                   destFilename, GetLastErrorMsg());
         return false;
     }
+    SCOPE_EXIT({ fclose(output); });
 
     // copy loop
     std::array<char, 1024> buffer;
-    while (!feof(input.get())) {
+    while (!feof(input)) {
         // read input
-        std::size_t rnum = fread(buffer.data(), sizeof(char), buffer.size(), input.get());
+        std::size_t rnum = fread(buffer.data(), sizeof(char), buffer.size(), input);
         if (rnum != buffer.size()) {
-            if (ferror(input.get()) != 0) {
+            if (ferror(input) != 0) {
                 LOG_ERROR(Common_Filesystem, "failed reading from source, {} --> {}: {}",
                           srcFilename, destFilename, GetLastErrorMsg());
                 return false;
@@ -306,7 +362,7 @@ bool Copy(const std::string& srcFilename, const std::string& destFilename) {
         }
 
         // write output
-        std::size_t wnum = fwrite(buffer.data(), sizeof(char), rnum, output.get());
+        std::size_t wnum = fwrite(buffer.data(), sizeof(char), rnum, output);
         if (wnum != rnum) {
             LOG_ERROR(Common_Filesystem, "failed writing to output, {} --> {}: {}", srcFilename,
                       destFilename, GetLastErrorMsg());
@@ -332,6 +388,10 @@ u64 GetSize(const std::string& filename) {
     struct stat buf;
 #ifdef _WIN32
     if (_wstat64(Common::UTF8ToUTF16W(filename).c_str(), &buf) == 0)
+#elif ANDROID
+    u64 result = AndroidStorage::GetSize(filename);
+    LOG_TRACE(Common_Filesystem, "{}: {}", filename, result);
+    return result;
 #else
     if (stat(filename.c_str(), &buf) == 0)
 #endif
@@ -401,6 +461,10 @@ bool ForeachDirectoryEntry(u64* num_entries_out, const std::string& directory,
     // windows loop
     do {
         const std::string virtual_name(Common::UTF16ToUTF8(ffd.cFileName));
+#elif ANDROID
+    // android loop
+    auto result = AndroidStorage::GetFilesName(directory);
+    for (auto virtual_name : result) {
 #else
     DIR* dirp = opendir(directory.c_str());
     if (!dirp)
@@ -424,6 +488,8 @@ bool ForeachDirectoryEntry(u64* num_entries_out, const std::string& directory,
 #ifdef _WIN32
     } while (FindNextFileW(handle_find, &ffd) != 0);
     FindClose(handle_find);
+#elif ANDROID
+    }
 #else
     }
     closedir(dirp);
@@ -483,7 +549,8 @@ void GetAllFilesFromNestedEntries(FSTEntry& directory, std::vector<FSTEntry>& ou
 }
 
 bool DeleteDirRecursively(const std::string& directory, unsigned int recursion) {
-    const auto callback = [recursion](u64* num_entries_out, const std::string& directory,
+    const auto callback = [recursion]([[maybe_unused]] u64* num_entries_out,
+                                      const std::string& directory,
                                       const std::string& virtual_name) -> bool {
         std::string new_path = directory + DIR_SEP_CHR + virtual_name;
 
@@ -503,7 +570,8 @@ bool DeleteDirRecursively(const std::string& directory, unsigned int recursion) 
     return true;
 }
 
-void CopyDir(const std::string& source_path, const std::string& dest_path) {
+void CopyDir([[maybe_unused]] const std::string& source_path,
+             [[maybe_unused]] const std::string& dest_path) {
 #ifndef _WIN32
     if (source_path == dest_path)
         return;
@@ -512,12 +580,18 @@ void CopyDir(const std::string& source_path, const std::string& dest_path) {
     if (!FileUtil::Exists(dest_path))
         FileUtil::CreateFullPath(dest_path);
 
+#ifdef ANDROID
+    auto result = AndroidStorage::GetFilesName(source_path);
+    for (auto virtualName : result) {
+#else
     DIR* dirp = opendir(source_path.c_str());
     if (!dirp)
         return;
 
     while (struct dirent* result = readdir(dirp)) {
         const std::string virtualName(result->d_name);
+#endif // ANDROID
+
         // check for "." and ".."
         if (((virtualName[0] == '.') && (virtualName[1] == '\0')) ||
             ((virtualName[0] == '.') && (virtualName[1] == '.') && (virtualName[2] == '\0')))
@@ -535,8 +609,11 @@ void CopyDir(const std::string& source_path, const std::string& dest_path) {
         } else if (!FileUtil::Exists(dest))
             FileUtil::Copy(source, dest);
     }
+
+#ifndef ANDROID
     closedir(dirp);
-#endif
+#endif // ANDROID
+#endif // _WIN32
 }
 
 std::optional<std::string> GetCurrentDir() {
@@ -557,6 +634,10 @@ std::optional<std::string> GetCurrentDir() {
     std::string strDir = dir;
 #endif
     free(dir);
+
+    if (!strDir.ends_with(DIR_SEP)) {
+        strDir += DIR_SEP;
+    }
     return strDir;
 } // namespace FileUtil
 
@@ -569,17 +650,36 @@ bool SetCurrentDir(const std::string& directory) {
 }
 
 #if defined(__APPLE__)
-std::string GetBundleDirectory() {
-    CFURLRef BundleRef;
-    char AppBundlePath[MAXPATHLEN];
+std::optional<std::string> GetBundleDirectory() {
     // Get the main bundle for the app
-    BundleRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    CFStringRef BundlePath = CFURLCopyFileSystemPath(BundleRef, kCFURLPOSIXPathStyle);
-    CFStringGetFileSystemRepresentation(BundlePath, AppBundlePath, sizeof(AppBundlePath));
-    CFRelease(BundleRef);
-    CFRelease(BundlePath);
+    CFBundleRef bundle_ref = CFBundleGetMainBundle();
+    if (!bundle_ref) {
+        return {};
+    }
 
-    return AppBundlePath;
+    CFURLRef bundle_url_ref = CFBundleCopyBundleURL(bundle_ref);
+    if (!bundle_url_ref) {
+        return {};
+    }
+    SCOPE_EXIT({ CFRelease(bundle_url_ref); });
+
+    CFStringRef bundle_path_ref = CFURLCopyFileSystemPath(bundle_url_ref, kCFURLPOSIXPathStyle);
+    if (!bundle_path_ref) {
+        return {};
+    }
+    SCOPE_EXIT({ CFRelease(bundle_path_ref); });
+
+    char app_bundle_path[MAXPATHLEN];
+    if (!CFStringGetFileSystemRepresentation(bundle_path_ref, app_bundle_path,
+                                             sizeof(app_bundle_path))) {
+        return {};
+    }
+
+    std::string path_str(app_bundle_path);
+    if (!path_str.ends_with(DIR_SEP)) {
+        path_str += DIR_SEP;
+    }
+    return path_str;
 }
 #endif
 
@@ -629,7 +729,7 @@ static const std::string& GetHomeDirectory() {
  * @return The directory path
  * @sa http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
  */
-static const std::string GetUserDirectory(const std::string& envvar) {
+[[maybe_unused]] static const std::string GetUserDirectory(const std::string& envvar) {
     const char* directory = getenv(envvar.c_str());
 
     std::string user_dir;
@@ -654,22 +754,6 @@ static const std::string GetUserDirectory(const std::string& envvar) {
     return user_dir;
 }
 #endif
-
-std::string GetSysDirectory() {
-    std::string sysDir;
-
-#if defined(__APPLE__)
-    sysDir = GetBundleDirectory();
-    sysDir += DIR_SEP;
-    sysDir += SYSDATA_DIR;
-#else
-    sysDir = SYSDATA_DIR;
-#endif
-    sysDir += DIR_SEP;
-
-    LOG_DEBUG(Common_Filesystem, "Setting to {}:", sysDir);
-    return sysDir;
-}
 
 namespace {
 std::unordered_map<UserPath, std::string> g_paths;
@@ -696,24 +780,37 @@ void SetUserPath(const std::string& path) {
         g_paths.emplace(UserPath::ConfigDir, user_path + CONFIG_DIR DIR_SEP);
         g_paths.emplace(UserPath::CacheDir, user_path + CACHE_DIR DIR_SEP);
 #elif ANDROID
-        if (FileUtil::Exists(DIR_SEP SDCARD_DIR)) {
-            user_path = DIR_SEP SDCARD_DIR DIR_SEP EMU_DATA_DIR DIR_SEP;
-            g_paths.emplace(UserPath::ConfigDir, user_path + CONFIG_DIR DIR_SEP);
-            g_paths.emplace(UserPath::CacheDir, user_path + CACHE_DIR DIR_SEP);
-        }
+        user_path = "/";
+        g_paths.emplace(UserPath::ConfigDir, user_path + CONFIG_DIR DIR_SEP);
+        g_paths.emplace(UserPath::CacheDir, user_path + CACHE_DIR DIR_SEP);
 #else
-        if (FileUtil::Exists(ROOT_DIR DIR_SEP USERDATA_DIR)) {
-            user_path = ROOT_DIR DIR_SEP USERDATA_DIR DIR_SEP;
+        auto current_dir = FileUtil::GetCurrentDir();
+        if (current_dir.has_value() &&
+            FileUtil::Exists(current_dir.value() + USERDATA_DIR DIR_SEP)) {
+            user_path = current_dir.value() + USERDATA_DIR DIR_SEP;
             g_paths.emplace(UserPath::ConfigDir, user_path + CONFIG_DIR DIR_SEP);
             g_paths.emplace(UserPath::CacheDir, user_path + CACHE_DIR DIR_SEP);
         } else {
-            std::string data_dir = GetUserDirectory("XDG_DATA_HOME");
-            std::string config_dir = GetUserDirectory("XDG_CONFIG_HOME");
-            std::string cache_dir = GetUserDirectory("XDG_CACHE_HOME");
+            std::string data_dir = GetUserDirectory("XDG_DATA_HOME") + DIR_SEP EMU_DATA_DIR DIR_SEP;
+            std::string config_dir =
+                GetUserDirectory("XDG_CONFIG_HOME") + DIR_SEP EMU_DATA_DIR DIR_SEP;
+            std::string cache_dir =
+                GetUserDirectory("XDG_CACHE_HOME") + DIR_SEP EMU_DATA_DIR DIR_SEP;
 
-            user_path = data_dir + DIR_SEP EMU_DATA_DIR DIR_SEP;
-            g_paths.emplace(UserPath::ConfigDir, config_dir + DIR_SEP EMU_DATA_DIR DIR_SEP);
-            g_paths.emplace(UserPath::CacheDir, cache_dir + DIR_SEP EMU_DATA_DIR DIR_SEP);
+#if defined(__APPLE__)
+            // If XDG directories don't already exist from a previous setup, use standard macOS
+            // paths.
+            if (!FileUtil::Exists(data_dir) && !FileUtil::Exists(config_dir) &&
+                !FileUtil::Exists(cache_dir)) {
+                data_dir = GetHomeDirectory() + DIR_SEP APPLE_EMU_DATA_DIR DIR_SEP;
+                config_dir = data_dir + CONFIG_DIR DIR_SEP;
+                cache_dir = data_dir + CACHE_DIR DIR_SEP;
+            }
+#endif
+
+            user_path = data_dir;
+            g_paths.emplace(UserPath::ConfigDir, config_dir);
+            g_paths.emplace(UserPath::CacheDir, cache_dir);
         }
 #endif
     }
@@ -773,7 +870,10 @@ const std::string& GetDefaultUserPath(UserPath path) {
     return g_default_paths[path];
 }
 
-const void UpdateUserPath(UserPath path, const std::string& filename) {
+void UpdateUserPath(UserPath path, const std::string& filename) {
+    if (filename.empty()) {
+        return;
+    }
     if (!FileUtil::IsDirectory(filename)) {
         LOG_ERROR(Common_Filesystem, "Path is not a directory. UserPath: {}  filename: {}", path,
                   filename);
@@ -793,7 +893,7 @@ std::size_t ReadFileToString(bool text_file, const std::string& filename, std::s
         return 0;
 
     str.resize(static_cast<u32>(file.GetSize()));
-    return file.ReadArray(&str[0], str.size());
+    return file.ReadArray(str.data(), str.size());
 }
 
 void SplitFilename83(const std::string& filename, std::array<char, 9>& short_name,
@@ -820,14 +920,14 @@ void SplitFilename83(const std::string& filename, std::array<char, 9>& short_nam
             short_name[7] = '1';
             break;
         }
-        short_name[j++] = toupper(letter);
+        short_name[j++] = Common::ToUpper(letter);
     }
 
     // Get extension.
     if (point != std::string::npos) {
         j = 0;
         for (char letter : filename.substr(point + 1, 3))
-            extension[j++] = toupper(letter);
+            extension[j++] = Common::ToUpper(letter);
     }
 }
 
@@ -880,7 +980,7 @@ std::string_view GetFilename(std::string_view path) {
     const auto name_index = path.find_last_of("\\/");
 
     if (name_index == std::string_view::npos) {
-        return {};
+        return path;
     }
 
     return path.substr(name_index + 1);
@@ -911,6 +1011,9 @@ std::string_view RemoveTrailingSlash(std::string_view path) {
 
 std::string SanitizePath(std::string_view path_, DirectorySeparator directory_separator) {
     std::string path(path_);
+#ifdef ANDROID
+    return std::string(RemoveTrailingSlash(path));
+#endif
     char type1 = directory_separator == DirectorySeparator::BackwardSlash ? '/' : '\\';
     char type2 = directory_separator == DirectorySeparator::BackwardSlash ? '\\' : '/';
 
@@ -957,6 +1060,7 @@ IOFile& IOFile::operator=(IOFile&& other) noexcept {
 
 void IOFile::Swap(IOFile& other) noexcept {
     std::swap(m_file, other.m_file);
+    std::swap(m_fd, other.m_fd);
     std::swap(m_good, other.m_good);
     std::swap(filename, other.filename);
     std::swap(openmode, other.openmode);
@@ -967,14 +1071,43 @@ bool IOFile::Open() {
     Close();
 
 #ifdef _WIN32
-    if (flags != 0) {
-        m_file = _wfsopen(Common::UTF8ToUTF16W(filename).c_str(),
-                          Common::UTF8ToUTF16W(openmode).c_str(), flags);
-        m_good = m_file != nullptr;
-    } else {
-        m_good = _wfopen_s(&m_file, Common::UTF8ToUTF16W(filename).c_str(),
-                           Common::UTF8ToUTF16W(openmode).c_str()) == 0;
+    if (flags == 0) {
+        flags = _SH_DENYNO;
     }
+    m_file = _wfsopen(Common::UTF8ToUTF16W(filename).c_str(),
+                      Common::UTF8ToUTF16W(openmode).c_str(), flags);
+    m_good = m_file != nullptr;
+
+#elif ANDROID
+    // Check whether filepath is startsWith content
+    AndroidStorage::AndroidOpenMode android_open_mode = AndroidStorage::ParseOpenmode(openmode);
+    if (android_open_mode == AndroidStorage::AndroidOpenMode::WRITE ||
+        android_open_mode == AndroidStorage::AndroidOpenMode::READ_WRITE ||
+        android_open_mode == AndroidStorage::AndroidOpenMode::WRITE_APPEND ||
+        android_open_mode == AndroidStorage::AndroidOpenMode::WRITE_TRUNCATE ||
+        android_open_mode == AndroidStorage::AndroidOpenMode::READ_WRITE_TRUNCATE ||
+        android_open_mode == AndroidStorage::AndroidOpenMode::READ_WRITE_APPEND) {
+        if (!FileUtil::Exists(filename)) {
+            std::string directory(GetParentPath(filename));
+            std::string display_name(GetFilename(filename));
+            if (!AndroidStorage::CreateFile(directory, display_name)) {
+                m_good = m_file != nullptr;
+                return m_good;
+            }
+        }
+    }
+    m_fd = AndroidStorage::OpenContentUri(filename, android_open_mode);
+    if (m_fd != -1) {
+        int error_num = 0;
+        m_file = fdopen(m_fd, openmode.c_str());
+        error_num = errno;
+        if (error_num != 0 && m_file == nullptr) {
+            LOG_ERROR(Common_Filesystem, "Error on file: {}, error: {}", filename,
+                      strerror(error_num));
+        }
+    }
+
+    m_good = m_file != nullptr;
 #else
     m_file = std::fopen(filename.c_str(), openmode.c_str());
     m_good = m_file != nullptr;
@@ -1034,6 +1167,43 @@ std::size_t IOFile::ReadImpl(void* data, std::size_t length, std::size_t data_si
     return std::fread(data, data_size, length, m_file);
 }
 
+#ifdef _WIN32
+static std::size_t pread(int fd, void* buf, std::size_t count, uint64_t offset) {
+    long unsigned int read_bytes = 0;
+    OVERLAPPED overlapped = {0};
+    HANDLE file = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
+
+    overlapped.OffsetHigh = static_cast<uint32_t>(offset >> 32);
+    overlapped.Offset = static_cast<uint32_t>(offset & 0xFFFF'FFFFLL);
+    SetLastError(0);
+    bool ret = ReadFile(file, buf, static_cast<uint32_t>(count), &read_bytes, &overlapped);
+
+    if (!ret && GetLastError() != ERROR_HANDLE_EOF) {
+        errno = GetLastError();
+        return std::numeric_limits<std::size_t>::max();
+    }
+    return read_bytes;
+}
+#else
+#define pread ::pread
+#endif
+
+std::size_t IOFile::ReadAtImpl(void* data, std::size_t length, std::size_t data_size,
+                               std::size_t offset) {
+    if (!IsOpen()) {
+        m_good = false;
+        return std::numeric_limits<std::size_t>::max();
+    }
+
+    if (length == 0) {
+        return 0;
+    }
+
+    DEBUG_ASSERT(data != nullptr);
+
+    return pread(fileno(m_file), data, data_size * length, offset);
+}
+
 std::size_t IOFile::WriteImpl(const void* data, std::size_t length, std::size_t data_size) {
     if (!IsOpen()) {
         m_good = false;
@@ -1065,4 +1235,34 @@ bool IOFile::Resize(u64 size) {
     return m_good;
 }
 
+template <typename T>
+using boost_iostreams = boost::iostreams::stream<T>;
+
+template <>
+void OpenFStream<std::ios_base::in>(
+    boost_iostreams<boost::iostreams::file_descriptor_source>& fstream,
+    const std::string& filename) {
+    IOFile file(filename, "r");
+    if (file.GetFd() == -1)
+        return;
+    int fd = dup(file.GetFd());
+    if (fd == -1)
+        return;
+    boost::iostreams::file_descriptor_source file_descriptor_source(fd,
+                                                                    boost::iostreams::close_handle);
+    fstream.open(file_descriptor_source);
+}
+
+template <>
+void OpenFStream<std::ios_base::out>(
+    boost_iostreams<boost::iostreams::file_descriptor_sink>& fstream, const std::string& filename) {
+    IOFile file(filename, "w");
+    if (file.GetFd() == -1)
+        return;
+    int fd = dup(file.GetFd());
+    if (fd == -1)
+        return;
+    boost::iostreams::file_descriptor_sink file_descriptor_sink(fd, boost::iostreams::close_handle);
+    fstream.open(file_descriptor_sink);
+}
 } // namespace FileUtil

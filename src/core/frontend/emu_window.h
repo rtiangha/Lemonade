@@ -7,10 +7,27 @@
 #include <memory>
 #include <tuple>
 #include <utility>
+
 #include "common/common_types.h"
+#include "core/3ds.h"
 #include "core/frontend/framebuffer_layout.h"
 
+namespace Common {
+class DynamicLibrary;
+}
+
 namespace Frontend {
+
+/// Information for the Graphics Backends signifying what type of screen pointer is in
+/// WindowInformation
+enum class WindowSystemType : u8 {
+    Headless,
+    Android,
+    Windows,
+    MacOS,
+    X11,
+    Wayland,
+};
 
 struct Frame;
 /**
@@ -60,11 +77,43 @@ class GraphicsContext {
 public:
     virtual ~GraphicsContext();
 
+    /// Checks whether this context uses OpenGL ES.
+    virtual bool IsGLES() {
+        return false;
+    }
+
+    /// Inform the driver to swap the front/back buffers and present the current image
+    virtual void SwapBuffers(){};
+
     /// Makes the graphics context current for the caller thread
-    virtual void MakeCurrent() = 0;
+    virtual void MakeCurrent(){};
 
     /// Releases (dunno if this is the "right" word) the context from the caller thread
-    virtual void DoneCurrent() = 0;
+    virtual void DoneCurrent(){};
+
+    /// Gets the GPU driver library (used by Android only)
+    virtual std::shared_ptr<Common::DynamicLibrary> GetDriverLibrary() {
+        return {};
+    }
+
+    class Scoped {
+    public:
+        explicit Scoped(GraphicsContext& context_) : context(context_) {
+            context.MakeCurrent();
+        }
+        ~Scoped() {
+            context.DoneCurrent();
+        }
+
+    private:
+        GraphicsContext& context;
+    };
+
+    /// Calls MakeCurrent on the context and calls DoneCurrent when the scope for the returned value
+    /// ends
+    [[nodiscard]] Scoped Acquire() {
+        return Scoped{*this};
+    }
 };
 
 /**
@@ -87,12 +136,32 @@ public:
  */
 class EmuWindow : public GraphicsContext {
 public:
+    class TouchState;
+
     /// Data structure to store emuwindow configuration
     struct WindowConfig {
         bool fullscreen = false;
         int res_width = 0;
         int res_height = 0;
-        std::pair<unsigned, unsigned> min_client_area_size;
+        std::pair<unsigned, unsigned> min_client_area_size{
+            Core::kScreenTopWidth, Core::kScreenTopHeight + Core::kScreenBottomHeight};
+    };
+
+    /// Data describing host window system information
+    struct WindowSystemInfo {
+        // Window system type. Determines which GL context or Vulkan WSI is used.
+        WindowSystemType type = WindowSystemType::Headless;
+
+        // Connection to a display server. This is used on X11 and Wayland platforms.
+        void* display_connection = nullptr;
+
+        // Render surface. This is a pointer to the native window handle, which depends
+        // on the platform. e.g. HWND for Windows, Window for X11. If the surface is
+        // set to nullptr, the video backend will run in headless mode.
+        void* render_surface = nullptr;
+
+        // Scale of the render surface. For hidpi systems, this will be >1.
+        float render_surface_scale = 1.0f;
     };
 
     /// Polls window events
@@ -110,6 +179,16 @@ public:
     virtual std::unique_ptr<GraphicsContext> CreateSharedContext() const {
         return nullptr;
     }
+
+    /**
+     * Save current GraphicsContext.
+     */
+    virtual void SaveContext(){};
+
+    /**
+     * Restore saved GraphicsContext.
+     */
+    virtual void RestoreContext(){};
 
     /**
      * Signal that a touch pressed event has occurred (e.g. mouse click pressed)
@@ -138,6 +217,10 @@ public:
         return active_config;
     }
 
+    bool StrictContextRequired() const {
+        return strict_context_required;
+    }
+
     /**
      * Requests the internal configuration to be replaced by the specified argument at some point in
      * the future.
@@ -146,6 +229,13 @@ public:
      */
     void SetConfig(const WindowConfig& val) {
         config = val;
+    }
+
+    /**
+     * Returns system information about the drawing area.
+     */
+    const WindowSystemInfo& GetWindowInfo() const {
+        return window_info;
     }
 
     /**
@@ -167,6 +257,7 @@ public:
 
 protected:
     EmuWindow();
+    EmuWindow(bool is_secondary);
     virtual ~EmuWindow();
 
     /**
@@ -194,23 +285,40 @@ protected:
         framebuffer_layout = layout;
     }
 
+    bool is_secondary{};
+    bool strict_context_required{};
+    WindowSystemInfo window_info;
+
 private:
     /**
      * Handler called when the minimal client area was requested to be changed via SetConfig.
      * For the request to be honored, EmuWindow implementations will usually reimplement this
      * function.
      */
-    virtual void OnMinimalClientAreaChangeRequest(std::pair<u32, u32> minimal_size) {
+    virtual void OnMinimalClientAreaChangeRequest(
+        [[maybe_unused]] std::pair<u32, u32> minimal_size) {
         // By default, ignore this request and do nothing.
     }
 
+    void CreateTouchState();
+
+    /**
+     * Check if the given x/y coordinates are within the touchpad specified by the framebuffer
+     * layout
+     * @param layout FramebufferLayout object describing the framebuffer size and screen positions
+     * @param framebuffer_x Framebuffer x-coordinate to check
+     * @param framebuffer_y Framebuffer y-coordinate to check
+     * @return True if the coordinates are within the touchpad, otherwise false
+     */
+    bool IsWithinTouchscreen(const Layout::FramebufferLayout& layout, unsigned framebuffer_x,
+                             unsigned framebuffer_y);
+
     Layout::FramebufferLayout framebuffer_layout; ///< Current framebuffer layout
 
-    WindowConfig config;        ///< Internal configuration (changes pending for being applied in
-                                /// ProcessConfigurationChanges)
-    WindowConfig active_config; ///< Internal active configuration
+    WindowConfig config{};        ///< Internal configuration (changes pending for being applied in
+                                  /// ProcessConfigurationChanges)
+    WindowConfig active_config{}; ///< Internal active configuration
 
-    class TouchState;
     std::shared_ptr<TouchState> touch_state;
 
     /**

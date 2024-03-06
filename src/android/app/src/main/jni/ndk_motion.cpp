@@ -6,7 +6,6 @@
 #include "common/assert.h"
 #include "common/logging/log.h"
 #include "common/vector_math.h"
-#include "jni/native.h"
 #include "jni/ndk_motion.h"
 
 namespace InputManager {
@@ -63,7 +62,7 @@ class NDKMotion final : public Input::MotionDevice {
     }
 
     void Construct() {
-        sensor_manager = ASensorManager_getInstanceForPackage("org.citra.emu");
+        sensor_manager = ASensorManager_getInstanceForPackage("org.citra.citra_emu");
         looper = ALooper_prepare(ALOOPER_PREPARE_ALLOW_NON_CALLBACKS);
         if (!sensor_manager || !looper) {
             LOG_CRITICAL(Input, "Could not retrieve sensor manager");

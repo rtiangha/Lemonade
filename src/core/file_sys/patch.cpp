@@ -15,8 +15,8 @@
 namespace FileSys::Patch {
 
 bool ApplyIpsPatch(const std::vector<u8>& ips, std::vector<u8>& buffer) {
-    u32 cursor = 5;
-    u32 patch_length = ips.size() - 3;
+    std::size_t cursor = 5;
+    std::size_t patch_length = ips.size() - 3;
     std::string ips_header(ips.begin(), ips.begin() + 5);
 
     if (ips_header != "PATCH") {
@@ -30,7 +30,7 @@ bool ApplyIpsPatch(const std::vector<u8>& ips, std::vector<u8>& buffer) {
         if (eof_check == "EOF")
             return false;
 
-        u32 offset = ips[cursor] << 16 | ips[cursor + 1] << 8 | ips[cursor + 2];
+        std::size_t offset = ips[cursor] << 16 | ips[cursor + 1] << 8 | ips[cursor + 2];
         std::size_t length = ips[cursor + 3] << 8 | ips[cursor + 4];
 
         // check for an rle record
@@ -63,6 +63,7 @@ namespace Bps {
 // Realistically uint32s are more than enough for code patching.
 using Number = u32;
 
+constexpr std::size_t MagicSize = 4;
 constexpr std::size_t FooterSize = 12;
 
 // The BPS format uses CRC32 checksums.
@@ -98,7 +99,7 @@ public:
 
     template <typename ValueType>
     std::optional<ValueType> Read() {
-        static_assert(std::is_pod_v<ValueType>);
+        static_assert(std::is_trivial_v<ValueType>);
         ValueType val{};
         if (!Read(&val, sizeof(val)))
             return std::nullopt;
@@ -130,7 +131,7 @@ public:
         return m_offset;
     }
 
-    bool Seek(size_t offset) {
+    bool Seek(std::size_t offset) {
         if (offset > m_size)
             return false;
         m_offset = offset;
@@ -149,7 +150,7 @@ public:
         : m_source{source}, m_target{target}, m_patch{patch} {}
 
     bool Apply() {
-        const auto magic = *m_patch.Read<std::array<char, 4>>();
+        const auto magic = *m_patch.Read<std::array<char, MagicSize>>();
         if (std::string_view(magic.data(), magic.size()) != "BPS1") {
             LOG_ERROR(Service_FS, "Invalid BPS magic");
             return false;
@@ -241,7 +242,7 @@ private:
         if (m_target_relative_offset + length > m_target.size())
             return false;
         // Byte by byte copy.
-        for (size_t i = 0; i < length; ++i)
+        for (std::size_t i = 0; i < length; ++i)
             m_target.data()[m_target.Tell() + i] = m_target.data()[m_target_relative_offset++];
         m_target.Seek(m_target.Tell() + length);
         return true;
@@ -257,10 +258,24 @@ private:
 } // namespace Bps
 
 bool ApplyBpsPatch(const std::vector<u8>& patch, std::vector<u8>& buffer) {
+    Bps::Stream patch_stream{patch.data(), patch.size()};
+
+    // Move the offset past the file format marker (i.e. "BPS1")
+    patch_stream.Seek(Bps::MagicSize);
+
+    const Bps::Number source_size = patch_stream.ReadNumber();
+    const Bps::Number target_size = patch_stream.ReadNumber();
+
+    if (target_size > source_size) {
+        LOG_INFO(Service_FS, "Resizing target to {}", target_size);
+        buffer.resize(target_size);
+    }
+
+    patch_stream.Seek(0);
+
     const std::vector<u8> source = buffer;
     Bps::Stream source_stream{source.data(), source.size()};
     Bps::Stream target_stream{buffer.data(), buffer.size()};
-    Bps::Stream patch_stream{patch.data(), patch.size()};
     Bps::PatchApplier applier{source_stream, target_stream, patch_stream};
     return applier.Apply();
 }

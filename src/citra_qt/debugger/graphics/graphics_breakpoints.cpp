@@ -9,18 +9,17 @@
 #include <QVBoxLayout>
 #include "citra_qt/debugger/graphics/graphics_breakpoints.h"
 #include "citra_qt/debugger/graphics/graphics_breakpoints_p.h"
-#include "common/assert.h"
 
 BreakPointModel::BreakPointModel(std::shared_ptr<Pica::DebugContext> debug_context, QObject* parent)
     : QAbstractListModel(parent), context_weak(debug_context),
       at_breakpoint(debug_context->at_breakpoint),
       active_breakpoint(debug_context->active_breakpoint) {}
 
-int BreakPointModel::columnCount(const QModelIndex& parent) const {
+int BreakPointModel::columnCount([[maybe_unused]] const QModelIndex& parent) const {
     return 1;
 }
 
-int BreakPointModel::rowCount(const QModelIndex& parent) const {
+int BreakPointModel::rowCount([[maybe_unused]] const QModelIndex& parent) const {
     return static_cast<int>(Pica::DebugContext::Event::NumEvents);
 }
 
@@ -60,12 +59,15 @@ QVariant BreakPointModel::data(const QModelIndex& index, int role) const {
 }
 
 Qt::ItemFlags BreakPointModel::flags(const QModelIndex& index) const {
-    if (!index.isValid())
-        return 0;
+    if (!index.isValid()) {
+        return {};
+    }
 
     Qt::ItemFlags flags = Qt::ItemIsEnabled;
-    if (index.column() == 0)
+    if (index.column() == 0) {
         flags |= Qt::ItemIsUserCheckable;
+    }
+
     return flags;
 }
 
@@ -189,12 +191,12 @@ GraphicsBreakPointsWidget::GraphicsBreakPointsWidget(
     setWidget(main_widget);
 }
 
-void GraphicsBreakPointsWidget::OnPicaBreakPointHit(Event event, void* data) {
+void GraphicsBreakPointsWidget::OnPicaBreakPointHit(Event event, const void* data) {
     // Process in GUI thread
     emit BreakPointHit(event, data);
 }
 
-void GraphicsBreakPointsWidget::OnBreakPointHit(Pica::DebugContext::Event event, void* data) {
+void GraphicsBreakPointsWidget::OnBreakPointHit(Pica::DebugContext::Event event, const void* data) {
     status_text->setText(tr("Emulation halted at breakpoint"));
     resume_button->setEnabled(true);
 }

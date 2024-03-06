@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <atomic>
-#include <iomanip>
 #include <mutex>
 #include <random>
 #include <regex>
@@ -1029,10 +1028,6 @@ bool Room::Create(const std::string& name, const std::string& description,
         return false;
     }
     room_impl->state = State::Open;
-
-    if (!verify_backend) {
-        verify_backend = std::make_unique<Network::VerifyUser::NullBackend>();
-    }
 
     room_impl->room_information.name = name;
     room_impl->room_information.description = description;

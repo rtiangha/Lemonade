@@ -46,8 +46,8 @@ SDL2Sink::SDL2Sink(std::string device_name) : impl(std::make_unique<Impl>()) {
         device = device_name.c_str();
     }
 
-    impl->audio_device_id = SDL_OpenAudioDevice(
-        device, false, &desired_audiospec, &obtained_audiospec, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
+    impl->audio_device_id =
+        SDL_OpenAudioDevice(device, false, &desired_audiospec, &obtained_audiospec, 0);
     if (impl->audio_device_id <= 0) {
         LOG_CRITICAL(Audio_Sink, "SDL_OpenAudioDevice failed with code {} for device \"{}\"",
                      impl->audio_device_id, device_name);
@@ -83,7 +83,7 @@ void SDL2Sink::Impl::Callback(void* impl_, u8* buffer, int buffer_size_in_bytes)
     if (!impl || !impl->cb)
         return;
 
-    const size_t num_frames = buffer_size_in_bytes / (2 * sizeof(s16));
+    const std::size_t num_frames = buffer_size_in_bytes / (2 * sizeof(s16));
 
     impl->cb(reinterpret_cast<s16*>(buffer), num_frames);
 }

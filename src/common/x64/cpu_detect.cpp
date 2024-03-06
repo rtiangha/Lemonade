@@ -2,6 +2,9 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "common/arch.h"
+#if CITRA_ARCH(x86_64)
+
 #include <cstring>
 #include "common/common_types.h"
 #include "common/x64/cpu_detect.h"
@@ -53,7 +56,7 @@ static CPUCaps Detect() {
     // Citra at all anyway
 
     int cpu_id[4];
-    memset(caps.brand_string, 0, sizeof(caps.brand_string));
+    std::memset(caps.brand_string, 0, sizeof(caps.brand_string));
 
     // Detect CPU's CPUID capabilities and grab CPU string
     __cpuid(cpu_id, 0x00000000);
@@ -110,6 +113,11 @@ static CPUCaps Detect() {
                 caps.bmi1 = true;
             if ((cpu_id[1] >> 8) & 1)
                 caps.bmi2 = true;
+            // Checks for AVX512F, AVX512CD, AVX512VL, AVX512DQ, AVX512BW (Intel Skylake-X/SP)
+            if ((cpu_id[1] >> 16) & 1 && (cpu_id[1] >> 28) & 1 && (cpu_id[1] >> 31) & 1 &&
+                (cpu_id[1] >> 17) & 1 && (cpu_id[1] >> 30) & 1) {
+                caps.avx512 = caps.avx2;
+            }
         }
     }
 
@@ -139,3 +147,5 @@ const CPUCaps& GetCPUCaps() {
 }
 
 } // namespace Common
+
+#endif // CITRA_ARCH(x86_64)

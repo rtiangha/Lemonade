@@ -1,16 +1,26 @@
-**DISCONTINUED PROJECT USE CITRA OFFICAL INSTEAD**
-==============
-[Citra Nightly Android Downlaod](https://citra-emu.org/download/#)
+<h1 align="center">
+  <br>
+  <a href="https://citra-emu.org/"><img src="https://i.imgur.com/ADJjMnR.png" alt="Lime" width="200"></a>
+  <br>
+  <b>Lime</b>
+  <br>
+</h1>
 
-As you can notice , there haven't been any new builds for a while now **becuase i officially announce that this project is discontinued and wont be receiving any more updates** 
+Emulation never dies! it changes and moves forward!
 
-### Why?
+<h4 align="left"><b>Lime</b> is the world's most popular, open-source, Nintendo 3DS emulator.
+<br>
+It is written in C++ with portability in mind and builds are actively maintained for Windows, Linux, Android and macOS.
+</h4>
 
-This fork was made becuase citra offcial wasn't receiving any updates at the time but now the project is alive and well so keeping this fork alive would be pointless and meaningless. 
-Also my android development ended since July 2023. I got a Steam deck and now I am no longer developing for android
+## Release Builds
 
-### Thanks to everyone who used my fork. If you want you can join my telegram group (Steam Deck group)
+https://github.com/RyzenDew/Lime-3DS-Emulator/releases
 
-* __Telegram__: [Telegram Channel](https://t.me/joinchat/lTkg6yC6pQAxNzM0)
+## support me
 
-Touch your hearts , you're the queens of broken heart
+Just subcribe to my Youtube https://www.youtube.com/c/MattsCreative 
+
+## License
+
+Lime is licensed under the GPLv2 (or any later version). Refer to the [LICENSE.txt](https://github.com/citra-emu/citra/blob/master/license.txt) file.

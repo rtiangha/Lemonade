@@ -6,7 +6,7 @@
 
 #include <optional>
 #include <boost/icl/interval_set.hpp>
-#include <boost/serialization/set.hpp>
+#include <boost/serialization/export.hpp>
 #include "common/common_types.h"
 #include "common/serialization/boost_interval_set.hpp"
 
@@ -61,6 +61,14 @@ struct MemoryRegionInfo {
     std::optional<u32> LinearAllocate(u32 size);
 
     /**
+     * Allocates memory from the linear heap with only size specified.
+     * @param size size of the memory to allocate.
+     * @returns the address offset to the found block, searching from the end of FCRAM; null if
+     * there is no enough space
+     */
+    std::optional<u32> RLinearAllocate(u32 size);
+
+    /**
      * Frees one segment of memory. The memory must have been allocated as heap or linear heap.
      * @param offset the region address offset to the beginning of FCRAM.
      * @param size the size of the region to free.
@@ -75,15 +83,9 @@ struct MemoryRegionInfo {
 private:
     friend class boost::serialization::access;
     template <class Archive>
-    void serialize(Archive& ar, const unsigned int file_version) {
-        ar& base;
-        ar& size;
-        ar& used;
-        ar& free_blocks;
-        if (Archive::is_loading::value) {
-            is_locked = true;
-        }
-    }
+    void serialize(Archive& ar, const unsigned int);
 };
 
 } // namespace Kernel
+
+BOOST_CLASS_EXPORT_KEY(Kernel::MemoryRegionInfo)

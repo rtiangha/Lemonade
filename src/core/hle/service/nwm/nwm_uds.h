@@ -65,7 +65,7 @@ static_assert(sizeof(NodeInfo) == 40, "NodeInfo has incorrect size.");
 
 using NodeList = std::vector<NodeInfo>;
 
-enum class NetworkStatus {
+enum class NetworkStatus : u32 {
     NotConnected = 3,
     ConnectedAsHost = 6,
     Connecting = 7,
@@ -73,9 +73,15 @@ enum class NetworkStatus {
     ConnectedAsSpectator = 10,
 };
 
+enum class NetworkStatusChangeReason : u32 {
+    None = 0,
+    ConnectionEstablished = 1,
+    ConnectionLost = 4,
+};
+
 struct ConnectionStatus {
-    u32_le status;
-    INSERT_PADDING_WORDS(1);
+    enum_le<NetworkStatus> status;
+    enum_le<NetworkStatusChangeReason> status_change_reason;
     u16_le network_node_id;
     u16_le changed_nodes;
     u16_le nodes[UDSMaxNodes];
@@ -410,6 +416,17 @@ private:
     void ConnectToNetworkDeprecated(Kernel::HLERequestContext& ctx);
 
     /**
+     * NWM_UDS::EjectClient Disconnects clients.
+     *  Inputs:
+     *      0 : Command header
+     *      1 : Network node id
+     *  Outputs:
+     *      0 : Return header
+     *      1 : Result of function, 0 on success, otherwise error code
+     */
+    void EjectClient(Kernel::HLERequestContext& ctx);
+
+    /**
      * NWM_UDS::DecryptBeaconData service function.
      * Decrypts the encrypted data tags contained in the 802.11 beacons.
      *  Inputs:
@@ -426,23 +443,19 @@ private:
      *      1 : Result of function, 0 on success, otherwise error code
      *      2, 3: output buffer return descriptor & ptr
      */
-    void DecryptBeaconData(Kernel::HLERequestContext& ctx, u16 command_id);
-
-    template <u16 command_id>
     void DecryptBeaconData(Kernel::HLERequestContext& ctx);
 
     ResultVal<std::shared_ptr<Kernel::Event>> Initialize(
         u32 sharedmem_size, const NodeInfo& node, u16 version,
         std::shared_ptr<Kernel::SharedMemory> sharedmem);
 
-    ResultCode BeginHostingNetwork(const u8* network_info_buffer, std::size_t network_info_size,
-                                   std::vector<u8> passphrase);
+    Result BeginHostingNetwork(std::span<const u8> network_info_buffer, std::vector<u8> passphrase);
 
     void ConnectToNetwork(Kernel::HLERequestContext& ctx, u16 command_id,
-                          const u8* network_info_buffer, std::size_t network_info_size,
-                          u8 connection_type, std::vector<u8> passphrase);
+                          std::span<const u8> network_info_buffer, u8 connection_type,
+                          std::vector<u8> passphrase);
 
-    void BeaconBroadcastCallback(u64 userdata, s64 cycles_late);
+    void BeaconBroadcastCallback(std::uintptr_t user_data, s64 cycles_late);
 
     /**
      * Returns a list of received 802.11 beacon frames from the specified sender since the last

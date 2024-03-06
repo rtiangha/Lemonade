@@ -9,14 +9,18 @@
 #include <jni.h>
 #include "video_core/rasterizer_interface.h"
 
+namespace Service::AM {
+enum class InstallStatus : u32;
+} // namespace Service::AM
+
 namespace IDCache {
 
 JNIEnv* GetEnvForThread();
-jclass GetNativeLibraryClass();
+
 jclass GetCoreErrorClass();
 jclass GetSavestateInfoClass();
-jclass GetDiskCacheProgressClass();
-jclass GetDiskCacheLoadCallbackStageClass();
+
+jclass GetNativeLibraryClass();
 jmethodID GetOnCoreError();
 jmethodID GetDisplayAlertMsg();
 jmethodID GetDisplayAlertPrompt();
@@ -26,10 +30,20 @@ jmethodID GetLandscapeScreenLayout();
 jmethodID GetExitEmulationActivity();
 jmethodID GetRequestCameraPermission();
 jmethodID GetRequestMicPermission();
-jmethodID GetDiskCacheLoadProgress();
-jmethodID GetAddNetplayMessage();
 
+jclass GetCheatClass();
+jfieldID GetCheatPointer();
+jmethodID GetCheatConstructor();
+
+jfieldID GetGameInfoPointer();
+
+jclass GetDiskCacheProgressClass();
+jmethodID GetDiskCacheLoadProgress();
 jobject GetJavaLoadCallbackStage(VideoCore::LoadCallbackStage stage);
+
+jclass GetCiaInstallHelperClass();
+jmethodID GetCiaInstallHelperSetProgress();
+jobject GetJavaCiaInstallStatus(Service::AM::InstallStatus status);
 
 } // namespace IDCache
 

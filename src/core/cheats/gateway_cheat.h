@@ -6,6 +6,8 @@
 
 #include <atomic>
 #include <memory>
+#include <vector>
+#include "common/common_types.h"
 #include "core/cheats/cheat_base.h"
 
 namespace Cheats {
@@ -75,7 +77,7 @@ public:
     ///     (there might be multiple lines of those hex numbers)
     ///     Comment lines start with a '*'
     /// This function will pares the file for such structures
-    static std::vector<std::unique_ptr<CheatBase>> LoadFile(const std::string& filepath);
+    static std::vector<std::shared_ptr<CheatBase>> LoadFile(const std::string& filepath);
 
 private:
     std::atomic<bool> enabled = false;

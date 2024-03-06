@@ -66,7 +66,7 @@ public:
 
 private:
     const std::size_t source_id;
-    Memory::MemorySystem* memory_system;
+    const Memory::MemorySystem* memory_system{};
     StereoFrame16 current_frame;
 
     using Format = SourceConfiguration::Configuration::Format;
@@ -87,8 +87,8 @@ private:
         Format format;
 
         bool from_queue;
-        u32_dsp play_position; // = 0;
-        bool has_played;       // = false;
+        u32 play_position; // = 0;
+        bool has_played;   // = false;
 
     private:
         template <class Archive>
@@ -121,7 +121,7 @@ private:
         // State variables
 
         bool enabled = false;
-        u16 sync = 0;
+        u16 sync_count = 0;
 
         // Mixing
 
@@ -136,14 +136,14 @@ private:
         // Current buffer
 
         u32 current_sample_number = 0;
-        u32 next_sample_number = 0;
         PAddr current_buffer_physical_address = 0;
         AudioInterp::StereoBuffer16 current_buffer = {};
 
         // buffer_id state
 
         bool buffer_update = false;
-        u32 current_buffer_id = 0;
+        u16 last_buffer_id = 0;
+        u16 current_buffer_id = 0;
 
         // Decoding state
 
@@ -164,13 +164,12 @@ private:
         template <class Archive>
         void serialize(Archive& ar, const unsigned int) {
             ar& enabled;
-            ar& sync;
+            ar& sync_count;
             ar& gain;
             ar& input_queue;
             ar& mono_or_stereo;
             ar& format;
             ar& current_sample_number;
-            ar& next_sample_number;
             ar& current_buffer_physical_address;
             ar& current_buffer;
             ar& buffer_update;

@@ -9,12 +9,12 @@
 
 namespace HLE::Applets {
 
-ResultCode ErrEula::ReceiveParameter(const Service::APT::MessageParameter& parameter) {
+Result ErrEula::ReceiveParameterImpl(const Service::APT::MessageParameter& parameter) {
     if (parameter.signal != Service::APT::SignalType::Request) {
         LOG_ERROR(Service_APT, "unsupported signal {}", parameter.signal);
         UNIMPLEMENTED();
         // TODO(Subv): Find the right error code
-        return ResultCode(-1);
+        return ResultUnknown;
     }
 
     // The LibAppJustStarted message contains a buffer with the size of the framebuffer shared
@@ -23,45 +23,43 @@ ResultCode ErrEula::ReceiveParameter(const Service::APT::MessageParameter& param
     Service::APT::CaptureBufferInfo capture_info;
     ASSERT(sizeof(capture_info) == parameter.buffer.size());
 
-    memcpy(&capture_info, parameter.buffer.data(), sizeof(capture_info));
+    std::memcpy(&capture_info, parameter.buffer.data(), sizeof(capture_info));
 
     // TODO: allocated memory never released
     using Kernel::MemoryPermission;
     // Create a SharedMemory that directly points to this heap block.
-    framebuffer_memory = Core::System::GetInstance().Kernel().CreateSharedMemoryForApplet(
+    framebuffer_memory = system.Kernel().CreateSharedMemoryForApplet(
         0, capture_info.size, MemoryPermission::ReadWrite, MemoryPermission::ReadWrite,
         "ErrEula Memory");
 
     // Send the response message with the newly created SharedMemory
-    Service::APT::MessageParameter result;
-    result.signal = Service::APT::SignalType::Response;
-    result.buffer.clear();
-    result.destination_id = Service::APT::AppletId::Application;
-    result.sender_id = id;
-    result.object = framebuffer_memory;
+    SendParameter({
+        .sender_id = id,
+        .destination_id = parent,
+        .signal = Service::APT::SignalType::Response,
+        .object = framebuffer_memory,
+    });
 
-    SendParameter(result);
-    return RESULT_SUCCESS;
+    return ResultSuccess;
 }
 
-ResultCode ErrEula::StartImpl(const Service::APT::AppletStartupParameter& parameter) {
-    is_running = true;
+Result ErrEula::Start(const Service::APT::MessageParameter& parameter) {
+    startup_param = parameter.buffer;
 
     // TODO(Subv): Set the expected fields in the response buffer before resending it to the
     // application.
     // TODO(Subv): Reverse the parameter format for the ErrEula applet
 
-    // Let the application know that we're closing
-    Service::APT::MessageParameter message;
-    message.buffer.resize(parameter.buffer.size());
-    std::fill(message.buffer.begin(), message.buffer.end(), 0);
-    message.signal = Service::APT::SignalType::WakeupByExit;
-    message.destination_id = Service::APT::AppletId::Application;
-    message.sender_id = id;
-    SendParameter(message);
+    // Let the application know that we're closing.
+    Finalize();
+    return ResultSuccess;
+}
 
-    is_running = false;
-    return RESULT_SUCCESS;
+Result ErrEula::Finalize() {
+    std::vector<u8> buffer(startup_param.size());
+    std::fill(buffer.begin(), buffer.end(), 0);
+    CloseApplet(nullptr, buffer);
+    return ResultSuccess;
 }
 
 void ErrEula::Update() {}

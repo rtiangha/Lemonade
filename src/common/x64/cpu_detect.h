@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include "common/arch.h"
+#if CITRA_ARCH(x86_64)
+
 namespace Common {
 
 /// x86/x64 CPU capabilities that may be detected by this module
@@ -18,6 +21,7 @@ struct CPUCaps {
     bool sse4_2;
     bool avx;
     bool avx2;
+    bool avx512;
     bool bmi1;
     bool bmi2;
     bool fma;
@@ -32,3 +36,5 @@ struct CPUCaps {
 const CPUCaps& GetCPUCaps();
 
 } // namespace Common
+
+#endif // CITRA_ARCH(x86_64)

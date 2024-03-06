@@ -13,9 +13,10 @@
 #include "common/bit_field.h"
 #include "common/common_funcs.h"
 #include "common/common_types.h"
+#include "common/settings.h"
+#include "core/core_timing.h"
 #include "core/frontend/input.h"
 #include "core/hle/service/service.h"
-#include "core/settings.h"
 
 namespace Core {
 class System;
@@ -299,11 +300,16 @@ public:
 
     const PadState& GetState() const;
 
+    // Updating period for each HID device. These empirical values are measured from a 11.2 3DS.
+    static constexpr u64 pad_update_ticks = BASE_CLOCK_RATE_ARM11 / 234;
+    static constexpr u64 accelerometer_update_ticks = BASE_CLOCK_RATE_ARM11 / 104;
+    static constexpr u64 gyroscope_update_ticks = BASE_CLOCK_RATE_ARM11 / 101;
+
 private:
     void LoadInputDevices();
-    void UpdatePadCallback(u64 userdata, s64 cycles_late);
-    void UpdateAccelerometerCallback(u64 userdata, s64 cycles_late);
-    void UpdateGyroscopeCallback(u64 userdata, s64 cycles_late);
+    void UpdatePadCallback(std::uintptr_t user_data, s64 cycles_late);
+    void UpdateAccelerometerCallback(std::uintptr_t user_data, s64 cycles_late);
+    void UpdateGyroscopeCallback(std::uintptr_t user_data, s64 cycles_late);
 
     Core::System& system;
 

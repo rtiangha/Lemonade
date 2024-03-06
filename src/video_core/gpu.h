@@ -1,75 +1,115 @@
-// Copyright 2019 Citra Emulator Project
+// Copyright 2023 Citra Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
 #pragma once
 
-#include "common/common_types.h"
-#include "core/hw/gpu.h"
-#include "video_core/gpu_thread.h"
+#include <functional>
+#include <memory>
+#include <boost/serialization/access.hpp>
+
+#include "core/hle/service/gsp/gsp_interrupt.h"
+
+namespace Service::GSP {
+struct Command;
+struct FrameBufferInfo;
+} // namespace Service::GSP
 
 namespace Core {
 class System;
 }
 
+namespace Pica {
+class DebugContext;
+class PicaCore;
+struct RegsLcd;
+union ColorFill;
+} // namespace Pica
+
+namespace Frontend {
+class EmuWindow;
+}
+
 namespace VideoCore {
 
+/// Measured on hardware to be 2240568 timer cycles or 4481136 ARM11 cycles
+constexpr u64 FRAME_TICKS = 4481136ull;
+
+class GraphicsDebugger;
 class RendererBase;
 
-class GPUBackend {
+/**
+ * The GPU class is the high level interface to the video_core for core services.
+ */
+class GPU {
 public:
-    explicit GPUBackend(VideoCore::RendererBase& renderer);
+    explicit GPU(Core::System& system, Frontend::EmuWindow& emu_window,
+                 Frontend::EmuWindow* secondary_window);
+    ~GPU();
 
-    virtual ~GPUBackend();
+    /// Sets the function to call for signalling GSP interrupts.
+    void SetInterruptHandler(Service::GSP::InterruptHandler handler);
 
-    virtual void ProcessCommandList(PAddr list, u32 size) = 0;
-    virtual void SwapBuffers() = 0;
-    virtual void DisplayTransfer(const GPU::Regs::DisplayTransferConfig* config) = 0;
-    virtual void MemoryFill(const GPU::Regs::MemoryFillConfig* config, bool is_second_filler) = 0;
-    virtual void FlushRegion(VAddr addr, u64 size) = 0;
-    virtual void FlushAndInvalidateRegion(VAddr addr, u64 size) = 0;
-    virtual void InvalidateRegion(VAddr addr, u64 size) = 0;
-    virtual void WaitForProcessing();
+    /// Notify rasterizer that any caches of the specified region should be flushed to Switch memory
+    void FlushRegion(PAddr addr, u32 size);
 
-protected:
-    VideoCore::RendererBase& renderer;
-};
+    /// Notify rasterizer that any caches of the specified region should be invalidated
+    void InvalidateRegion(PAddr addr, u32 size);
 
-class GPUSerial : public GPUBackend {
-public:
-    explicit GPUSerial(Core::System& system, VideoCore::RendererBase& renderer);
+    /// Flushes and invalidates all memory in the rasterizer cache and removes any leftover state.
+    void ClearAll(bool flush);
 
-    ~GPUSerial();
+    /// Executes the provided GSP command.
+    void Execute(const Service::GSP::Command& command);
 
-    void ProcessCommandList(PAddr list, u32 size) override;
-    void SwapBuffers() override;
-    void DisplayTransfer(const GPU::Regs::DisplayTransferConfig* config) override;
-    void MemoryFill(const GPU::Regs::MemoryFillConfig* config, bool is_second_filler) override;
-    void FlushRegion(VAddr addr, u64 size) override;
-    void FlushAndInvalidateRegion(VAddr addr, u64 size) override;
-    void InvalidateRegion(VAddr addr, u64 size) override;
+    /// Updates GPU display framebuffer configuration using the specified parameters.
+    void SetBufferSwap(u32 screen_id, const Service::GSP::FrameBufferInfo& info);
+
+    /// Sets the LCD color fill configuration for the top and bottom screens.
+    void SetColorFill(const Pica::ColorFill& fill);
+
+    /// Reads a word from the GPU virtual address.
+    u32 ReadReg(VAddr addr);
+
+    /// Writes the provided value to the GPU virtual address.
+    void WriteReg(VAddr addr, u32 data);
+
+    /// Synchronizes fixed function renderer state with PICA registers.
+    void Sync();
+
+    /// Returns a mutable reference to the renderer.
+    [[nodiscard]] VideoCore::RendererBase& Renderer();
+
+    /// Returns a mutable reference to the PICA GPU.
+    [[nodiscard]] Pica::PicaCore& PicaCore();
+
+    /// Returns an immutable reference to the PICA GPU.
+    [[nodiscard]] const Pica::PicaCore& PicaCore() const;
+
+    /// Returns a mutable reference to the pica debugging context.
+    [[nodiscard]] Pica::DebugContext& DebugContext();
+
+    /// Returns a mutable reference to the GSP command debugger.
+    [[nodiscard]] GraphicsDebugger& Debugger();
 
 private:
-    Core::System& system;
-};
+    void SubmitCmdList(u32 index);
 
-class GPUParallel : public GPUBackend {
-public:
-    explicit GPUParallel(Core::System& system, VideoCore::RendererBase& renderer);
+    void MemoryFill(u32 index);
 
-    ~GPUParallel();
+    void MemoryTransfer();
 
-    void ProcessCommandList(PAddr list, u32 size) override;
-    void SwapBuffers() override;
-    void DisplayTransfer(const GPU::Regs::DisplayTransferConfig* config) override;
-    void MemoryFill(const GPU::Regs::MemoryFillConfig* config, bool is_second_filler) override;
-    void FlushRegion(VAddr addr, u64 size) override;
-    void FlushAndInvalidateRegion(VAddr addr, u64 size) override;
-    void InvalidateRegion(VAddr addr, u64 size) override;
-    void WaitForProcessing() override;
+    void VBlankCallback(uintptr_t user_data, s64 cycles_late);
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const u32 file_version);
 
 private:
-    GPUThread::ThreadManager gpu_thread;
+    struct Impl;
+    std::unique_ptr<Impl> impl;
+
+    PAddr VirtualToPhysicalAddress(VAddr addr);
 };
 
 } // namespace VideoCore
