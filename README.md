@@ -8,7 +8,7 @@
 
 ![GitHub all releases](https://img.shields.io/github/downloads/Gamer64ytb/Citra-Enhanced/total)
 ![Bitbucket open issues](https://img.shields.io/bitbucket/issues/Gamer64ytb/Citra-Enhanced)
-`
+
 # Lemonade is an Android-focused 3DS Emulator ___fork___
 
 ***We plan to add new features and enhancements on top of the ___base___ emulator***
