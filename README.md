@@ -9,9 +9,9 @@
 ![GitHub all releases](https://img.shields.io/github/downloads/Gamer64ytb/Citra-Enhanced/total)
 ![Bitbucket open issues](https://img.shields.io/bitbucket/issues/Gamer64ytb/Citra-Enhanced)
 `
-# Lemonade is an Android focued 3DS Emulaor ___fork___
+# Lemonade is an Android focused 3DS Emulaor ___fork___
 
-***We plan to add new features and enhacments on top of the ___base___ emulator***
+***We plan to add new features and enhancements on top of the ___base___ emulator***
 
 ## What's new so far 
 
@@ -25,6 +25,6 @@ Coming Soon..
 
 **We are lookign for devlopers so please contant us on discord if you are interested**
 
-Discord: Soon..
+[![](https://dcbadge.vercel.app/api/server/INVITEID)](https://discord.gg/INVITEID)
 
-[Telegram (Spanish)](https://t.me/joinchat/lTkg6yC6pQAxNzM0)
+[![](https://patrolavia.github.io/telegram-badge/chat.png)](https://t.me/joinchat/lTkg6yC6pQAxNzM0)
