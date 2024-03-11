@@ -2,7 +2,7 @@
   <br>
     <a>Lemonade</a>
   <br>
-    <b href="https://citra-emu.org/"><img src="https://github.com/kleidiss/Citra-Enhanced/assets/124008722/c171265e-8d7f-4cb8-8f4e-3ae73bf231b9" alt="Lime" width="200"></b>
+    <b href="https://citra-emu.org/"><img src="https://github.com/Gamer64ytb/Citra-Enhanced/assets/124008722/c171265e-8d7f-4cb8-8f4e-3ae73bf231b9" alt="Lime" width="200"></b>
   <br>
 </h1>
 
@@ -25,6 +25,6 @@ Coming Soon..
 
 **We are looking for developers! so please contact us on discord if you are interested**
 
-[![](https://dcbadge.vercel.app/api/server/INVITEID)](https://discord.gg/INVITEID)
+[![](https://dcbadge.vercel.app/api/server/INVITEID)](https://discord.gg/NVTYcV4v20)
 
 [![](https://patrolavia.github.io/telegram-badge/chat.png)](https://t.me/joinchat/lTkg6yC6pQAxNzM0)
