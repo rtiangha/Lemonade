@@ -54,6 +54,8 @@ class ForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // init notis (fx crash)
+        showRunningNotification()
         if (intent == null) {
             return START_NOT_STICKY
         }
