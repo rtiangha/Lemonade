@@ -19,7 +19,22 @@
 - More coming soon we are still focusing on figuring out how to work with this codebase
 
 ## HOW TO BUILD?
-Coming Soon..
+**Dependencies (Windows)**
+- Android Studio
+- NDK and CMake
+- Git
+
+If you get the error ```invalid linker name in argument '-fuse-ld=gold'``` when starting compiling (A rebbot is needed after installing these)
+- Visual Stidio Build Tools (C++ Tools)
+- [MinGW-W64](https://github.com/niXman/mingw-builds-binaries)
+
+###  Compiling
+- Start Android Studio, on the startup dialog select Open
+- Navigate to the citra/src/android directory and click on OK
+- Build > Generate Signed Bundle/APK
+- Select 'APK' and create a key
+- **Make sure** to select CanaryRelease 
+
 
 ## Contacting
 
