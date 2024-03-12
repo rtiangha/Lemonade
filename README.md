@@ -2,7 +2,7 @@
   <br>
     <a>Lemonade</a>
   <br>
-    <b href="https://citra-emu.org/"><img src="https://github.com/kleidiss/Citra-Enhanced/assets/124008722/c171265e-8d7f-4cb8-8f4e-3ae73bf231b9" alt="Lime" width="200"></b>
+    <b href="https://citra-emu.org/"><img src="https://github.com/Gamer64ytb/Lemonade/blob/master/assets/logo.png" alt="Lime" width="200"></b>
   <br>
 </h1>
 
