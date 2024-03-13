@@ -4,15 +4,15 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "org.citra.citra_emu.canary",
+  "applicationId": "org.gamerytb.lemonade.canary",
   "variantName": "canaryRelease",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 25858962,
-      "versionName": "5af43be5e",
+      "versionCode": 25872302,
+      "versionName": "c211b2737",
       "outputFile": "app-canary-release.apk"
     }
   ],
