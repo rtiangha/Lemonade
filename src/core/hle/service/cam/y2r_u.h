@@ -355,6 +355,8 @@ private:
     bool transfer_end_interrupt_enabled = false;
     bool spacial_dithering_enabled = false;
 
+    Core::TimingEventType* conversion_delay_event;
+
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
     friend class boost::serialization::access;
