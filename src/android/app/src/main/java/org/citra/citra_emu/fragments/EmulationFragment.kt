@@ -310,6 +310,11 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
                     true
                 }
 
+                R.id.menu_lemotweaks -> {
+                    emulationActivity.displayLemotweaks()
+                    true
+                }
+
                 R.id.menu_settings -> {
                     SettingsActivity.launch(
                         requireContext(),

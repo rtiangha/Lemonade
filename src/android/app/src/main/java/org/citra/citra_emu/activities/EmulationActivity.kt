@@ -23,6 +23,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.NavHostFragment
 import androidx.preference.PreferenceManager
 import org.citra.citra_emu.CitraApplication
@@ -161,6 +163,28 @@ class EmulationActivity : AppCompatActivity() {
             getString(R.string.emulation_menu_help),
             Toast.LENGTH_LONG
         ).show()
+    }
+
+    fun DialogFragment.showWithAnimations(
+            manager: FragmentManager,
+            tag: String?,
+            enterAnim: Int,
+            exitAnim: Int
+    ) {
+        manager.beginTransaction().apply {
+            setCustomAnimations(enterAnim, exitAnim)
+            add(this@showWithAnimations, tag)
+            commitAllowingStateLoss()
+        }
+    }
+
+    fun displayLemotweaks() {
+        LemotweaksDialog.newInstance().showWithAnimations(
+                supportFragmentManager,
+                "LemotweaksDialog",
+                R.anim.nav_default_pop_enter_anim,
+                R.anim.nav_default_pop_exit_anim
+        )
     }
 
     private fun enableFullscreenImmersive() {
