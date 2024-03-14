@@ -15,7 +15,7 @@
 
 # Notice ⚠️
 
-**THE LEMONADE APK WILL BE PUBLISHED ONCE WE FEEL THE PROJECT HAS ENOUGH CHANGES MADE TO IT FROM THE BASE. WE DONT TO RELEASE A RESKINNED APK WITH NO CHANGES**
+**THE LEMONADE APK WILL BE PUBLISHED ONCE WE FEEL THE PROJECT HAS ENOUGH CHANGES MADE TO IT FROM THE BASE. WE DONT WANT TO RELEASE A RESKINNED APK WITH NO CHANGES**
 
 You can track the progress we have made below
 
@@ -25,7 +25,19 @@ You can track the progress we have made below
 - A few hacks ported from Citra MMJ
 - (WIP) Redesigned In-game properties menu 
 
-## HOW TO BUILD?
+# PC Builds?
+
+For now we have no plans to make a PC version of Lemonade for 2 reasons 
+
+- There are other forks focusing on PC development 
+- We lack the knowledge to actually improve the PC version of this emulator 
+
+However if you want to help with making a PC version of this emulator you can contact us on discord and we may reverse this decision
+
+## HOW TO BUILD THE APK?
+
+Even though we haven't officially released the APK you may still want to test it out so here's how to build from source 
+
 **Dependencies (Windows)**
 - Android Studio
 - NDK and CMake
