@@ -25,7 +25,7 @@ You can track the progress we have made below
 - A few hacks ported from Citra MMJ
 - (WIP) Redesigned In-game properties menu 
 
-# PC Builds?
+### PC Builds?
 
 For now we have no plans to make a PC version of Lemonade for 2 reasons 
 
