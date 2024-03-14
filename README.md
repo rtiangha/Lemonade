@@ -13,10 +13,17 @@
 
 ***We plan to add new features and enhancements on top of the ___base___ emulator***
 
+# Notice ⚠️
+
+**THE LEMONADE APK WILL BE PUBLISHED ONCE WE FEEL THE PROJECT HAS ENOUGH CHANGES MADE TO IT FROM THE BASE. WE DONT TO RELEASE A RESKINNED APK WITH NO CHANGES**
+
+You can track the progress we have made below
+
 ## What's new so far 
 
 - Added a option to adjust touch controls opacity 
-- More coming soon we are still focusing on figuring out how to work with this codebase
+- A few hacks ported from Citra MMJ
+- (WIP) Redesigned In-game properties menu 
 
 ## HOW TO BUILD?
 **Dependencies (Windows)**
