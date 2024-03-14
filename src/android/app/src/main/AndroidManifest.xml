@@ -35,11 +35,11 @@
     <application
         android:name="org.citra.citra_emu.CitraApplication"
         android:label="@string/app_name"
-        android:icon="@mipmap/lemonade"
+        android:icon="@drawable/ic_lemonade"
         android:allowBackup="false"
         android:supportsRtl="true"
         android:isGame="true"
-        android:banner="@mipmap/lemonade"
+        android:banner="@drawable/ic_lemonade"
         android:requestLegacyExternalStorage="true">
 
         <meta-data android:name="android.game_mode_config"
