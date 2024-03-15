@@ -16,9 +16,6 @@
 [submodule "externals/xbyak"]
 	path = externals/xbyak
 	url = https://github.com/herumi/xbyak.git
-[submodule "extexternals/fmt"]
-	path = extexternals/fmt
-	url = https://github.com/fmtlib/fmt.git
 [submodule "externals/enet"]
 	path = externals/enet
 	url = https://github.com/lsalzman/enet.git
