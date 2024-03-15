@@ -1,12 +1,3 @@
-[submodule "boost"]
-    path = externals/boost
-    url = https://github.com/blitzingeagle/ext-boost.git
-[submodule "nihstro"]
-    path = externals/nihstro
-    url = https://github.com/neobrain/nihstro.git
-[submodule "soundtouch"]
-    path = externals/soundtouch
-    url = https://codeberg.org/soundtouch/soundtouch.git
 [submodule "catch2"]
     path = externals/catch2
     url = https://github.com/catchorg/Catch2
@@ -91,3 +82,27 @@
 [submodule "oaknut"]
 	path = externals/oaknut
 	url = https://github.com/merryhime/oaknut.git
+[submodule "externals/boost"]
+	path = externals/boost
+	url = https://github.com/blitzingeagle/ext-boost.git
+[submodule "externals/nihstro"]
+	path = externals/nihstro
+	url = https://github.com/neobrain/nihstro.git
+[submodule "externals/catch2"]
+	path = externals/catch2
+	url = https://github.com/catchorg/Catch2
+[submodule "externals/soundtouch"]
+	path = externals/soundtouch
+	url = https://codeberg.org/soundtouch/soundtouch.git
+[submodule "externals/dynarmic"]
+	path = externals/dynarmic
+	url = https://github.com/blitzingeagle/dynarmic.git
+[submodule "externals/xbyak"]
+	path = externals/xbyak
+	url = https://github.com/herumi/xbyak.git
+[submodule "extexternals/fmt"]
+	path = extexternals/fmt
+	url = https://github.com/fmtlib/fmt.git
+[submodule "externals/enet"]
+	path = externals/enet
+	url = https://github.com/lsalzman/enet.git
