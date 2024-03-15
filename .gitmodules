@@ -91,3 +91,6 @@
 [submodule "externals/dds-ktx"]
 	path = externals/dds-ktx
 	url = https://github.com/septag/dds-ktx
+[submodule "externals/fmt"]
+	path = externals/fmt
+	url = https://github.com/fmtlib/fmt.git
