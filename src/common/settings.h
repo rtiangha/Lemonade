@@ -542,6 +542,7 @@ struct Values {
 
     // Miscellaneous
     Setting<std::string> log_filter{"*:Info", "log_filter"};
+    Setting<std::string> log_regex_filter{"", "log_regex_filter"};
 
     // MMJ Hacks
     SwitchableSetting<bool> core_downcount_hack{false, "core_downcount_hack"};
