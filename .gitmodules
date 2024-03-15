@@ -88,3 +88,6 @@
 [submodule "externals/oaknut"]
 	path = externals/oaknut
 	url = https://github.com/merryhime/oaknut.git
+[submodule "externals/dds-ktx"]
+	path = externals/dds-ktx
+	url = https://github.com/septag/dds-ktx
