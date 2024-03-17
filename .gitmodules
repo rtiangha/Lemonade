@@ -91,3 +91,6 @@
 [submodule "externals/fmt"]
 	path = externals/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "externals/externals/boost"]
+	path = externals/externals/boost
+	url = https://github.com/blitzingeagle/ext-boost.git
