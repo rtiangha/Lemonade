@@ -30,7 +30,7 @@
 	url = https://github.com/libusb/libusb.git
 [submodule "externals/cubeb"]
 	path = externals/cubeb
-	url = https://github.com/mozilla/cubeb
+	url = https://github.com/mozilla/cubeb.git
 [submodule "externals/discord-rpc"]
 	path = externals/discord-rpc
 	url = https://github.com/blitzingeagle/discord-rpc.git
@@ -51,7 +51,7 @@
 	url = https://github.com/lemenkov/libyuv.git
 [submodule "externals/sdl2/SDL"]
 	path = externals/sdl2/SDL
-	url = https://github.com/libsdl-org/SDL
+	url = https://github.com/libsdl-org/SDL.git
 [submodule "externals/cryptopp-cmake"]
 	path = externals/cryptopp-cmake
 	url = https://github.com/abdes/cryptopp-cmake.git
@@ -60,10 +60,10 @@
 	url = https://github.com/weidai11/cryptopp.git
 [submodule "externals/openal-soft"]
 	path = externals/openal-soft
-	url = https://github.com/kcat/openal-soft
+	url = https://github.com/kcat/openal-soft.git
 [submodule "externals/glslang"]
 	path = externals/glslang
-	url = https://github.com/KhronosGroup/glslang
+	url = https://github.com/KhronosGroup/glslang.git
 [submodule "externals/vma"]
 	path = externals/vma
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
