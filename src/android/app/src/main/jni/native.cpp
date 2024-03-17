@@ -351,7 +351,7 @@ void Java_org_citra_citra_1emu_NativeLibrary_swapScreens([[maybe_unused]] JNIEnv
     Camera::NDK::g_rotation = rotation;
 }
 
-jintArray Java_org_citra_citra_1emu_NativeLibrary_getRunningSettings([[maybe_unused]] JNIEnv* env,
+jintArray Java_org_citra_citra_1emu_NativeLibrary_getLemontweaks([[maybe_unused]] JNIEnv* env,
                                                                      [[maybe_unused]] jobject obj) {
     int i = 0;
     int settings[3];
@@ -366,7 +366,7 @@ jintArray Java_org_citra_citra_1emu_NativeLibrary_getRunningSettings([[maybe_unu
     return array;
 }
 
-void Java_org_citra_citra_1emu_NativeLibrary_setRunningSettings(JNIEnv* env,
+void Java_org_citra_citra_1emu_NativeLibrary_setLemontweaks(JNIEnv* env,
                                                                 [[maybe_unused]] jobject obj,
                                                                 jintArray array) {
     int i = 0;

@@ -294,8 +294,8 @@
     <string name="setting_not_editable_description">This option can\'t be changed while a game is running.</string>
     <string name="auto_select">Auto-Select</string>
 
-    <!-- Lemotweaks -->
-    <string name="lemotweaks_title">Lemotweaks</string>
+    <!-- Lemontweaks -->
+    <string name="lemontweaks_title">Lemontweaks</string>
     <string name="setting_core_ticks_hack">FMV Hack</string>
     <string name="setting_skip_slow_draw">Skip Slow Draw</string>
     <string name="setting_skip_texture_copy">Skip Texture Copy</string>

@@ -179,9 +179,10 @@ class EmulationActivity : AppCompatActivity() {
     }
 
     fun displayLemotweaks() {
-        LemotweaksDialog.newInstance().showWithAnimations(
+        LemontweaksDialog.newInstance().showWithAnimations(
                 supportFragmentManager,
-                "LemotweaksDialog",
+                "LemontweaksDialog",
+                // TODO: anim need to be changed
                 R.anim.nav_default_pop_enter_anim,
                 R.anim.nav_default_pop_exit_anim
         )

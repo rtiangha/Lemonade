@@ -165,9 +165,9 @@ object NativeLibrary {
      */
     external fun swapScreens(swapScreens: Boolean, rotation: Int)
 
-    external fun getRunningSettings(): IntArray
+    external fun getLemontweaks(): IntArray
 
-    external fun setRunningSettings(settings: IntArray)
+    external fun setLemontweaks(settings: IntArray)
 
     external fun initializeGpuDriver(
         hookLibDir: String?,
