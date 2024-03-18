@@ -2,12 +2,11 @@
   <br>
     <a>Lemonade</a>
   <br>
-    <b href="https://citra-emu.org/"><img src="https://github.com/Gamer64ytb/Lemonade/blob/master/assets/logo.png" alt="Lime" width="200"></b>
+    <b href="https://github.com/Gamer64ytb/Lemonade/blob/master/"><img src="https://github.com/Gamer64ytb/Lemonade/blob/master/assets/Lemonade.png" alt="Lemonade" width="200"></b>
   <br>
 </h1>
 
 ![GitHub all releases](https://img.shields.io/github/downloads/Gamer64ytb/Lemonade/total)
-![Bitbucket open issues](https://img.shields.io/bitbucket/issues/Gamer64ytb/Lemonade)
 
 # Lemonade is an Android-focused 3DS Emulator ___fork___
 
