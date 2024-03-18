@@ -12,7 +12,6 @@
 
 ***We plan to add new features and enhancements on top of the ___base___ emulator***
 
-# Notice
 ## PC Builds?
 
 For now we have no plans to make a PC version of Lemonade for 2 reasons 
@@ -35,7 +34,7 @@ If you get the error ```invalid linker name in argument '-fuse-ld=gold'```
 - [MinGW-W64](https://github.com/niXman/mingw-builds-binaries) (Make sure to get the online installer and add the bin directiry of MinGW-W64 to your PATH variable)
 
 If you get the error ```SPIR-V Tools not found'```
- - Like the error says, edit the cmakelists.txt file of glslang (located on the extenrnals folder)
+ - Edit the cmakelists.txt file of glslang (located on the extenrnals folder)
 
 Add ```set(ALLOW_EXTERNAL_SPIRV_TOOLS ON)```
  
