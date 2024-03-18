@@ -38,6 +38,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import android.content.pm.ActivityInfo
+import android.graphics.Color
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.preference.PreferenceManager
@@ -311,7 +312,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
                 }
 
                 R.id.menu_lemotweaks -> {
-                    emulationActivity.displayLemotweaks()
+                    emulationActivity.displayLemontweaks()
                     true
                 }
 
@@ -902,7 +903,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
                 val perfStats = NativeLibrary.getPerfStats()
                 if (perfStats[FPS] > 0) {
                     binding.showFpsText.text = String.format(
-                        "FPS: %d Speed: %d%%",
+                        "LEMONADE | FPS: %d - SPD: %d%%",
                         (perfStats[FPS] + 0.5).toInt(),
                         (perfStats[SPEED] * 100.0 + 0.5).toInt()
                     )
@@ -910,6 +911,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
                 perfStatsUpdateHandler.postDelayed(perfStatsUpdater!!, 3000)
             }
             perfStatsUpdateHandler.post(perfStatsUpdater!!)
+            binding.showFpsText.setShadowLayer(1.6f, 1.5f, 1.3f, Color.BLACK)
             binding.showFpsText.visibility = View.VISIBLE
         } else {
             if (perfStatsUpdater != null) {
