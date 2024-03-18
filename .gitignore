@@ -38,3 +38,4 @@ Thumbs.db
 .flatpak-builder/
 repo/
 src/android/local.properties
+src/android/local.properties
