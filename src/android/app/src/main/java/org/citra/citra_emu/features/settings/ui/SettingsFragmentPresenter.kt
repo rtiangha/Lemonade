@@ -173,7 +173,8 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
     private fun addGeneralSettings(sl: ArrayList<SettingsItem>) {
         settingsActivity.setToolbarTitle(settingsActivity.getString(R.string.preferences_general))
         sl.apply {
-            add(
+            // TODO: Needs to be fixed
+            /*add(
                 SwitchSetting(
                     BooleanSetting.DISPLAY_CUTOUT_EXPAND,
                     R.string.expand_to_cutout_area,
@@ -181,7 +182,7 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     BooleanSetting.DISPLAY_CUTOUT_EXPAND.key,
                     BooleanSetting.DISPLAY_CUTOUT_EXPAND.defaultValue
                 )
-            )
+            )*/
             add(
                 SwitchSetting(
                     IntSetting.USE_FRAME_LIMIT,
