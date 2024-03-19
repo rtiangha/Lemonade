@@ -12,6 +12,12 @@
 
 ***We plan to add new features and enhancements on top of the ___base___ emulator***
 
+## Bug reports
+
+Please, before you make a bug report confirm that the issues only happens on Lemonade
+
+We will try to fix base bugs too, but we need to know if the issues were caused by us or was in the base itself
+
 ## PC Builds?
 
 For now we have no plans to make a PC version of Lemonade for 2 reasons 
