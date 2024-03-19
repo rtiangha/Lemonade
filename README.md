@@ -12,19 +12,7 @@
 
 ***We plan to add new features and enhancements on top of the ___base___ emulator***
 
-# Notice ⚠️
-
-**THE LEMONADE APK WILL BE PUBLISHED ONCE WE FEEL THE PROJECT HAS ENOUGH CHANGES MADE TO IT FROM THE BASE. WE DONT WANT TO RELEASE A RESKINNED APK WITH NO CHANGES**
-
-You can track the progress we have made below
-
-## What's new so far 
-
-- Added a option to adjust touch controls opacity 
-- A few hacks ported from Citra MMJ
-- (WIP) Redesigned In-game properties menu 
-
-### PC Builds?
+## PC Builds?
 
 For now we have no plans to make a PC version of Lemonade for 2 reasons 
 
@@ -35,17 +23,21 @@ However if you want to help with making a PC version of this emulator you can co
 
 ## HOW TO BUILD THE APK?
 
-Even though we haven't officially released the APK you may still want to test it out so here's how to build from source 
-
 **Dependencies (Windows)**
 - Android Studio
 - NDK and CMake
 - Git
 
-If you get the error ```invalid linker name in argument '-fuse-ld=gold'``` when starting compiling (A rebbot is needed after installing these)
+If you get the error ```invalid linker name in argument '-fuse-ld=gold'```
+- LLVM For Windows
 - Visual Stidio Build Tools (C++ Tools)
-- [MinGW-W64](https://github.com/niXman/mingw-builds-binaries)
+- [MinGW-W64](https://github.com/niXman/mingw-builds-binaries) (Make sure to get the online installer and add the bin directiry of MinGW-W64 to your PATH variable)
 
+If you get the error ```SPIR-V Tools not found'```
+ - Edit the cmakelists.txt file of glslang (located on the extenrnals folder)
+
+Add ```set(ALLOW_EXTERNAL_SPIRV_TOOLS ON)```
+ 
 ###  Compiling
 - Start Android Studio, on the startup dialog select Open
 - Navigate to the citra/src/android directory and click on OK
