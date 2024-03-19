@@ -3,7 +3,8 @@
 
     <style name="Theme.Citra.Splash.Main" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/citra_surface</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_lemonade</item>
+        <!-- TODO: Needs to be fixed -->
+        <!-- <item name="windowSplashScreenAnimatedIcon">@drawable/ic_lemonade</item> -->
         <item name="postSplashScreenTheme">@style/Theme.Citra.Main</item>
     </style>
 
