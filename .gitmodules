@@ -51,7 +51,7 @@
 	url = https://github.com/lemenkov/libyuv.git
 [submodule "externals/sdl2/SDL"]
 	path = externals/sdl2/SDL
-	url = https://github.com/libsdl-org/SDL.git
+	url = https://github.com/libsdl-org/SDL
 [submodule "externals/cryptopp-cmake"]
 	path = externals/cryptopp-cmake
 	url = https://github.com/abdes/cryptopp-cmake.git
