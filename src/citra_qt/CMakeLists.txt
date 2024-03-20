@@ -263,7 +263,7 @@ if (APPLE)
     set_target_properties(citra-qt PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST "${DIST_DIR}/Info.plist.in"
-        MACOSX_BUNDLE_BUNDLE_NAME "Citra"
+        MACOSX_BUNDLE_BUNDLE_NAME "Lemonade"
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.citra-emu.citra"
         MACOSX_BUNDLE_BUNDLE_VERSION "${BUILD_VERSION}"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${BUILD_FULLNAME}"
@@ -285,6 +285,7 @@ if (APPLE)
 elseif(WIN32)
     # compile as a win32 gui application instead of a console application
     target_link_libraries(citra-qt PRIVATE Qt6::EntryPointImplementation)
+    set_target_properties(citra-qt PROPERTIES OUTPUT_NAME "lemonade-qt")
     if(MSVC)
         set_target_properties(citra-qt PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
     elseif(MINGW)
