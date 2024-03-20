@@ -8,7 +8,7 @@
 
 ![GitHub all releases](https://img.shields.io/github/downloads/Gamer64ytb/Lemonade/total)
 
-# Lemonade is an Android-focused 3DS Emulator ___fork___
+# Lemonade is a 3DS Emulator ___fork___
 
 ***We plan to add new features and enhancements on top of the ___base___ emulator***
 
@@ -20,12 +20,8 @@ We will try to fix base bugs too, but we need to know if the issues were caused 
 
 ## PC Builds?
 
-For now we have no plans to make a PC version of Lemonade for 2 reasons 
+Soon...
 
-- There are other forks focusing on PC development 
-- We lack the knowledge to actually improve the PC version of this emulator 
-
-However if you want to help with making a PC version of this emulator you can contact us on discord and we may reverse this decision
 
 ## HOW TO BUILD THE APK?
 
