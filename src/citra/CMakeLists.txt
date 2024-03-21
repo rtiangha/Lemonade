@@ -33,6 +33,8 @@ endif()
 
 create_target_directory_groups(citra)
 
+set_target_properties(citra PROPERTIES OUTPUT_NAME "lemonade")
+
 target_link_libraries(citra PRIVATE citra_common citra_core input_common network)
 target_link_libraries(citra PRIVATE inih)
 if (MSVC)
