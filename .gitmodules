@@ -61,7 +61,6 @@
 [submodule "glslang"]
 	path = externals/glslang
 	url = https://github.com/KhronosGroup/glslang
-        branch = 1e4955adbcd9b3f5eaf2129e918ca057baed6520
 [submodule "vma"]
 	path = externals/vma
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
