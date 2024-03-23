@@ -3,6 +3,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CMakeModules)
+set (CITRA_ENABLE_COMPATIBILITY_REPORTING OFF)
 if (POLICY CMP0071)
     cmake_policy(SET CMP0071 NEW)
 endif()
@@ -17,8 +18,6 @@ add_executable(citra-qt
     applets/swkbd.h
     bootmanager.cpp
     bootmanager.h
-    compatibility_list.cpp
-    compatibility_list.h
     camera/camera_util.cpp
     camera/camera_util.h
     camera/still_image_camera.cpp
@@ -191,9 +190,7 @@ add_executable(citra-qt
     util/mica.h
 )
 
-file(GLOB COMPAT_LIST
-     ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.qrc
-     ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json)
+
 file(GLOB_RECURSE ICONS ${PROJECT_SOURCE_DIR}/dist/icons/*)
 file(GLOB_RECURSE THEMES ${PROJECT_SOURCE_DIR}/dist/qt_themes/*)
 
