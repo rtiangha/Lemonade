@@ -15,7 +15,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/externals/cmake-modul
 include(DownloadExternals)
 include(CMakeDependentOption)
 
-project(citra LANGUAGES C CXX ASM)
+project(lemonade-emu LANGUAGES C CXX ASM)
 
 # Some submodules like to pick their own default build type if not specified.
 # Make sure we default to Release build type always, unless the generator has custom types.
@@ -430,13 +430,13 @@ endif()
 if (NOT ANDROID AND NOT IOS)
     include(BundleTarget)
     if (ENABLE_SDL2_FRONTEND)
-        bundle_target(citra)
+        bundle_target(lemonade)
     endif()
     if (ENABLE_QT)
-        bundle_target(citra-qt)
+        bundle_target(lemonade-qt)
     endif()
     if (ENABLE_DEDICATED_ROOM)
-        bundle_target(citra-room)
+        bundle_target(lemonade-room)
     endif()
 endif()
 

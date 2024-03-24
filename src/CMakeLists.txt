@@ -181,11 +181,11 @@ if (ENABLE_TESTS)
 endif()
 
 if (ENABLE_SDL2 AND ENABLE_SDL2_FRONTEND)
-    add_subdirectory(citra)
+    add_subdirectory(lemonade)
 endif()
 
 if (ENABLE_QT)
-    add_subdirectory(citra_qt)
+    add_subdirectory(lemonade_qt)
 endif()
 
 if (ENABLE_DEDICATED_ROOM)

@@ -18,18 +18,18 @@
 #define EMU_DATA_DIR USER_DIR
 #else
 #ifdef _WIN32
-#define EMU_DATA_DIR "Citra"
+#define EMU_DATA_DIR "Lemonade"
 #elif defined(__APPLE__)
 #include <TargetConditionals.h>
 #if TARGET_OS_IPHONE
-#define APPLE_EMU_DATA_DIR "Documents" DIR_SEP "Citra"
+#define APPLE_EMU_DATA_DIR "Documents" DIR_SEP "Lemonade"
 #else
-#define APPLE_EMU_DATA_DIR "Library" DIR_SEP "Application Support" DIR_SEP "Citra"
+#define APPLE_EMU_DATA_DIR "Library" DIR_SEP "Application Support" DIR_SEP "Lemonade"
 #endif
 // For compatibility with XDG paths.
-#define EMU_DATA_DIR "citra-emu"
+#define EMU_DATA_DIR "lemonade-emu"
 #else
-#define EMU_DATA_DIR "citra-emu"
+#define EMU_DATA_DIR "lemonade-emu"
 #endif
 #endif
 
@@ -55,7 +55,7 @@
 
 // Filenames
 // Files in the directory returned by GetUserPath(UserPath::LogDir)
-#define LOG_FILE "citra_log.txt"
+#define LOG_FILE "lemonade_log.txt"
 
 // Files in the directory returned by GetUserPath(UserPath::ConfigDir)
 #define EMU_CONFIG "emu.ini"
