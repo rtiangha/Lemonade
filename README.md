@@ -54,8 +54,6 @@ Add ```set(ALLOW_EXTERNAL_SPIRV_TOOLS ON)```
 
 [![](https://dcbadge.vercel.app/api/server/NVTYcV4v2Q)](https://discord.gg/NVTYcV4v2Q)
 
-[![](https://patrolavia.github.io/telegram-badge/chat.png)](https://t.me/joinchat/lTkg6yC6pQAxNzM0)
-
 ## To do:
 
 - Add 100% speed hack
