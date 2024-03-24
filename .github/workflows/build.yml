@@ -65,7 +65,7 @@ jobs:
         matrix:
           target: ["appimage", "fresh"]
       container:
-        image: RyzenDew/build-environments:linux-${{ matrix.target }}
+        image: ryzendew/build-environments:linux-${{ matrix.target }}
         options: -u 1001
       env:
         CCACHE_DIR: ${{ github.workspace }}/.ccache
