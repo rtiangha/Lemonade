@@ -1,12 +1,9 @@
 <h1 align="center">
+    <b href="https://github.com/Gamer64ytb/Lemonade/blob/master/"><img src="https://github.com/Gamer64ytb/Lemonade/blob/some-fixes/assets/Lemonade_banner.png" alt="Lemonade" height="100%" width="100%"></b>
   <br>
-    <a>Lemonade</a>
-  <br>
-    <b href="https://github.com/Gamer64ytb/Lemonade/blob/master/"><img src="https://github.com/Gamer64ytb/Lemonade/blob/master/assets/Lemonade.png" alt="Lemonade" width="200"></b>
-  <br>
-</h1>
-
+  
 ![GitHub all releases](https://img.shields.io/github/downloads/Gamer64ytb/Lemonade/total)
+</h1>
 
 # Lemonade is a 3DS Emulator ___fork___
 
