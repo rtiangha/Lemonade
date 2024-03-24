@@ -135,7 +135,7 @@ jobs:
       - name: Build
         run: |
           # Build the project with CMake
-          cmake --buTild ${{github.workspace}}/build --config ${{ env.BUILD_TYPE }}
+          cmake --build ${{github.workspace}}/build --config ${{ env.BUILD_TYPE }}
 
           # Build the Android app with Gradle
           cd src/android
