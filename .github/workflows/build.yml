@@ -65,7 +65,7 @@ jobs:
         matrix:
           target: ["appimage", "fresh"]
       container:
-        image: pablomk7/build-environments:linux-${{ matrix.target }}
+        image: ishan09811/build-environments:linux-${{ matrix.target }}
         options: -u 1001
       env:
         CCACHE_DIR: ${{ github.workspace }}/.ccache
