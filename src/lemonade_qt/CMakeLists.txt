@@ -338,7 +338,7 @@ target_compile_definitions(lemonade-qt PRIVATE
     -DQT_NO_CAST_TO_ASCII
 )
 
-if (CITRA_ENABLE_COMPATIBILITY_REPORTING)
+if (LEMONADE_ENABLE_COMPATIBILITY_REPORTING)
     target_compile_definitions(lemonade-qt PRIVATE -DCITRA_ENABLE_COMPATIBILITY_REPORTING)
 endif()
 
