@@ -125,7 +125,7 @@ if (BUNDLE_TARGET_EXECUTE)
             --plugin checkrt
             --executable "${executable_path}"
             --icon-file "${source_path}/dist/citra.svg"
-            --desktop-file "${source_path}/dist/${executable_name}.desktop"
+            --desktop-file "${source_path}/dist/lemonade-qt.desktop"
             --appdir "${appdir_path}"
             RESULT_VARIABLE linuxdeploy_appdir_result)
         if (NOT linuxdeploy_appdir_result EQUAL "0")
