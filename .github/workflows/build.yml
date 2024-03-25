@@ -89,7 +89,9 @@ jobs:
             chmod +x ./.ci/linux.sh
             ./.ci/linux.sh
         - name: Pack
-          run: ./.ci/pack.sh
+          run: | 
+             chmod +x ./.ci/pack.sh
+             ./.ci/pack.sh
           if: ${{ matrix.target == 'appimage' }}
         - name: Upload
           uses: actions/upload-artifact@v4
