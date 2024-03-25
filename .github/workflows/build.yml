@@ -11,7 +11,7 @@ jobs:
         runs-on: windows-latest
         strategy:
           matrix:
-            target: ["msvc", "msys2"]
+            target: ["msvc"]
         defaults:
           run:
             shell: ${{ (matrix.target == 'msys2' && 'msys2') || 'bash' }} {0}
