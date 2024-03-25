@@ -85,7 +85,9 @@ jobs:
             restore-keys: |
               ${{ runner.os }}-${{ matrix.target }}-
         - name: Build
-          run: ./.ci/linux.sh
+          run: | 
+            chmod +x ./.ci/linux.sh
+            ./.ci/linux.sh
         - name: Pack
           run: ./.ci/pack.sh
           if: ${{ matrix.target == 'appimage' }}
