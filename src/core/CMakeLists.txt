@@ -512,6 +512,6 @@ if ("x86_64" IN_LIST ARCHITECTURE OR "arm64" IN_LIST ARCHITECTURE)
     target_link_libraries(lemonade_core PRIVATE dynarmic)
 endif()
 
-if (CITRA_USE_PRECOMPILED_HEADERS)
+if (LEMONADE_USE_PRECOMPILED_HEADERS)
     target_precompile_headers(lemonade_core PRIVATE precompiled_headers.h)
 endif()
