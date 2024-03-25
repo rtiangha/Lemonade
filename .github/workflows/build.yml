@@ -113,6 +113,16 @@ jobs:
       - name: Fetch submodules
         run: git submodule update --init --recursive
 
+      - name: Setup Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+             ~/.gradle/caches
+             ~/externals/glslang
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/buildSrc/build.gradle') }}-glslang-${{ hashFiles('externals/glslang/**') }}
+          restore-keys: |
+             ${{ runner.os }}-gradle-
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
