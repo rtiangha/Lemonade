@@ -2,6 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <tuple>
 #include "common/alignment.h"
 #include "common/color.h"
 #include "common/vector_math.h"
