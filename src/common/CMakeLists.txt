@@ -195,7 +195,7 @@ if ("arm64" IN_LIST ARCHITECTURE)
     target_link_libraries(lemonade_common PRIVATE oaknut)
 endif()
 
-if (CITRA_USE_PRECOMPILED_HEADERS)
+if (LEMONADE_USE_PRECOMPILED_HEADERS)
     target_precompile_headers(lemonade_common PRIVATE precompiled_headers.h)
 endif()
 
