@@ -117,11 +117,11 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-             ~/.gradle/caches
-             ~/externals/glslang
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/buildSrc/build.gradle') }}-glslang-${{ hashFiles('externals/glslang/**') }}
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-android-${{ github.sha }}
           restore-keys: |
-             ${{ runner.os }}-gradle-
+            ${{ runner.os }}-android-
 
       - name: Setup Java
         uses: actions/setup-java@v4
