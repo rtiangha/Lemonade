@@ -10,26 +10,49 @@ jobs:
   release:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.name == 'Lemonade CI Builds'
     runs-on: ubuntu-latest
-    
+
     steps:
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt update && sudo apt install -y gh
+
+      - name: Authenticate GitHub CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.LEMONADEACTIONS }}
+        run: |
+          echo "$GITHUB_TOKEN" | gh auth login --with-token
+
       - name: Download Windows MSVC Artifact
         uses: actions/download-artifact@v2
         with:
           name: Windows_MSVC
           path: artifacts/windows-msvc.zip
-      
+
       - name: Download Linux AppImage Artifact
         uses: actions/download-artifact@v2
         with:
           name: Linux_AppImage
           path: artifacts/linux-appimage.zip
-      
+
       - name: Download Android APK Artifact
         uses: actions/download-artifact@v2
         with:
           name: Android APK
           path: artifacts/Android APK.zip
-      
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Extract Artifacts
+        run: |
+          mkdir extracted
+          unzip artifacts/windows-msvc.zip -d extracted/windows-msvc
+          unzip artifacts/linux-appimage.zip -d extracted/linux-appimage
+          unzip artifacts/Android APK.zip -d extracted/android-apk
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -41,29 +64,26 @@ jobs:
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the repository's secret token
-      
-      - name: Upload Windows MSVC Artifact to Release
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/windows-msvc.zip
-          asset_name: windows-msvc.zip
-          asset_content_type: application/zip
-      
-      - name: Upload Linux AppImage Artifact to Release
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/linux-appimage.zip
-          asset_name: linux-appimage.zip
-          asset_content_type: application/octet-stream
-      
-      - name: Upload Android APK Artifact to Release
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/Android APK.zip
-          asset_name: Android APK.zip
-          asset_content_type: application/vnd.android.package-archive
-          
+          GITHUB_TOKEN: ${{ secrets.LEMONADEACTIONS }}
+
+      - name: Upload Extracted Files
+        env:
+          GITHUB_TOKEN: ${{ secrets.LEMONADEACTIONS }}
+        run: |
+          # Function to upload files in a directory
+          upload_files() {
+            local directory=$1
+            local content_type=$2
+            for filepath in extracted/$directory/*; do
+              if [ -f "$filepath" ]; then
+                filename=$(basename "$filepath")
+                echo "Uploading $filename to release..."
+                gh release upload ${{ steps.create_release.outputs.tag_name }} "$filepath" --clobber -R ${{ github.repository }} --name "$filename" --content-type "$content_type"
+              fi
+            done
+          }
+
+          # Call the function for each directory with the appropriate content type
+          upload_files "windows-msvc" "application/octet-stream"
+          upload_files "linux-appimage" "application/octet-stream"
+          upload_files "android-apk" "application/vnd.android.package-archive"
