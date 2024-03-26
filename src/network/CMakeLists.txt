@@ -24,6 +24,6 @@ endif()
 
 target_link_libraries(network PRIVATE lemonade_common enet Boost::serialization httplib)
 
-if (CITRA_USE_PRECOMPILED_HEADERS)
+if (LEMONADE_USE_PRECOMPILED_HEADERS)
     target_precompile_headers(network PRIVATE precompiled_headers.h)
 endif()
