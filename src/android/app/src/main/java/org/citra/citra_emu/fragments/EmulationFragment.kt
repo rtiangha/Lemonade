@@ -70,6 +70,9 @@ import org.citra.citra_emu.utils.EmulationLifecycleUtil
 import org.citra.citra_emu.utils.Log
 import org.citra.citra_emu.utils.ViewUtils
 import org.citra.citra_emu.viewmodel.EmulationViewModel
+// -- leia --
+import org.citra.citra_emu.LeiaHelper3D
+import org.citra.citra_emu.LeiaSurfaceView;
 
 class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.FrameCallback {
     private val preferences: SharedPreferences
@@ -79,6 +82,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
     private var perfStatsUpdater: Runnable? = null
 
     private lateinit var emulationActivity: EmulationActivity
+    private lateinit var leiaSurfaceView: LeiaSurfaceView
 
     private var _binding: FragmentEmulationBinding? = null
     private val binding get() = _binding!!
@@ -167,6 +171,18 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
             return
         }
 
+        val sL = LeiaHelper3D.SurfaceListener{ surface ->
+            Log.debug("SurfaceListener onSurfaceChanged called") // Log debug warning
+            emulationState.newSurface(surface)
+        }
+        binding.surfaceEmulation.setSurfaceListener(sL)
+
+        /*try{
+            binding.surfaceEmulation.holder.addCallback(this);
+        }catch(e: Exception){
+            Log.debug("SurfaceListener error: $e") // Log debug warning
+        }*/
+
         binding.surfaceEmulation.holder.addCallback(this)
         binding.doneControlConfig.setOnClickListener {
             binding.doneControlConfig.visibility = View.GONE
@@ -228,6 +244,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
         binding.inGameMenu.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.menu_emulation_pause -> {
+                    LeiaHelper3D.update3dMode(binding.surfaceEmulation, !emulationState.isPaused, !emulationState.isPaused)
                     if (emulationState.isPaused) {
                         emulationState.unpause()
                         it.title = resources.getString(R.string.pause_emulation)
@@ -353,6 +370,8 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
                         return
                     }
 
+                    LeiaHelper3D.update3dMode(binding.surfaceEmulation, false, false)
+
                     if (binding.drawerLayout.isOpen) {
                         binding.drawerLayout.close()
                     } else {
@@ -443,6 +462,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
 
     override fun onResume() {
         super.onResume()
+        LeiaHelper3D.update3dMode(binding.surfaceEmulation, true, true)
         Choreographer.getInstance().postFrameCallback(this)
         if (NativeLibrary.isRunning()) {
             NativeLibrary.unPauseEmulation()
@@ -457,6 +477,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
     }
 
     override fun onPause() {
+        LeiaHelper3D.update3dMode(binding.surfaceEmulation, false, false)
         if (NativeLibrary.isRunning()) {
             emulationState.pause()
         }
@@ -922,8 +943,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
-        // We purposely don't do anything here.
-        // All work is done in surfaceChanged, which we are guaranteed to get even for surface creation.
+        Log.debug("[EmulationFragment] Surface Created")
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
@@ -933,6 +953,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
         emulationState.clearSurface()
+        LeiaHelper3D.update3dMode(binding.surfaceEmulation, false, false)
     }
 
     override fun doFrame(frameTimeNanos: Long) {
