@@ -64,9 +64,7 @@ class EmulationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeUtil.setTheme(this)
 
-        if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
-            LeiaHelper3D.init(application)
-        }
+        LeiaHelper3D.init(application)
 
         settingsViewModel.settings.loadSettings()
 

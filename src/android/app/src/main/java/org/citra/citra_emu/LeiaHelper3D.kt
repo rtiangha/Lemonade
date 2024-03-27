@@ -50,28 +50,32 @@ class LeiaHelper3D {
     
     companion object {
         fun init(application: Application) {
-            try {
-                val initArgs = LeiaSDK.InitArgs().apply {
-                    platform.app = application
-                    platform.logLevel = LogLevel.Trace
+            if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
+                try {
+                    val initArgs = LeiaSDK.InitArgs().apply {
+                        platform.app = application
+                        platform.logLevel = LogLevel.Trace
+                    }
+                    val leiaSDK = LeiaSDK.createSDK(initArgs)
+                    leiaSDK.startFaceTracking(false)
+                } catch (e: Exception) {
+                    Log.e("MainApp", "Failed to initialize LeiaSDK: ${e.message}")
+                    Toast.makeText(application, "Failed to initialize LeiaSDK", Toast.LENGTH_SHORT).show()
                 }
-                val leiaSDK = LeiaSDK.createSDK(initArgs)
-                leiaSDK.startFaceTracking(false)
-            } catch (e: Exception) {
-                Log.e("MainApp", "Failed to initialize LeiaSDK: ${e.message}")
-                Toast.makeText(application, "Failed to initialize LeiaSDK", Toast.LENGTH_SHORT).show()
             }
         }
 
         fun update3dMode(surfaceView: InterlacedSurfaceView, enable3dMode: Boolean, hasFocus: Boolean) {
-            surfaceView.config.use { config ->
-                config.setNumTiles(if (enable3dMode) 2 else 1, 1)
-            }
+            if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
+                surfaceView.config.use { config ->
+                    config.setNumTiles(if (enable3dMode) 2 else 1, 1)
+                }
 
-            val leiaSDK = LeiaSDK.getInstance()
-            leiaSDK?.let {
-                it.startFaceTracking(enable3dMode && hasFocus)
-                it.enableBacklight(enable3dMode && hasFocus)
+                val leiaSDK = LeiaSDK.getInstance()
+                leiaSDK?.let {
+                    it.startFaceTracking(enable3dMode && hasFocus)
+                    it.enableBacklight(enable3dMode && hasFocus)
+                }
             }
         }
     }
