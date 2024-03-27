@@ -97,9 +97,9 @@ jobs:
           uses: actions/upload-artifact@v4
           if: ${{ matrix.target == 'appimage' }}
           with:
-            name: Android-${{ env.TARGET }}
+            name: ${{ env.OS }}-${{ env.TARGET }}
             path: artifacts/
-    arm64:
+    Android-ARM64:
       runs-on: ubuntu-latest
 
       strategy:
