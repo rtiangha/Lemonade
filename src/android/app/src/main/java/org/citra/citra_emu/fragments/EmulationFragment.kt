@@ -59,6 +59,7 @@ import org.citra.citra_emu.display.ScreenLayout
 import org.citra.citra_emu.features.settings.model.SettingsViewModel
 import org.citra.citra_emu.features.settings.ui.SettingsActivity
 import org.citra.citra_emu.features.settings.utils.SettingsFile
+import org.citra.citra_emu.features.settings.model.BooleanSetting
 import org.citra.citra_emu.model.Game
 import org.citra.citra_emu.utils.DirectoryInitialization
 import org.citra.citra_emu.utils.DirectoryInitialization.DirectoryInitializationState
@@ -171,17 +172,13 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
             return
         }
 
-        val sL = LeiaHelper3D.SurfaceListener{ surface ->
-            Log.debug("SurfaceListener onSurfaceChanged called") // Log debug warning
-            emulationState.newSurface(surface)
+        if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
+            val sL = LeiaHelper3D.SurfaceListener{ surface ->
+                Log.debug("SurfaceListener onSurfaceChanged called") // Log debug warning
+                emulationState.newSurface(surface)
+            }
+            binding.surfaceEmulation.setSurfaceListener(sL)
         }
-        binding.surfaceEmulation.setSurfaceListener(sL)
-
-        /*try{
-            binding.surfaceEmulation.holder.addCallback(this);
-        }catch(e: Exception){
-            Log.debug("SurfaceListener error: $e") // Log debug warning
-        }*/
 
         binding.surfaceEmulation.holder.addCallback(this)
         binding.doneControlConfig.setOnClickListener {
@@ -244,7 +241,9 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
         binding.inGameMenu.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.menu_emulation_pause -> {
-                    LeiaHelper3D.update3dMode(binding.surfaceEmulation, !emulationState.isPaused, !emulationState.isPaused)
+                    if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
+                        LeiaHelper3D.update3dMode(binding.surfaceEmulation, !emulationState.isPaused, !emulationState.isPaused)
+                    }
                     if (emulationState.isPaused) {
                         emulationState.unpause()
                         it.title = resources.getString(R.string.pause_emulation)
@@ -370,7 +369,9 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
                         return
                     }
 
-                    LeiaHelper3D.update3dMode(binding.surfaceEmulation, false, false)
+                    if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
+                        LeiaHelper3D.update3dMode(binding.surfaceEmulation, false, false)
+                    }
 
                     if (binding.drawerLayout.isOpen) {
                         binding.drawerLayout.close()
@@ -462,7 +463,9 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
 
     override fun onResume() {
         super.onResume()
-        LeiaHelper3D.update3dMode(binding.surfaceEmulation, true, true)
+        if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
+            LeiaHelper3D.update3dMode(binding.surfaceEmulation, true, true)
+        }
         Choreographer.getInstance().postFrameCallback(this)
         if (NativeLibrary.isRunning()) {
             NativeLibrary.unPauseEmulation()
@@ -477,7 +480,9 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
     }
 
     override fun onPause() {
-        LeiaHelper3D.update3dMode(binding.surfaceEmulation, false, false)
+        if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
+            LeiaHelper3D.update3dMode(binding.surfaceEmulation, false, false)
+        }
         if (NativeLibrary.isRunning()) {
             emulationState.pause()
         }
@@ -953,7 +958,9 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
         emulationState.clearSurface()
-        LeiaHelper3D.update3dMode(binding.surfaceEmulation, false, false)
+        if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
+            LeiaHelper3D.update3dMode(binding.surfaceEmulation, false, false)
+        }
     }
 
     override fun doFrame(frameTimeNanos: Long) {
