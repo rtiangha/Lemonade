@@ -11,34 +11,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: Install GitHub CLI
-        run: |
-          sudo apt update && sudo apt install -y gh
-
-      - name: Authenticate GitHub CLI
-        env:
-          GITHUB_TOKEN: ${{ secrets.LEMONADEACTIONS }}
-        run: |
-          echo "$GITHUB_TOKEN" | gh auth login --with-token
-
       - name: Download Windows MSVC Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: Windows_MSVC
-          path: artifacts/windows-msvc.zip
+        run: |
+          curl -L -o artifacts/windows-msvc.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msvc.zip
 
       - name: Download Linux AppImage Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: Linux_AppImage
-          path: artifacts/linux-appimage.zip
+        run: |
+          curl -L -o artifacts/linux-appimage.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/linux-appimage.zip
 
       - name: Download Android APK Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: Android APK
-          path: artifacts/Android APK.zip
+        run: |
+          curl -L -o artifacts/Android APK.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/Android%20APK.zip
 
       - name: Setup Python
         uses: actions/setup-python@v2
@@ -60,14 +43,10 @@ jobs:
           release_name: Lemonade ${{ github.run_number }}
           body: |
             Description of the release goes here.
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.LEMONADEACTIONS }}
-
+          draft: true
+          prerelease: true
+        
       - name: Upload Extracted Files
-        env:
-          GITHUB_TOKEN: ${{ secrets.LEMONADEACTIONS }}
         run: |
           # Function to upload files in a directory
           upload_files() {
