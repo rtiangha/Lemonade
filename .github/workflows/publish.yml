@@ -23,18 +23,6 @@ jobs:
         run: |
           curl -L -o Android-APK.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/Android-APK.zip
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Extract Artifacts
-        run: |
-          mkdir extracted
-          unzip windows-msvc.zip -d extracted/windows-msvc
-          unzip linux-appimage.zip -d extracted/linux-appimage
-          unzip Android-APK.zip -d extracted/app-canary-release
-
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -47,23 +35,34 @@ jobs:
             Description of the release goes here.
           draft: true
           prerelease: true
-        
-      - name: Upload Extracted Files
-        run: |
-          # Function to upload files in a directory
-          upload_files() {
-            local directory=$1
-            local content_type=$2
-            for filepath in extracted/$directory/*; do
-              if [ -f "$filepath" ]; then
-                filename=$(basename "$filepath")
-                echo "Uploading $filename to release..."
-                gh release upload ${{ steps.create_release.outputs.tag_name }} "$filepath" --clobber -R ${{ github.repository }} --name "$filename" --content-type "$content_type"
-              fi
-            done
-          }
 
-          # Call the function for each directory with the appropriate content type
-          upload_files "windows-msvc" "application/octet-stream"
-          upload_files "linux-appimage" "application/octet-stream"
-          upload_files "app-canary-release" "application/vnd.android.package-archive"
+      - name: upload Android artifact
+        uses: actions/upload-release-asset@v1
+        env:
+         GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./$(pwd)/Android-APK.zip
+          asset_name: Android-APK.zip
+          asset_content_type: application/zip
+          
+      - name: upload linux-appimage artifact
+        uses: actions/upload-release-asset@v1
+        env:
+         GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./$(pwd)/linux-appimage.zip
+          asset_name: linux-appimage.zip
+          asset_content_type: application/zip
+          
+      - name: upload windows artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./$(pwd)/windows-msvc.zip
+          asset_name: windows-msvc.zip
+          asset_content_type: application/zip
+          
