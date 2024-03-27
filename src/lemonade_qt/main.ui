@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Citra</string>
+   <string>Lemonade</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -477,7 +477,7 @@
     <string>Modify Lemonade Install</string>
    </property>
    <property name="toolTip">
-    <string>Opens the maintenance tool to modify your Citra installation</string>
+    <string>Opens the maintenance tool to modify your Lemonade installation</string>
    </property>
   </action>
   <action name="action_Screen_Layout_Default">
