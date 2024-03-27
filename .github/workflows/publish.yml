@@ -34,7 +34,7 @@ jobs:
           body: |
             Description of the release goes here.
           draft: true
-          prerelease: true
+          prerelease: false
 
       - name: upload Android artifact
         uses: actions/upload-release-asset@v1
@@ -42,7 +42,7 @@ jobs:
          GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./$(pwd)/Android-APK.zip
+          asset_path: ./${GITHUB_WORKSPACE}/Android-APK.zip
           asset_name: Android-APK.zip
           asset_content_type: application/zip
           
@@ -52,7 +52,7 @@ jobs:
          GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./$(pwd)/linux-appimage.zip
+          asset_path: ./${GITHUB_WORKSPACE}/linux-appimage.zip
           asset_name: linux-appimage.zip
           asset_content_type: application/zip
           
@@ -62,7 +62,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./$(pwd)/windows-msvc.zip
+          asset_path: ./${GITHUB_WORKSPACE}/windows-msvc.zip
           asset_name: windows-msvc.zip
           asset_content_type: application/zip
           
