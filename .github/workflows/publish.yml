@@ -21,7 +21,7 @@ jobs:
 
       - name: Download Android APK Artifact
         run: |
-          curl -L -o APK.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/Android-APK.zip
+          curl -L -o Android-APK.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/Android-APK.zip
 
       - name: Setup Python
         uses: actions/setup-python@v2
@@ -33,7 +33,7 @@ jobs:
           mkdir extracted
           unzip windows-msvc.zip -d extracted/windows-msvc
           unzip linux-appimage.zip -d extracted/linux-appimage
-          unzip Android-APK.zip -d extracted/android-apk
+          unzip Android-APK.zip -d extracted/app-canary-release
 
       - name: Create Release
         id: create_release
@@ -64,4 +64,4 @@ jobs:
           # Call the function for each directory with the appropriate content type
           upload_files "windows-msvc" "application/octet-stream"
           upload_files "linux-appimage" "application/octet-stream"
-          upload_files "android-apk" "application/vnd.android.package-archive"
+          upload_files "app-canary-release" "application/vnd.android.package-archive"
