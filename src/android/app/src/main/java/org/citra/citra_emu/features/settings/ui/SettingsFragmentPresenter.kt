@@ -751,6 +751,15 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
 
             add(HeaderSetting(R.string.stereoscopy))
             add(
+                SwitchSetting(
+                    BooleanSetting.LUMEPAD_SUPPORT,
+                    R.string.lumepad_support,
+                    0,
+                    BooleanSetting.LUMEPAD_SUPPORT.key,
+                    BooleanSetting.LUMEPAD_SUPPORT.defaultValue
+                )
+            )
+            add(
                 SingleChoiceSetting(
                     IntSetting.STEREOSCOPIC_3D_MODE,
                     R.string.render3d,
