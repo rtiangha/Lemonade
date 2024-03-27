@@ -97,7 +97,7 @@ jobs:
           uses: actions/upload-artifact@v4
           if: ${{ matrix.target == 'appimage' }}
           with:
-            name: ${{ env.OS }}-${{ env.TARGET }}
+            name: Android-${{ env.TARGET }}
             path: artifacts/
     arm64:
       runs-on: ubuntu-latest
@@ -154,7 +154,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Android APK
+          name: Android-APK
           path: |
             ./src/android/app/build/outputs/apk/canary/${{ env.BUILD_TYPE }}/app-canary-${{ env.BUILD_TYPE }}.apk
 
