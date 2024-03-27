@@ -31,9 +31,9 @@ jobs:
       - name: Extract Artifacts
         run: |
           mkdir extracted
-          unzip artifacts/windows-msvc.zip -d extracted/windows-msvc
-          unzip artifacts/linux-appimage.zip -d extracted/linux-appimage
-          unzip artifacts/Android APK.zip -d extracted/android-apk
+          unzip windows-msvc.zip -d extracted/windows-msvc
+          unzip linux-appimage.zip -d extracted/linux-appimage
+          unzip Android APK.zip -d extracted/android-apk
 
       - name: Create Release
         id: create_release
