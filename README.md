@@ -19,7 +19,6 @@ We will try to fix base bugs too, but we need to know if the issues were caused 
 
 Soon...
 
-
 ## HOW TO BUILD THE APK?
 
 **Dependencies (Windows)**
