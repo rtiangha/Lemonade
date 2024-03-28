@@ -29,15 +29,12 @@ val downloadedJniLibsPath = "${buildDir}/downloadedJniLibs"
 val shouldAddDebugInfo: () -> Boolean = { true }
 val useInAppFaceTracking: () -> Boolean = { false }
 
-// Disable use of localProperties temporary 
-/*
 val localPropertiesFile = File(rootProject.projectDir, "local.properties")
 val properties = Properties()
 check(localPropertiesFile.exists())
 localPropertiesFile.reader(charset = Charsets.UTF_8).use { reader ->
     properties.load(reader)
 }
-*/
 //extra.set("cnsdkPath", properties.getProperty("cnsdk.dir").also {
 //    check(it != null) { "cnsdk.dir not set in local.properties" }
 //    if (!File(it).isAbsolute) {
