@@ -52,9 +52,7 @@ class LeiaSurfaceView(context: Context, attrs: AttributeSet) : InterlacedSurface
 class LeiaHelper3D {
 
     fun interface SurfaceListener {
-        if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
             fun onSurfaceChanged(surface: Surface)
-        }
     }
     
     companion object {
