@@ -23,38 +23,30 @@ class LeiaSurfaceView(context: Context, attrs: AttributeSet) : InterlacedSurface
     // constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
 
     fun init() {
-        if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
-            Log.i("LeiaHelper3D: LeiaSurfaceView","init")
-            setViewAsset(asset)
-        }
+        Log.i("LeiaHelper3D: LeiaSurfaceView","init")
+        setViewAsset(asset)
     }
 
     fun setSurfaceListener(surfaceListener: LeiaHelper3D.SurfaceListener) {
-        if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
-            val surfaceAsset = InputViewsAsset.createEmptySurfaceForVideo {
-                    surfaceTexture: SurfaceTexture? ->
-                surfaceTexture?.setDefaultBufferSize(2560, 1600)
-                Log.d("SurfaceListener", "createEmptySurfaceForVideo -> calling onSurfaceChanged")
-                surfaceListener.onSurfaceChanged(Surface(surfaceTexture))
-            }
-            setViewAsset(surfaceAsset)
+        val surfaceAsset = InputViewsAsset.createEmptySurfaceForVideo {
+                surfaceTexture: SurfaceTexture? ->
+            surfaceTexture?.setDefaultBufferSize(2560, 1600)
+            Log.d("SurfaceListener", "createEmptySurfaceForVideo -> calling onSurfaceChanged")
+            surfaceListener.onSurfaceChanged(Surface(surfaceTexture))
         }
+        setViewAsset(surfaceAsset)
     }
 
     fun addTexture(texture: SurfaceTexture, transform: FloatArray) {
-        if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
-            Log.d("SurfaceListener", "addTexture")
-            textureRenderer.addTexture(texture, transform)
-        }
+        Log.d("SurfaceListener", "addTexture")
+        textureRenderer.addTexture(texture, transform)
     }
 }
 
 class LeiaHelper3D {
 
     fun interface SurfaceListener {
-        if (BooleanSetting.LUMEPAD_SUPPORT.boolean) {
-            fun onSurfaceChanged(surface: Surface)
-        }
+        fun onSurfaceChanged(surface: Surface)
     }
     
     companion object {
