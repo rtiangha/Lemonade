@@ -106,6 +106,8 @@ jobs:
         matrix:
           build_type:
             - release
+      env:
+        CCACHE_DIR: ${{ github.workspace }}/.ccache
 
       steps:
       - name: Set BUILD_TYPE variable
@@ -121,6 +123,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
+            ${{ env.CCACHE_DIR }}
           key: ${{ runner.os }}-android-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-android-
@@ -148,6 +151,9 @@ jobs:
 
       - name: Build
         run: |
+          chmod +x ./.ci/export.sh
+          ./.ci/export.sh
+          
           # Build the project with CMake
           cmake --build ${{github.workspace}}/build --config ${{ env.BUILD_TYPE }}
 
