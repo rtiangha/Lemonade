@@ -108,7 +108,6 @@ jobs:
             - release
       env:
         CCACHE_DIR: ${{ github.workspace }}/.ccache
-        JAVA_DIR: ./opt/hostedtoolcache/Java_Zulu_jdk/17.0.10-7/x64/usr/lib/jvm/
 
       steps:
       - name: Set BUILD_TYPE variable
@@ -125,16 +124,19 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
             ${{ env.CCACHE_DIR }}
-            ${{ env.JAVA_DIR }}
           key: ${{ runner.os }}-android-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-android-
 
+        env:
+           SEGMENT_DOWNLOAD_TIMEOUT_MINS: '1'
+           
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
+          cache: 'gradle'
 
       - name: Deps
         run: |
