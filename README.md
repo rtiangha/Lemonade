@@ -19,7 +19,6 @@ We will try to fix base bugs too, but we need to know if the issues were caused 
 
 Soon...
 
-
 ## HOW TO BUILD THE APK?
 
 **Dependencies (Windows)**
@@ -45,7 +44,7 @@ Add ```set(ALLOW_EXTERNAL_SPIRV_TOOLS ON)```
 - **Make sure** to select CanaryRelease 
 
 
-## Contacting
+## Contacting us
 
 **We are looking for developers! so please contact us on discord if you are interested**
 
