@@ -108,6 +108,7 @@ jobs:
             - release
       env:
         CCACHE_DIR: ${{ github.workspace }}/.ccache
+        JAVA_DIR: ./opt/hostedtoolcache/Java_Zulu_jdk/17.0.10-7/x64/usr/lib/jvm/
 
       steps:
       - name: Set BUILD_TYPE variable
@@ -124,6 +125,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
             ${{ env.CCACHE_DIR }}
+            ${{ env.JAVA_DIR }}
           key: ${{ runner.os }}-android-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-android-
@@ -140,23 +142,11 @@ jobs:
             sudo apt-get update -y
             sudo apt-get install ccache glslang-dev glslang-tools apksigner -y
 
-      - name: Set glslang submodule to specific commit
-        run: |
-            cd externals/glslang  # Navigate to the glslang submodule directory
-            git checkout 1e4955adbcd9b3f5eaf2129e918ca057baed6520  # Checkout the specific commit
-            cd ../..  # Navigate back to the root of the repository
-
-      - name: Configure CMake
-        run: cmake -B ${{github.workspace}}/build -DENABLE_SDL2=OFF -DENABLE_SDL2_FRONTEND=OFF -DENABLE_QT=OFF
-
       - name: Build
         run: |
           chmod +x ./.ci/export.sh
           ./.ci/export.sh
           
-          # Build the project with CMake
-          cmake --build ${{github.workspace}}/build --config ${{ env.BUILD_TYPE }}
-
           # Build the Android app with Gradle
           cd src/android
           ./gradlew assemble${{ env.BUILD_TYPE }}
