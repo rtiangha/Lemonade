@@ -154,9 +154,6 @@ jobs:
           chmod +x ./.ci/export.sh
           ./.ci/export.sh
           
-          # Build the project with CMake
-          cmake --build ${{github.workspace}}/build --config ${{ env.BUILD_TYPE }}
-
           # Build the Android app with Gradle
           cd src/android
           ./gradlew assemble${{ env.BUILD_TYPE }}
