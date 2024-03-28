@@ -55,10 +55,10 @@ val cnsdkPath: String = properties.getProperty("cnsdk.dir").also {
 }
 println("CNSDK directory: $cnsdkPath")
 val getCNSDKVersionName: () -> String = {
-    // Extract the folder name from the path
-    val folderName = File(cnsdkPath).name
-    Extract the version name from the path
-    folderName.removePrefix("cnsdk-android-")
+    // Extract the file name from the path
+    val fileName = cnsdkPath.substringAfterLast("/")
+    // Remove the prefix from the file name to get the version
+    fileName.removePrefix("cnsdk-android-")
 }
 fun getCNSDKLibName(forceInApp: Boolean): String {
     return if (useInAppFaceTracking() || forceInApp) {
