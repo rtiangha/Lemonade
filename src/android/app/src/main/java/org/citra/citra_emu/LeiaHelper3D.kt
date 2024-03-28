@@ -11,7 +11,6 @@ import com.leia.core.LogLevel
 import com.leia.sdk.LeiaSDK
 import com.leia.sdk.views.InputViewsAsset
 import com.leia.sdk.views.InterlacedSurfaceView
-import org.citra.citra_emu.features.settings.model.BooleanSetting
 import org.citra.citra_emu.vendor.simongellis.leia.webxr.LeiaTextureRenderer
 import org.citra.citra_emu.vendor.simongellis.leia.webxr.RendererImpl
 
