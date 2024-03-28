@@ -124,15 +124,20 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
             ${{ env.CCACHE_DIR }}
+            ${{ env.JAVA_DIR }}
           key: ${{ runner.os }}-android-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-android-
 
       - name: Setup Java
+        id: java_home
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
+          
+        env:
+         JAVA_DIR: ${{ steps.java_home.outputs.java-home }}/usr/lib/jvm/
 
       - name: Deps
         run: |
