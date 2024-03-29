@@ -2,8 +2,8 @@
 
 ## Make sure to git clone properly 
 
-git clone --recursive https://github.com/Lemonade-emu/Lemonade
-cd Lemonade
+- git clone --recursive https://github.com/Lemonade-emu/Lemonade
+- cd Lemonade
 
 **The --recursive option automatically clones the required Git submodules too.**
 
