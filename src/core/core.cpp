@@ -833,8 +833,6 @@ void System::SetCpuUsageLimit(bool enabled, u32 num_cores) {
 }
 
 void System::Shutdown(bool is_deserializing) {
-    // Log last frame performance stats
-    const auto perf_results = GetAndResetPerfStats();
 
     // Shutdown emulation session
     is_powered_on = false;
