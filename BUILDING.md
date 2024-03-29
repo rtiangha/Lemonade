@@ -1,6 +1,3 @@
-An unofficial PKGBUILD of Citra is available for Arch Linux on the AUR.
-Dependencies:
-
 # Common steps/errors
 
 ## Make sure to git clone properly 
@@ -9,6 +6,54 @@ git clone --recursive https://github.com/Lemonade-emu/Lemonade
 cd Lemonade
 
 **The --recursive option automatically clones the required Git submodules too.**
+
+## Common errors
+
+If you get the error ```invalid linker name in argument '-fuse-ld=gold'```
+- LLVM For Windows
+- Visual Stidio Build Tools (C++ Tools)
+- [MinGW-W64](https://github.com/niXman/mingw-builds-binaries) (Make sure to get the online installer and add the bin directiry of MinGW-W64 to your PATH variable)
+
+If you get the error ```SPIR-V Tools not found'```
+ - Edit the cmakelists.txt file of glslang (located on the extenrnals folder)
+
+Add ```set(ALLOW_EXTERNAL_SPIRV_TOOLS ON)```
+
+# Building for Windows
+
+## MSVC Build for Windows
+
+Minimal Dependencies
+
+On Windows, all library dependencies are automatically included within the "externals" folder or can be downloaded on-demand. To build Lemonade, you simply need to install:
+
+- Visual Studio 2022 - Make sure to select C++ support in the installer.  
+- CMake GUI - Used to generate Visual Studio project files. 2
+- Git for Windows
+
+(Make sure you select (Add Git to your system PATH) while installing it)
+
+### Building
+
+1 -Open the CMake GUI application and point it to the Lemonade folder you previosly cloned.
+
+2 -For the build directory, use a build/ subdirectory inside the source directory or some other directory of your choice. (Tell CMake to create it.)
+
+3 - Click the "Configure" button and choose Visual Studio 17 2022, with x64 for the optional platform.
+
+**NOTE: If you get errors like "XXX does not contain a CMakeLists.txt file" at this step, it means you didn't use the `--recursive` flag in the clone step, or you used tools other than the git CLI. Please run "git submodule update --init --recursive" to get remaining dependencies.**
+
+4 -Click "Generate" to create the project files.
+
+5 - Open the solution file lemoande.sln in Visual Studio 2022, which is located in the build folder.
+
+**Depending on which frontend (SDL2 or Qt) you want to build or run, select "lemoande" or "lemoande-qt" in the Solution Explorer, right-click and "Set as Startup Project".**
+
+6 - Select the appropriate build type, Debug for debug purposes or Release for performance (in case of doubt choose the latter).
+
+7 - Press F5 or select Build → Rebuild Solution in the menu.
+
+**NOTE: Please refer to Common errors if any errors. If you did not find a solution feel free to ask us in the discord server.
 
 # Building for Linux
 
@@ -95,7 +140,7 @@ cd Lemonade
         Fedora: dnf install cmake
         OpenSUSE: zypper in cmake extra-cmake-modules
 
-    Note on Boost library: you don't need to install Boost library on your system, because citra provides a bundled trimmed Boost library. However, if you already have Boost library installed on your system, please make sure its version is at least 1.66 (which contains a bug fix for GCC 7), otherwise compilation would fail.
+    Note on Boost library: you don't need to install Boost library on your system, because Lemonade provides a bundled trimmed Boost library. However, if you already have Boost library installed on your system, please make sure its version is at least 1.66 (which contains a bug fix for GCC 7), otherwise compilation would fail.
 
 ### Building Lemoande in Debug Mode (Slow):
 
@@ -164,8 +209,8 @@ After building, the binaries lemonade, lemoande-qt and lemoande-room (depending 
 
 ### Debugging:
 ```
-cd data
-gdb ../build/bin/citra-qt
+cd Lemonade
+gdb ../build/bin/lemoande-qt
 (gdb) run
 <crash>
 (gdb) bt
@@ -186,20 +231,14 @@ If your distribution's version of Qt is too old, there are a few places you may 
 - Android Studio
 - NDK and CMake
 - Git
-
-If you get the error ```invalid linker name in argument '-fuse-ld=gold'```
-- LLVM For Windows
-- Visual Stidio Build Tools (C++ Tools)
-- [MinGW-W64](https://github.com/niXman/mingw-builds-binaries) (Make sure to get the online installer and add the bin directiry of MinGW-W64 to your PATH variable)
-
-If you get the error ```SPIR-V Tools not found'```
- - Edit the cmakelists.txt file of glslang (located on the extenrnals folder)
-
-Add ```set(ALLOW_EXTERNAL_SPIRV_TOOLS ON)```
  
 ###  Compiling
-- Start Android Studio, on the startup dialog select Open
-- Navigate to the citra/src/android directory and click on OK
-- Build > Generate Signed Bundle/APK
-- Select 'APK' and create a key
-- **Make sure** to select CanaryRelease 
+1 - Start Android Studio, on the startup dialog select Open
+
+2 - Navigate to the lemonade/src/android directory and click on OK
+
+3 - Build > Generate Signed Bundle/APK
+
+4 - Select 'APK' and create a key
+
+5 - **Make sure** to select CanaryRelease 
