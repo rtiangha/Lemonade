@@ -64,8 +64,8 @@ android {
         applicationId = "org.gamerytb.lemonade"
         minSdk = 28
         targetSdk = 34
-        versionCode = autoVersion
-        versionName = getGitVersion()
+        versionCode = lemonadealpha
+        versionName = Lemonade Alpha 2
 
         ndk {
             //noinspection ChromeOsAbiSupport
