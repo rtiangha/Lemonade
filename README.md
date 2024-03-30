@@ -13,7 +13,6 @@ Lemonade is an open source and experimental emulator that emulates the functiona
 
 Lemonade was started after the __base__, a previous Nintendo 3ds emulator, was discontinued. The Lemonade Project was created to continue the work of __base__, fixing its issues and improving its performance and compatibility.
 
-
 ### Who develops Lemonade?
 
 The Lemonade Project's main developers are [@Gamer64ytb](https://github.com/Gamer64ytb) [@kleidiss](https://github.com/kleidiss) and [@ishan0774](https://github.com/Ishan09811) but the Lemonade team also has a few contributors who help with the development of the emulator.
