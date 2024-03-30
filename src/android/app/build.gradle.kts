@@ -64,7 +64,7 @@ android {
         applicationId = "org.gamerytb.lemonade"
         minSdk = 28
         targetSdk = 34
-        versionCode = 0.2
+        versionCode = 69
         versionName = "Lemonade Alpha 2"
 
         ndk {
