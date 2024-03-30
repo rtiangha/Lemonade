@@ -217,7 +217,7 @@ tasks.named("preBuild") {
 }
 
 fun getGitVersion(): String {
-    var versionName = "0.0"
+    var versionName = "0.2"
 
     try {
         versionName = ProcessBuilder("git", "describe", "--always", "--long")
