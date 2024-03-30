@@ -17,9 +17,9 @@ Lemonade was started after the __base__, a previous Nintendo 3ds emulator, was d
 
 The Lemonade Project's main developers are [@Gamer64ytb](https://github.com/Gamer64ytb) [@kleidiss](https://github.com/kleidiss) and [@ishan0774](https://github.com/Ishan09811) but the Lemonade team also has a few contributors who help with the development of the emulator.
 
-## Downlaod Link
+## Download Link
 
-Downlaod the emulator from our [official website](https://lemonade-emu.github.io/)
+Download the emulator from our [official website](https://lemonade-emu.github.io/)
 
 ## Bug reports/Feature Requests 
 
