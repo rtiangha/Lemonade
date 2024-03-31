@@ -51,3 +51,11 @@ Or you can get latest nighlt builds: **⚠️ May be completely broken (Not recc
   </h1>
 
 **For building instructions go [here](https://github.com/Lemonade-emu/Lemonade/blob/master/BUILDING.md). If you face any issues feel free to contact us on our discord server , we still are looking for more devs so any contributation is appeceated**
+
+<h1 align="center">
+  Owners and contributors 🙌
+  </h1>
+
+| Owner | Owner | Owner | Contributors |
+| :---: | :---: | :---: | :---: |
+| <img src="https://github.com/Gamer64ytb.png?size=115" width=115><br><sub>@Gaymer64</sub> <br><br>  | <img src="https://github.com/kleidiss.png?size=250" width=115><br><sub>@kleidiss</sub> <br><br> | <img src="https://github.com/Ishan09811.png?size=115" width=115><br><sub>@Isham09811</sub> <br><br> | <img src="https://github.com/dnmodder.png?size=115" width=115><br><sub>@dnmodder</sub> <br><br> |
