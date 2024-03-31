@@ -152,6 +152,8 @@ jobs:
           # Build the Android app with Gradle
           cd src/android
           ./gradlew assemble${{ env.BUILD_TYPE }}
+          chmod +x ./.ci/end.sh
+          ./.ci/end.sh
           ls -R app/build/outputs
           cd ../..
         env:
