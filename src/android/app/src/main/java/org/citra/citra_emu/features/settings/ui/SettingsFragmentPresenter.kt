@@ -219,7 +219,7 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                 override val section = null
                 override val isRuntimeEditable = false
                 override val valueAsString get() = string
-                override val defaultValue = "CITRA"
+                override val defaultValue = "LEMONADE"
             }
             add(
                 StringInputSetting(
