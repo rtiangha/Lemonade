@@ -244,6 +244,7 @@ jobs:
           cd ../..
           chmod +x ./.ci/end.sh
           ./.ci/end.sh
+        if: github.ref == 'refs/heads/master'
         env:
           ANDROID_KEYSTORE_FILE: ks.jks
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
