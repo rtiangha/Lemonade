@@ -167,10 +167,6 @@ android {
             dimension = "version"
             applicationIdSuffix = ".canary"
         }
-
-        create("nightly") {
-            dimension = "version"
-        }
     }
 
     externalNativeBuild {

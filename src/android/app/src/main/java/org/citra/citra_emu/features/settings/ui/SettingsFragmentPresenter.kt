@@ -198,7 +198,7 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     R.string.frame_limit_slider,
                     R.string.frame_limit_slider_description,
                     1,
-                    200,
+                    400,
                     "%",
                     IntSetting.FRAME_LIMIT.key,
                     IntSetting.FRAME_LIMIT.defaultValue.toFloat()
@@ -226,7 +226,7 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     usernameSetting,
                     R.string.username,
                     0,
-                    "CITRA",
+                    "LEMONADE",
                     10
                 )
             )
@@ -690,15 +690,6 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                 )
             )
             add(
-                SwitchSetting(
-                    BooleanSetting.CORE_DOWNCOUNT_HACK,
-                    R.string.core_downcount_hack,
-                    R.string.core_downcount_hack_description,
-                    BooleanSetting.CORE_DOWNCOUNT_HACK.key,
-                    BooleanSetting.CORE_DOWNCOUNT_HACK.defaultValue
-                )
-            )
-            add(
                 SliderSetting(
                     IntSetting.RESOLUTION_FACTOR,
                     R.string.internal_resolution,
@@ -972,6 +963,15 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     R.string.vsync_description,
                     IntSetting.VSYNC.key,
                     IntSetting.VSYNC.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.CORE_DOWNCOUNT_HACK,
+                    R.string.core_downcount_hack,
+                    R.string.core_downcount_hack_description,
+                    BooleanSetting.CORE_DOWNCOUNT_HACK.key,
+                    BooleanSetting.CORE_DOWNCOUNT_HACK.defaultValue
                 )
             )
             add(

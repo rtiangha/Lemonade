@@ -56,8 +56,8 @@
     <string name="licenses_description">Projects that make Lemonade for Android possible</string>
     <string name="build">Build</string>
     <string name="licenses">Licenses</string>
-    <string name="support_link">https://discord.gg/FAXfZV9</string>
-    <string name="website_link">https://Lemonade-emu.org/</string>
+    <string name="support_link">https://discord.gg/NVTYcV4v2Q</string>
+    <string name="website_link">https://lemonade-emu.github.io/</string>
     <string name="github_link">W</string>
 
     <!-- Setup strings -->
@@ -470,8 +470,8 @@
     <string name="theme_mode_follow_system">Follow System</string>
     <string name="theme_mode_light">Light</string>
     <string name="theme_mode_dark">Dark</string>
-    <string name="material_you">Material You</string>
-    <string name="material_you_description">Use system colors across the app</string>
+    <string name="material_you">Use Dynamic Colors</string>
+    <string name="material_you_description">Use dynamic colors across the app</string>
 
     <!-- Black backgrounds theme -->
     <string name="use_black_backgrounds">Black Backgrounds</string>

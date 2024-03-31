@@ -28,9 +28,9 @@ object ThemeUtil {
     fun setTheme(activity: AppCompatActivity) {
         setThemeMode(activity)
         if (preferences.getBoolean(Settings.PREF_MATERIAL_YOU, false)) {
-            activity.setTheme(R.style.Theme_Citra_Main_MaterialYou)
+            activity.setTheme(R.style.Theme_Lemonade_Main_MaterialYou)
         } else {
-            activity.setTheme(R.style.Theme_Citra_Main)
+            activity.setTheme(R.style.Theme_Lemonade_Main)
         }
 
         // Using a specific night mode check because this could apply incorrectly when using the
@@ -39,7 +39,7 @@ object ThemeUtil {
         if (preferences.getBoolean(Settings.PREF_BLACK_BACKGROUNDS, false) &&
             isNightMode(activity)
         ) {
-            activity.setTheme(R.style.ThemeOverlay_Citra_Dark)
+            activity.setTheme(R.style.ThemeOverlay_Lemonade_Dark)
         }
     }
 

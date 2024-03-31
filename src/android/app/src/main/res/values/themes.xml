@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Citra.Splash.Main" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/citra_surface</item>
+    <style name="Theme.Lemonade.Splash.Main" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/lemonade_surface</item>
         <!-- TODO: Needs to be fixed -->
         <!-- <item name="windowSplashScreenAnimatedIcon">@drawable/ic_lemonade</item> -->
-        <item name="postSplashScreenTheme">@style/Theme.Citra.Main</item>
+        <item name="postSplashScreenTheme">@style/Theme.Lemonade.Main</item>
     </style>
 
-    <style name="Theme.Citra" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.Lemonade" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Main theme colors -->
-        <item name="colorPrimary">@color/citra_primary</item>
-        <item name="colorOnPrimary">@color/citra_onPrimary</item>
-        <item name="colorPrimaryContainer">@color/citra_primaryContainer</item>
-        <item name="colorOnPrimaryContainer">@color/citra_onPrimaryContainer</item>
-        <item name="colorSecondary">@color/citra_secondary</item>
-        <item name="colorOnSecondary">@color/citra_onSecondary</item>
-        <item name="colorSecondaryContainer">@color/citra_secondaryContainer</item>
-        <item name="colorOnSecondaryContainer">@color/citra_onSecondaryContainer</item>
-        <item name="colorTertiary">@color/citra_tertiary</item>
-        <item name="colorOnTertiary">@color/citra_onTertiary</item>
-        <item name="colorTertiaryContainer">@color/citra_tertiaryContainer</item>
-        <item name="colorOnTertiaryContainer">@color/citra_onTertiaryContainer</item>
-        <item name="colorError">@color/citra_error</item>
-        <item name="colorErrorContainer">@color/citra_errorContainer</item>
-        <item name="colorOnError">@color/citra_onError</item>
-        <item name="colorOnErrorContainer">@color/citra_onErrorContainer</item>
-        <item name="android:colorBackground">@color/citra_background</item>
-        <item name="colorOnBackground">@color/citra_onBackground</item>
-        <item name="colorSurface">@color/citra_surface</item>
-        <item name="colorOnSurface">@color/citra_onSurface</item>
-        <item name="colorSurfaceVariant">@color/citra_surfaceVariant</item>
-        <item name="colorOnSurfaceVariant">@color/citra_onSurfaceVariant</item>
-        <item name="colorOutline">@color/citra_outline</item>
-        <item name="colorOnSurfaceInverse">@color/citra_inverseOnSurface</item>
-        <item name="colorSurfaceInverse">@color/citra_inverseSurface</item>
-        <item name="colorPrimaryInverse">@color/citra_inversePrimary</item>
+        <item name="colorPrimary">@color/lemonade_primary</item>
+        <item name="colorOnPrimary">@color/lemonade_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/lemonade_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/lemonade_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/lemonade_secondary</item>
+        <item name="colorOnSecondary">@color/lemonade_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/lemonade_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/lemonade_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/lemonade_tertiary</item>
+        <item name="colorOnTertiary">@color/lemonade_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/lemonade_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/lemonade_onTertiaryContainer</item>
+        <item name="colorError">@color/lemonade_error</item>
+        <item name="colorErrorContainer">@color/lemonade_errorContainer</item>
+        <item name="colorOnError">@color/lemonade_onError</item>
+        <item name="colorOnErrorContainer">@color/lemonade_onErrorContainer</item>
+        <item name="android:colorBackground">@color/lemonade_background</item>
+        <item name="colorOnBackground">@color/lemonade_onBackground</item>
+        <item name="colorSurface">@color/lemonade_surface</item>
+        <item name="colorOnSurface">@color/lemonade_onSurface</item>
+        <item name="colorSurfaceVariant">@color/lemonade_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/lemonade_onSurfaceVariant</item>
+        <item name="colorOutline">@color/lemonade_outline</item>
+        <item name="colorOnSurfaceInverse">@color/lemonade_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/lemonade_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/lemonade_inversePrimary</item>
 
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
 
-        <item name="sliderStyle">@style/CitraSlider</item>
+        <item name="sliderStyle">@style/LemonadeSlider</item>
 
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 
     <!-- Trick for API >= 29 specific changes -->
-    <style name="Theme.Citra.Main" parent="Theme.Citra" />
+    <style name="Theme.Lemonade.Main" parent="Theme.Lemonade" />
 
 </resources>
