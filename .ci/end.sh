@@ -1,3 +1,5 @@
+#!/bin/bash -ex
+
 ccache -s -v
 
 if [ ! -z "${ANDROID_KEYSTORE_B64}" ]; then
