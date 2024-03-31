@@ -31,6 +31,7 @@ Or you can get latest nighlt builds: **⚠️ May be completely broken (Not recc
 |Windows build|[![Qt Build](https://github.com/Lemonade-emu/Lemonade/actions/workflows/build.yml/badge.svg)](https://github.com/Lemonade-emu/Lemonade/actions/workflows/Qt_Build.yml)|[Windows MSVC](https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msvc.zip)|
 |Android build|[![Qt Build](https://github.com/Lemonade-emu/Lemonade/actions/workflows/build.yml/badge.svg)](https://github.com/Lemonade-emu/Lemonade/actions/workflows/Qt_Build.yml)|[Android-APK](https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/Android-APK.zip)|
 |Linux build|[![Qt Build](https://github.com/Lemonade-emu/Lemonade/actions/workflows/build.yml/badge.svg)](https://github.com/Lemonade-emu/Lemonade/actions/workflows/Qt_Build.yml)|[Linux AppImage](https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/linux-appimage.zip)|
+|Mac OS build (untested)|[![Qt Build](https://github.com/Lemonade-emu/Lemonade/actions/workflows/build.yml/badge.svg)](https://github.com/Lemonade-emu/Lemonade/actions/workflows/Qt_Build.yml)|[Mac OS Universal](https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/macos-universal.zip)|
 
 <h1 align="center">
   Bug Reports?
