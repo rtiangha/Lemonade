@@ -111,6 +111,8 @@ android {
                 keyPassword = System.getenv("ANDROID_KEYSTORE_PASS")
             }
         }
+    } else {
+        println("Keystore information not provided. App will not be signed for release.")
     }
 
     // Define build types, which are orthogonal to product flavors.
