@@ -462,4 +462,3 @@ private:
 } // namespace Core
 
 BOOST_CLASS_VERSION(Core::System, 1)
-
