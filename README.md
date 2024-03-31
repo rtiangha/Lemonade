@@ -51,5 +51,3 @@ Or you can get latest nighlt builds: **⚠️ May be completely broken (Not recc
   </h1>
 
 **For building instructions go [here](https://github.com/Lemonade-emu/Lemonade/blob/master/BUILDING.md). If you face any issues feel free to contact us on our discord server , we still are looking for more devs so any contributation is appeceated**
-
-| [<img src="https://github.com/alexandresanlim.png?size=115" width=115><br><sub>@alexandresanlim</sub>](https://github.com/alexandresanlim) <br><br> [![](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#white)](https://github.com/sponsors/alexandresanlim) | [<img src="https://github.com/mrhrifat.png?size=250" width=115><br><sub>@mrhrifat</sub>](https://github.com/mrhrifat) <br><br> [![](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mrhrifat) |
