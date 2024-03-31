@@ -2841,7 +2841,7 @@ bool GMainWindow::ConfirmClose() {
     }
 
     QMessageBox::StandardButton answer =
-        QMessageBox::question(this, tr("Lemonade"), tr("Would you like to touch the exit button?"),
+        QMessageBox::question(this, tr("Lemonade"), tr("Would you like to exit now?"),
                               QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
     return answer != QMessageBox::No;
 }
