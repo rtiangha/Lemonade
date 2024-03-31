@@ -4,6 +4,7 @@
 
 import android.databinding.tool.ext.capitalizeUS
 import de.undercouch.gradle.tasks.download.Download
+import java.io.ByteArrayOutputStream
 
 plugins {
     id("com.android.application")
@@ -20,19 +21,19 @@ plugins {
  * next 680 years.
  */
 val getVersionCode: () -> Int = {
-            try {
-                val output = ByteArrayOutputStream()
-                exec {
-                    commandLine("git", "describe", "--tags", "--abbrev=0")
-                    standardOutput = output
-                }
-                val tag = output.toString().trim()
-                val majorVersion = tag.split('.')[0].filter { it.isDigit() }
-                majorVersion.toIntOrNull() ?: 1
-            } catch (e: Exception) {
-                1 // Use 1 as the default version code
-            }
+    try {
+        val output = ByteArrayOutputStream()
+        exec {
+            commandLine("git", "describe", "--tags", "--abbrev=0")
+            standardOutput = output
         }
+        val tag = output.toString().trim()
+        val majorVersion = tag.split('.')[0].filter { it.isDigit() }
+        majorVersion.toIntOrNull() ?: 1
+    } catch (e: Exception) {
+        1 // Use 1 as the default version code
+    }
+}
 
 val abiFilter = listOf("arm64-v8a")
 
