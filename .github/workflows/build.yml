@@ -157,6 +157,7 @@ jobs:
           chmod +x ./.ci/end.sh
           ./.ci/end.sh
         env:
+          ANDROID_KEYSTORE_FILE: ${GITHUB_WORKSPACE}/ks.jks
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
