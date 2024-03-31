@@ -4,7 +4,7 @@
   
 ![GitHub all releases](https://img.shields.io/github/downloads/Gamer64ytb/Lemonade/total)
 [![](https://dcbadge.vercel.app/api/server/NVTYcV4v2Q)](https://discord.gg/NVTYcV4v2Q)
-[![Lemoande - Website](https://img.shields.io/badge/Lemoande-Website-2ea44f?logo=nintendo3ds&logoColor=yellow)](https://lemonade-emu.github.io/)
+[![Lemonade - Website](https://img.shields.io/badge/Lemoande-Website-2ea44f?logo=nintendo3ds&logoColor=yellow)](https://lemonade-emu.github.io/)
 </h1>
 
 <h1 align="center">
@@ -16,7 +16,7 @@
 It was started after the _base_, a previous Nintendo 3ds emulator, was discontinued. The Lemonade Project was created to continue the work of _base_, fixing its issues and improving its performance and compatibility.
 
 <h1 align="center">
-  How to downlaod Lemonade?
+  How to download Lemonade?
   </h1>
 
 **It is reccomended to use release builds**
