@@ -25,7 +25,7 @@ It was started after the _base_, a previous Nintendo 3ds emulator, was discontin
 
 **For Windows there is also an installer which you can get [here](https://github.com/Lemonade-emu/Lemonade-installer)**
 
-Or you can get latest nighlt builds: **⚠️ May be completely broken (Not reccomended for daily use)**
+Or you can get latest nightly builds: **⚠️ May be completely broken (Not reccomended for daily use)**
 |Platform|Status|Download|
 |--------|------------|--------|
 |Windows build|[![Qt Build](https://github.com/Lemonade-emu/Lemonade/actions/workflows/build.yml/badge.svg)](https://github.com/Lemonade-emu/Lemonade/actions/workflows/Qt_Build.yml)|[Windows MSVC](https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msvc.zip)|
