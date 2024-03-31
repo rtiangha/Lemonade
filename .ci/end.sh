@@ -3,5 +3,6 @@
 ccache -s -v
 
 if [ ! -z "${ANDROID_KEYSTORE_B64}" ]; then
-    rm "${ANDROID_KEYSTORE_FILE}"
+    chmod +x /home/runner/work/Lemonade/Lemonade/src/android/app/ks.jks
+    rm "/home/runner/work/Lemonade/Lemonade/src/android/app/ks.jks"
 fi
