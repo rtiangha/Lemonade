@@ -204,14 +204,14 @@ if (ENABLE_QT_UPDATER)
 endif()
 
 if (ENABLE_QT_TRANSLATION)
-    set(CITRA_QT_LANGUAGES "${PROJECT_SOURCE_DIR}/dist/languages" CACHE PATH "Path to the translation bundle for the Qt frontend")
+    set(LEMONADE_QT_LANGUAGES "${PROJECT_SOURCE_DIR}/dist/languages" CACHE PATH "Path to the translation bundle for the Qt frontend")
     option(GENERATE_QT_TRANSLATION "Generate en.ts as the translation source file" OFF)
 
     # Update source TS file if enabled
     if (GENERATE_QT_TRANSLATION)
         get_target_property(QT_SRCS lemonade-qt SOURCES)
         get_target_property(QT_INCLUDES lemonade-qt INCLUDE_DIRECTORIES)
-        qt_add_lupdate(lemonade-qt TS_FILES ${CITRA_QT_LANGUAGES}/en.ts
+        qt_add_lupdate(lemonade-qt TS_FILES ${LEMONADE_QT_LANGUAGES}/en.ts
             SOURCES ${QT_SRCS} ${UIS}
             INCLUDE_DIRECTORIES ${QT_INCLUDES}
             NO_GLOBAL_TARGET)
@@ -219,8 +219,8 @@ if (ENABLE_QT_TRANSLATION)
     endif()
 
     # Find all TS files except en.ts
-    file(GLOB_RECURSE LANGUAGES_TS ${CITRA_QT_LANGUAGES}/*.ts)
-    list(REMOVE_ITEM LANGUAGES_TS ${CITRA_QT_LANGUAGES}/en.ts)
+    file(GLOB_RECURSE LANGUAGES_TS ${LEMONADE_QT_LANGUAGES}/*.ts)
+    list(REMOVE_ITEM LANGUAGES_TS ${LEMONADE_QT_LANGUAGES}/en.ts)
 
     # Compile TS files to QM files
     qt_add_lrelease(lemonade-qt TS_FILES ${LANGUAGES_TS} NO_GLOBAL_TARGET QM_FILES_OUTPUT_VARIABLE LANGUAGES_QM)
