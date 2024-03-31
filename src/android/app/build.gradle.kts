@@ -92,7 +92,8 @@ android {
                 arguments(
                     "-DENABLE_QT=0", // Don't use QT
                     "-DENABLE_SDL2=0", // Don't use SDL
-                    "-DANDROID_ARM_NEON=true" // cryptopp requires Neon to work
+                    "-DANDROID_ARM_NEON=true", // cryptopp requires Neon to work
+                    "-DALLOW_EXTERNAL_SPIRV_TOOLS=ON" // Enable SPIRV Optimisations
                 )
             }
         }
