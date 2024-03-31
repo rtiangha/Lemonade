@@ -154,6 +154,10 @@ jobs:
           ./gradlew assemble${{ env.BUILD_TYPE }}
           ls -R app/build/outputs
           cd ../..
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
