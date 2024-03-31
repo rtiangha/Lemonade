@@ -132,6 +132,37 @@ jobs:
           with:
             path: ${{ env.OS }}-${{ env.TARGET }}
             key: ${{ runner.os }}-${{ matrix.target }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+    macos-universal:
+      runs-on: macos-14
+      needs: macos
+      env:
+        OS: macos
+        TARGET: universal
+      steps:
+        - uses: actions/checkout@v4
+        - name: Download x86_64 build from cache
+          uses: actions/cache/restore@v4
+          with:
+            path: ${{ env.OS }}-x86_64
+            key: ${{ runner.os }}-x86_64-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+            fail-on-cache-miss: true
+        - name: Download ARM64 build from cache
+          uses: actions/cache/restore@v4
+          with:
+            path: ${{ env.OS }}-arm64
+            key: ${{ runner.os }}-arm64-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+            fail-on-cache-miss: true
+        - name: Create universal app
+          run: ./.ci/macos-universal.sh
+          env:
+            ARTIFACTS: ${{ env.OS }}-x86_64 ${{ env.OS }}-arm64
+        - name: Pack
+          run: ./.ci/pack.sh
+        - name: Upload
+          uses: actions/upload-artifact@v4
+          with:
+            name: ${{ env.OS }}-${{ env.TARGET }}
+            path: artifacts/
     Android-ARM64:
       runs-on: ubuntu-latest
 
