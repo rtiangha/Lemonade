@@ -19,7 +19,21 @@ plugins {
  * This lets us upload a new build at most every 10 seconds for the
  * next 680 years.
  */
-val autoVersion = (((System.currentTimeMillis() / 1000) - 1451606400) / 10).toInt()
+val getVersionCode: () -> Int = {
+            try {
+                val output = ByteArrayOutputStream()
+                exec {
+                    commandLine("git", "describe", "--tags", "--abbrev=0")
+                    standardOutput = output
+                }
+                val tag = output.toString().trim()
+                val majorVersion = tag.split('.')[0].filter { it.isDigit() }
+                majorVersion.toIntOrNull() ?: 1
+            } catch (e: Exception) {
+                1 // Use 1 as the default version code
+            }
+        }
+
 val abiFilter = listOf("arm64-v8a")
 
 val downloadedJniLibsPath = "${buildDir}/downloadedJniLibs"
@@ -64,8 +78,8 @@ android {
         applicationId = "org.gamerytb.lemonade"
         minSdk = 28
         targetSdk = 34
-        versionCode = 69
-        versionName = "Lemonade Alpha 2"
+        versionCode = getVersionCode
+        versionName = getGitVersion
 
         ndk {
             //noinspection ChromeOsAbiSupport
