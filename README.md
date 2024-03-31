@@ -4,7 +4,7 @@
   
 ![GitHub all releases](https://img.shields.io/github/downloads/Gamer64ytb/Lemonade/total)
 [![](https://dcbadge.vercel.app/api/server/NVTYcV4v2Q)](https://discord.gg/NVTYcV4v2Q)
-[![Lemonade - Website](https://img.shields.io/badge/Lemoande-Website-2ea44f?logo=nintendo3ds&logoColor=yellow)](https://lemonade-emu.github.io/)
+[![Lemonade - Website](https://img.shields.io/badge/Lemonade-Website-2ea44f?logo=nintendo3ds&logoColor=yellow)](https://lemonade-emu.github.io/)
 </h1>
 
 <h1 align="center">
@@ -50,12 +50,12 @@ Or you can get latest nighlt builds: **⚠️ May be completely broken (Not recc
   How to build Lemonade
   </h1>
 
-**For building instructions go [here](https://github.com/Lemonade-emu/Lemonade/blob/master/BUILDING.md). If you face any issues feel free to contact us on our discord server , we still are looking for more devs so any contributation is appeceated**
+**For building instructions go [here](https://github.com/Lemonade-emu/Lemonade/blob/master/BUILDING.md). If you face any issues feel free to contact us on our Discord server , we still are looking for more devs so any help is appeceated**
 
 <h1 align="center">
-  Owners and contributors 🙌
+  Contributors 🙌
   </h1>
 
-| Owner | Owner | Owner | Contributors |
+| Owner | Owner | Owner | Contributor |
 | :---: | :---: | :---: | :---: |
 | <img src="https://github.com/Gamer64ytb.png?size=115" width=115><br><sub>@Gaymer64</sub> <br><br>  | <img src="https://github.com/kleidiss.png?size=250" width=115><br><sub>@kleidiss</sub> <br><br> | <img src="https://github.com/Ishan09811.png?size=115" width=115><br><sub>@Isham09811</sub> <br><br> | <img src="https://github.com/dnmodder.png?size=115" width=115><br><sub>@dnmodder</sub> <br><br> |
