@@ -3,36 +3,53 @@
   <br>
   
 ![GitHub all releases](https://img.shields.io/github/downloads/Gamer64ytb/Lemonade/total)
+[![](https://dcbadge.vercel.app/api/server/NVTYcV4v2Q)](https://discord.gg/NVTYcV4v2Q)
+[![Lemoande - Website](https://img.shields.io/badge/Lemoande-Website-2ea44f?logo=nintendo3ds&logoColor=yellow)](https://lemonade-emu.github.io/)
 </h1>
 
-## What is Lemonade?
+<h1 align="center">
+  What is Lemonade?
+  </h1>
 
-Lemonade is an open source and experimental emulator that emulates the functionality of a Nintendo 3ds system on operating systems such as Windows, Linux and Android.
+**Lemonade is an open source and experimental emulator that emulates the functionality of a Nintendo 3ds system on operating systems such as Windows, Linux and Android.**
 
-### When was Lemonade started?
+It was started after the _base_, a previous Nintendo 3ds emulator, was discontinued. The Lemonade Project was created to continue the work of _base_, fixing its issues and improving its performance and compatibility.
 
-Lemonade was started after the __base__, a previous Nintendo 3ds emulator, was discontinued. The Lemonade Project was created to continue the work of __base__, fixing its issues and improving its performance and compatibility.
+<h1 align="center">
+  How to downlaod Lemonade?
+  </h1>
 
-### Who develops Lemonade?
+**It is reccomended to use release builds**
 
-The Lemonade Project's main developers are [@Gamer64ytb](https://github.com/Gamer64ytb) [@kleidiss](https://github.com/kleidiss) and [@ishan0774](https://github.com/Ishan09811) but the Lemonade team also has a few contributors who help with the development of the emulator.
+[![Download - Latest Release](https://img.shields.io/badge/Download-Latest_Release-2ea44f?logo=github&logoColor=e)](https://github.com/Lemonade-emu/Lemonade/releases/latest)
 
-## Download Link
+**For Windows there is also an installer which you can get [here](https://github.com/Lemonade-emu/Lemonade-installer)**
 
-Download the emulator from our [official website](https://lemonade-emu.github.io/)
+Or you can get latest nighlt builds: **⚠️ May be completely broken (Not reccomended for daily use)**
+|Platform|Status|Download|
+|--------|------------|--------|
+|Windows build|[![Qt Build](https://github.com/Lemonade-emu/Lemonade/actions/workflows/build.yml/badge.svg)](https://github.com/Lemonade-emu/Lemonade/actions/workflows/Qt_Build.yml)|[Windows MSVC](https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msvc.zip)|
+|Android build|[![Qt Build](https://github.com/Lemonade-emu/Lemonade/actions/workflows/build.yml/badge.svg)](https://github.com/Lemonade-emu/Lemonade/actions/workflows/Qt_Build.yml)|[Android-APK](https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/Android-APK.zip)|
+|Linux build|[![Qt Build](https://github.com/Lemonade-emu/Lemonade/actions/workflows/build.yml/badge.svg)](https://github.com/Lemonade-emu/Lemonade/actions/workflows/Qt_Build.yml)|[Linux AppImage](https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/linux-appimage.zip)|
 
-## Bug reports/Feature Requests 
+<h1 align="center">
+  Bug Reports?
+  </h1>
+     
+**Please, before you make a bug report confirm that the issues only happens on Lemonade**
 
-Please, before you make a bug report confirm that the issues only happens on Lemonade
+- We will try to fix __base__ bugs too, but we need to know if the issues were caused by us or was in the __base__ itself
 
-We will try to fix __base__ bugs too, but we need to know if the issues were caused by us or was in the __base__ itself
+<h1 align="center">
+  Compatibility
+  </h1>
 
-## Contacting us
+**Please fill out our new compatibillity tracker that can be found [here](https://github.com/Lemonade-emu/Lemonade-Games-List)**
 
-**We are looking for developers! so please contact us on discord if you are interested**
+<h1 align="center">
+  How to build Lemonade
+  </h1>
 
-[![](https://dcbadge.vercel.app/api/server/NVTYcV4v2Q)](https://discord.gg/NVTYcV4v2Q)
+**For building instructions go [here](https://github.com/Lemonade-emu/Lemonade/blob/master/BUILDING.md). If you face any issues feel free to contact us on our discord server , we still are looking for more devs so any contributation is appeceated**
 
-## How to build Lemonade?
-
-For building instructions go [here](https://github.com/Lemonade-emu/Lemonade/blob/master/BUILDING.md)
+| [<img src="https://github.com/alexandresanlim.png?size=115" width=115><br><sub>@alexandresanlim</sub>](https://github.com/alexandresanlim) <br><br> [![](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#white)](https://github.com/sponsors/alexandresanlim) | [<img src="https://github.com/mrhrifat.png?size=250" width=115><br><sub>@mrhrifat</sub>](https://github.com/mrhrifat) <br><br> [![](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mrhrifat) |
