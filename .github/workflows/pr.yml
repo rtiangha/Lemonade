@@ -1,7 +1,6 @@
 name: Lemonade PR Build
 
 on:
-  push:
   pull_request:
 
 jobs:
