@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>dist/lemonade.png</normaloff>dist/lemonade.png</iconset>
+    <normaloff>dist/citra.png</normaloff>dist/citra.png</iconset>
   </property>
   <property name="tabShape">
    <enum>QTabWidget::Rounded</enum>
@@ -84,7 +84,7 @@
     <addaction name="separator"/>
     <addaction name="menu_Amiibo"/>
     <addaction name="separator"/>
-    <addaction name="action_Open_Lemonade_Folder"/>
+    <addaction name="action_Open_Citra_Folder"/>
     <addaction name="separator"/>
     <addaction name="action_Exit"/>
    </widget>
@@ -584,7 +584,7 @@
     <string>Remove</string>
    </property>
   </action>
-  <action name="action_Open_Lemonade_Folder">
+  <action name="action_Open_Citra_Folder">
    <property name="text">
     <string>Open Lemonade Folder</string>
    </property>

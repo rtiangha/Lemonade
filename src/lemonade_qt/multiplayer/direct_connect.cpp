@@ -33,9 +33,9 @@ DirectConnectWindow::DirectConnectWindow(Core::System& system_, QWidget* parent)
 
     ui->nickname->setValidator(validation.GetNickname());
     ui->nickname->setText(UISettings::values.nickname);
-    if (ui->nickname->text().isEmpty() && !NetSettings::values.lemonade_username.empty()) {
-        // Use Lemonade Web Service user name as nickname by default
-        ui->nickname->setText(QString::fromStdString(NetSettings::values.lemonade_username));
+    if (ui->nickname->text().isEmpty() && !NetSettings::values.citra_username.empty()) {
+        // Use Citra Web Service user name as nickname by default
+        ui->nickname->setText(QString::fromStdString(NetSettings::values.citra_username));
     }
     ui->ip->setValidator(validation.GetIP());
     ui->ip->setText(UISettings::values.ip);

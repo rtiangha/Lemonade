@@ -5,7 +5,7 @@
 #pragma once
 
 #include "common/arch.h"
-#if LEMONADE_ARCH(x86_64)
+#if CITRA_ARCH(x86_64)
 
 namespace Common {
 
@@ -37,4 +37,4 @@ const CPUCaps& GetCPUCaps();
 
 } // namespace Common
 
-#endif // LEMONADE_ARCH(x86_64)
+#endif // CITRA_ARCH(x86_64)

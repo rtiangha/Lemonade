@@ -100,7 +100,7 @@ enum class Class : u8 {
     Input,           ///< Input emulation
     Network,         ///< Network emulation
     Movie,           ///< Movie (Input Recording) Playback
-    WebService,      ///< Interface to Lemonade Web Services
+    WebService,      ///< Interface to Citra Web Services
     RPC_Server,      ///< RPC server
     Count,           ///< Total number of logging classes
 };

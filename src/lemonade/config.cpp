@@ -333,8 +333,8 @@ void Config::ReadValues() {
         sdl2_config->GetBoolean("WebService", "enable_telemetry", false);
     NetSettings::values.web_api_url =
         sdl2_config->GetString("WebService", "web_api_url", "https://api.citra-emu.org");
-    NetSettings::values.lemonade_username = sdl2_config->GetString("WebService", "lemonade_username", "");
-    NetSettings::values.lemonade_token = sdl2_config->GetString("WebService", "lemonade_token", "");
+    NetSettings::values.citra_username = sdl2_config->GetString("WebService", "citra_username", "");
+    NetSettings::values.citra_token = sdl2_config->GetString("WebService", "citra_token", "");
 
     // Video Dumping
     Settings::values.output_format =

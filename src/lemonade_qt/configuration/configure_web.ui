@@ -21,7 +21,7 @@
        <property name="title">
         <string>Lemonade Web Service</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayoutLemonadeWebService">
+       <layout class="QVBoxLayout" name="verticalLayoutCitraWebService">
         <item>
          <widget class="QLabel" name="web_credentials_disclaimer">
           <property name="text">
@@ -30,7 +30,7 @@
          </widget>
         </item>
         <item>
-         <layout class="QGridLayout" name="gridLayoutLemonadeUsername">
+         <layout class="QGridLayout" name="gridLayoutCitraUsername">
           <item row="2" column="3">
            <widget class="QPushButton" name="button_verify_login">
             <property name="sizePolicy">

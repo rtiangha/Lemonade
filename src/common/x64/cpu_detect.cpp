@@ -3,7 +3,7 @@
 // Refer to the license.txt file included.
 
 #include "common/arch.h"
-#if LEMONADE_ARCH(x86_64)
+#if CITRA_ARCH(x86_64)
 
 #include <cstring>
 #include "common/common_types.h"
@@ -53,7 +53,7 @@ static CPUCaps Detect() {
     CPUCaps caps = {};
 
     // Assumes the CPU supports the CPUID instruction. Those that don't would likely not support
-    // Lemonade at all anyway
+    // Citra at all anyway
 
     int cpu_id[4];
     std::memset(caps.brand_string, 0, sizeof(caps.brand_string));
@@ -148,4 +148,4 @@ const CPUCaps& GetCPUCaps() {
 
 } // namespace Common
 
-#endif // LEMONADE_ARCH(x86_64)
+#endif // CITRA_ARCH(x86_64)

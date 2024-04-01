@@ -79,7 +79,7 @@
 #include "common/memory_detect.h"
 #include "common/scm_rev.h"
 #include "common/scope_exit.h"
-#if LEMONADE_ARCH(x86_64)
+#if CITRA_ARCH(x86_64)
 #include "common/x64/cpu_detect.h"
 #endif
 #include "common/settings.h"
@@ -244,7 +244,7 @@ GMainWindow::GMainWindow(Core::System& system_)
 
     LOG_INFO(Frontend, "Lemonade Version: {} | {}-{}", Common::g_build_fullname, Common::g_scm_branch,
              Common::g_scm_desc);
-#if LEMONADE_ARCH(x86_64)
+#if CITRA_ARCH(x86_64)
     const auto& caps = Common::GetCPUCaps();
     std::string cpu_string = caps.cpu_string;
     if (caps.avx || caps.avx2 || caps.avx512) {
@@ -284,7 +284,7 @@ GMainWindow::GMainWindow(Core::System& system_)
 #if defined(_WIN32)
     if (gl_renderer.startsWith(QStringLiteral("D3D12"))) {
         // OpenGLOn12 supports but does not yet advertise OpenGL 4.0+
-        // We can override the version here to allow Lemonade to work.
+        // We can override the version here to allow Citra to work.
         // TODO: Remove this when OpenGL 4.0+ is advertised.
         qputenv("MESA_GL_VERSION_OVERRIDE", "4.6");
     }
@@ -362,7 +362,7 @@ GMainWindow::~GMainWindow() {
 }
 
 void GMainWindow::InitializeWidgets() {
-#ifdef LEMONADE_ENABLE_COMPATIBILITY_REPORTING
+#ifdef CITRA_ENABLE_COMPATIBILITY_REPORTING
     ui->action_Report_Compatibility->setVisible(true);
 #endif
     render_window = new GRenderWindow(this, emu_thread.get(), system, false);
@@ -970,11 +970,11 @@ void GMainWindow::ConnectMenuEvents() {
     connect_menu(ui->action_Dump_Video, &GMainWindow::OnDumpVideo);
 
     // Help
-    connect_menu(ui->action_Open_Lemonade_Folder, &GMainWindow::OnOpenLemonadeFolder);
+    connect_menu(ui->action_Open_Citra_Folder, &GMainWindow::OnOpenCitraFolder);
     connect_menu(ui->action_FAQ, []() {
         QDesktopServices::openUrl(QUrl(QStringLiteral("https://citra-emu.org/wiki/faq/")));
     });
-    connect_menu(ui->action_About, &GMainWindow::OnMenuAboutLemonade);
+    connect_menu(ui->action_About, &GMainWindow::OnMenuAboutCitra);
 
 #if ENABLE_QT_UPDATER
     connect_menu(ui->action_Check_For_Updates, &GMainWindow::OnCheckForUpdates);
@@ -1120,7 +1120,7 @@ static std::optional<QDBusObjectPath> HoldWakeLockLinux(u32 window_id = 0) {
         return {};
     }
     QVariantMap options = {};
-    //: TRANSLATORS: This string is shown to the user to explain why Lemonade needs to prevent the
+    //: TRANSLATORS: This string is shown to the user to explain why Citra needs to prevent the
     //: computer from sleeping
     options.insert(QString::fromLatin1("reason"),
                    QCoreApplication::translate("GMainWindow", "Lemonade is running a game"));
@@ -1988,7 +1988,7 @@ void GMainWindow::OnLoadComplete() {
 }
 
 void GMainWindow::OnMenuReportCompatibility() {
-    if (!NetSettings::values.lemonade_token.empty() && !NetSettings::values.lemonade_username.empty()) {
+    if (!NetSettings::values.citra_token.empty() && !NetSettings::values.citra_username.empty()) {
         CompatDB compatdb{system.TelemetrySession(), this};
         compatdb.exec();
     } else {
@@ -2296,7 +2296,7 @@ void GMainWindow::OnRemoveAmiibo() {
     ui->action_Remove_Amiibo->setEnabled(false);
 }
 
-void GMainWindow::OnOpenLemonadeFolder() {
+void GMainWindow::OnOpenCitraFolder() {
     QDesktopServices::openUrl(QUrl::fromLocalFile(
         QString::fromStdString(FileUtil::GetUserPath(FileUtil::UserPath::UserDir))));
 }
@@ -2830,7 +2830,7 @@ void GMainWindow::OnCoreError(Core::System::ResultStatus result, std::string det
     }
 }
 
-void GMainWindow::OnMenuAboutLemonade() {
+void GMainWindow::OnMenuAboutCitra() {
     AboutDialog about{this};
     about.exec();
 }

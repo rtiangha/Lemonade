@@ -44,21 +44,21 @@
 static void PrintHelp(const char* argv0) {
     std::cout << "Usage: " << argv0
               << " [options] <filename>\n"
-                 "--room-name               The name of the room\n"
-                 "--room-description        The room description\n"
-                 "--port                    The port used for the room\n"
-                 "--max_members             The maximum number of players for this room\n"
-                 "--password                The password for the room\n"
-                 "--preferred-game          The preferred game for this room\n"
-                 "--preferred-game-id       The preferred game-id for this room\n"
-                 "--username                The username used for announce\n"
-                 "--token                   The token used for announce\n"
-                 "--web-api-url             Lemonade Web API url\n"
-                 "--ban-list-file           The file for storing the room ban list\n"
-                 "--log-file                The file for storing the room log\n"
-                 "--enable-lemonade-mods    Allow Lemonade Community Moderators to moderate on your room\n"
-                 "-h, --help                Display this help and exit\n"
-                 "-v, --version             Output version information and exit\n";
+                 "--room-name         The name of the room\n"
+                 "--room-description  The room description\n"
+                 "--port              The port used for the room\n"
+                 "--max_members       The maximum number of players for this room\n"
+                 "--password          The password for the room\n"
+                 "--preferred-game    The preferred game for this room\n"
+                 "--preferred-game-id The preferred game-id for this room\n"
+                 "--username          The username used for announce\n"
+                 "--token             The token used for announce\n"
+                 "--web-api-url       Lemonade Web API url\n"
+                 "--ban-list-file     The file for storing the room ban list\n"
+                 "--log-file          The file for storing the room log\n"
+                 "--enable-citra-mods Allow Lemonade Community Moderators to moderate on your room\n"
+                 "-h, --help          Display this help and exit\n"
+                 "-v, --version       Output version information and exit\n";
 }
 
 static void PrintVersion() {
@@ -66,7 +66,7 @@ static void PrintVersion() {
               << " Libnetwork: " << Network::network_version << std::endl;
 }
 
-/// The magic text at the beginning of a lemonade-room ban list file.
+/// The magic text at the beginning of a citra-room ban list file.
 static constexpr char BanListMagic[] = "LemonadeRoom-BanList-1";
 
 static constexpr char token_delimiter{':'};
@@ -169,11 +169,11 @@ int main(int argc, char** argv) {
     std::string token;
     std::string web_api_url;
     std::string ban_list_file;
-    std::string log_file = "lemonade-room.log";
+    std::string log_file = "citra-room.log";
     u64 preferred_game_id = 0;
     u16 port = Network::DefaultRoomPort;
     u32 max_members = 16;
-    bool enable_lemonade_mods = false;
+    bool enable_citra_mods = false;
 
     static struct option long_options[] = {
         {"room-name", required_argument, 0, 'n'},
@@ -188,7 +188,7 @@ int main(int argc, char** argv) {
         {"web-api-url", required_argument, 0, 'a'},
         {"ban-list-file", required_argument, 0, 'b'},
         {"log-file", required_argument, 0, 'l'},
-        {"enable-lemonade-mods", no_argument, 0, 'e'},
+        {"enable-citra-mods", no_argument, 0, 'e'},
         {"help", no_argument, 0, 'h'},
         {"version", no_argument, 0, 'v'},
         {0, 0, 0, 0},
@@ -235,7 +235,7 @@ int main(int argc, char** argv) {
                 log_file.assign(optarg);
                 break;
             case 'e':
-                enable_lemonade_mods = true;
+                enable_citra_mods = true;
                 break;
             case 'h':
                 PrintHelp(argv[0]);
@@ -289,18 +289,18 @@ int main(int argc, char** argv) {
         if (username.empty()) {
             std::cout << "Hosting a public room\n\n";
             NetSettings::values.web_api_url = web_api_url;
-            NetSettings::values.lemonade_username = UsernameFromDisplayToken(token);
-            username = NetSettings::values.lemonade_username;
-            NetSettings::values.lemonade_token = TokenFromDisplayToken(token);
+            NetSettings::values.citra_username = UsernameFromDisplayToken(token);
+            username = NetSettings::values.citra_username;
+            NetSettings::values.citra_token = TokenFromDisplayToken(token);
         } else {
             std::cout << "Hosting a public room\n\n";
             NetSettings::values.web_api_url = web_api_url;
-            NetSettings::values.lemonade_username = username;
-            NetSettings::values.lemonade_token = token;
+            NetSettings::values.citra_username = username;
+            NetSettings::values.citra_token = token;
         }
     }
-    if (!announce && enable_lemonade_mods) {
-        enable_lemonade_mods = false;
+    if (!announce && enable_citra_mods) {
+        enable_citra_mods = false;
         std::cout << "Can not enable Lemonade Moderators for private rooms\n\n";
     }
 
@@ -330,7 +330,7 @@ int main(int argc, char** argv) {
     if (std::shared_ptr<Network::Room> room = Network::GetRoom().lock()) {
         if (!room->Create(room_name, room_description, "", port, password, max_members, username,
                           preferred_game, preferred_game_id, std::move(verify_backend), ban_list,
-                          enable_lemonade_mods)) {
+                          enable_citra_mods)) {
             std::cout << "Failed to create room: \n\n";
             return -1;
         }

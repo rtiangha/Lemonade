@@ -6,8 +6,8 @@
 
 #include <boost/predef.h>
 
-#define LEMONADE_ARCH(NAME) (LEMONADE_ARCH_##NAME)
+#define CITRA_ARCH(NAME) (CITRA_ARCH_##NAME)
 
-#define LEMONADE_ARCH_x86_64 BOOST_ARCH_X86_64
-#define LEMONADE_ARCH_arm64                                                                           \
+#define CITRA_ARCH_x86_64 BOOST_ARCH_X86_64
+#define CITRA_ARCH_arm64                                                                           \
     (BOOST_ARCH_ARM >= BOOST_VERSION_NUMBER(8, 0, 0) && BOOST_ARCH_WORD_BITS == 64)

@@ -82,8 +82,8 @@ u64 RegenerateTelemetryId();
 
 /**
  * Verifies the username and token.
- * @param username Lemonade username to use for authentication.
- * @param token Lemonade token to use for authentication.
+ * @param username Citra username to use for authentication.
+ * @param token Citra token to use for authentication.
  * @returns Future with bool indicating whether the verification succeeded
  */
 bool VerifyLogin(const std::string& username, const std::string& token);

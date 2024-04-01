@@ -57,9 +57,9 @@ Lobby::Lobby(Core::System& system_, QWidget* parent, QStandardItemModel* list,
 
     ui->nickname->setValidator(validation.GetNickname());
     ui->nickname->setText(UISettings::values.nickname);
-    if (ui->nickname->text().isEmpty() && !NetSettings::values.lemonade_username.empty()) {
-        // Use Lemonade Web Service user name as nickname by default
-        ui->nickname->setText(QString::fromStdString(NetSettings::values.lemonade_username));
+    if (ui->nickname->text().isEmpty() && !NetSettings::values.citra_username.empty()) {
+        // Use Citra Web Service user name as nickname by default
+        ui->nickname->setText(QString::fromStdString(NetSettings::values.citra_username));
     }
 
     // UI Buttons
@@ -170,11 +170,11 @@ void Lobby::OnJoinRoom(const QModelIndex& source) {
     QFuture<void> f = QtConcurrent::run([this, nickname, ip, port, password, verify_UID] {
         std::string token;
 #ifdef ENABLE_WEB_SERVICE
-        if (!NetSettings::values.lemonade_username.empty() &&
-            !NetSettings::values.lemonade_token.empty()) {
+        if (!NetSettings::values.citra_username.empty() &&
+            !NetSettings::values.citra_token.empty()) {
             WebService::Client client(NetSettings::values.web_api_url,
-                                      NetSettings::values.lemonade_username,
-                                      NetSettings::values.lemonade_token);
+                                      NetSettings::values.citra_username,
+                                      NetSettings::values.citra_token);
             token = client.GetExternalJWT(verify_UID).returned_data;
             if (token.empty()) {
                 LOG_ERROR(WebService, "Could not get external JWT, verification may fail");

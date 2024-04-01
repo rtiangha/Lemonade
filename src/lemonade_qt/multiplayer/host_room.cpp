@@ -53,9 +53,9 @@ HostRoomWindow::HostRoomWindow(Core::System& system_, QWidget* parent, QStandard
 
     // Restore the settings:
     ui->username->setText(UISettings::values.room_nickname);
-    if (ui->username->text().isEmpty() && !NetSettings::values.lemonade_username.empty()) {
-        // Use Lemonade Web Service user name as nickname by default
-        ui->username->setText(QString::fromStdString(NetSettings::values.lemonade_username));
+    if (ui->username->text().isEmpty() && !NetSettings::values.citra_username.empty()) {
+        // Use Citra Web Service user name as nickname by default
+        ui->username->setText(QString::fromStdString(NetSettings::values.citra_username));
     }
     ui->room_name->setText(UISettings::values.room_name);
     ui->port->setText(UISettings::values.room_port);
@@ -154,7 +154,7 @@ void HostRoomWindow::Host() {
             bool created = room->Create(ui->room_name->text().toStdString(),
                                         ui->room_description->toPlainText().toStdString(), "", port,
                                         password, ui->max_player->value(),
-                                        NetSettings::values.lemonade_username, game_name.toStdString(),
+                                        NetSettings::values.citra_username, game_name.toStdString(),
                                         game_id, CreateVerifyBackend(is_public), ban_list);
             if (!created) {
                 NetworkMessage::ErrorManager::ShowError(
@@ -193,8 +193,8 @@ void HostRoomWindow::Host() {
 #ifdef ENABLE_WEB_SERVICE
         if (is_public) {
             WebService::Client client(NetSettings::values.web_api_url,
-                                      NetSettings::values.lemonade_username,
-                                      NetSettings::values.lemonade_token);
+                                      NetSettings::values.citra_username,
+                                      NetSettings::values.citra_token);
             if (auto room = Network::GetRoom().lock()) {
                 token = client.GetExternalJWT(room->GetVerifyUID()).returned_data;
             }
