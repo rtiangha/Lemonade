@@ -72,14 +72,14 @@ void ConfigureWeb::SetConfiguration() {
 
     ui->toggle_telemetry->setChecked(NetSettings::values.enable_telemetry);
 
-    if (NetSettings::values.citra_username.empty()) {
+    if (NetSettings::values.lemonade_username.empty()) {
         ui->username->setText(tr("Unspecified"));
     } else {
-        ui->username->setText(QString::fromStdString(NetSettings::values.citra_username));
+        ui->username->setText(QString::fromStdString(NetSettings::values.lemonade_username));
     }
 
     ui->edit_token->setText(QString::fromStdString(
-        GenerateDisplayToken(NetSettings::values.citra_username, NetSettings::values.citra_token)));
+        GenerateDisplayToken(NetSettings::values.lemonade_username, NetSettings::values.lemonade_token)));
 
     // Connect after setting the values, to avoid calling OnLoginChanged now
     connect(ui->edit_token, &QLineEdit::textChanged, this, &ConfigureWeb::OnLoginChanged);
@@ -94,9 +94,9 @@ void ConfigureWeb::ApplyConfiguration() {
     NetSettings::values.enable_telemetry = ui->toggle_telemetry->isChecked();
     UISettings::values.enable_discord_presence = ui->toggle_discordrpc->isChecked();
     if (user_verified) {
-        NetSettings::values.citra_username =
+        NetSettings::values.lemonade_username =
             UsernameFromDisplayToken(ui->edit_token->text().toStdString());
-        NetSettings::values.citra_token =
+        NetSettings::values.lemonade_token =
             TokenFromDisplayToken(ui->edit_token->text().toStdString());
     } else {
         QMessageBox::warning(

@@ -418,11 +418,11 @@ add_subdirectory(src)
 add_subdirectory(dist/installer)
 
 
-# Set citra-qt project or citra project as default StartUp Project in Visual Studio depending on whether QT is enabled or not
+# Set lemonade-qt project or lemonade project as default StartUp Project in Visual Studio depending on whether QT is enabled or not
 if(ENABLE_QT)
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT citra-qt)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT lemonade-qt)
 else()
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT citra)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT lemonade)
 endif()
 
 # Create target for outputting distributable bundles.

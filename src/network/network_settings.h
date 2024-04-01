@@ -12,8 +12,8 @@ struct Values {
     // WebService
     bool enable_telemetry;
     std::string web_api_url;
-    std::string citra_username;
-    std::string citra_token;
+    std::string lemonade_username;
+    std::string lemonade_token;
 } extern values;
 
 } // namespace NetSettings
