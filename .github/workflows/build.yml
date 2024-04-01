@@ -231,6 +231,9 @@ jobs:
             sudo add-apt-repository -y ppa:theofficialgman/gpu-tools
             sudo apt-get update -y
             sudo apt-get install ccache glslang-dev glslang-tools apksigner -y
+        if: github.ref == 'refs/heads/master'
+        env:
+          KEYSTORE_PATH: ks.jks
 
       - name: Build
         run: |
@@ -244,9 +247,8 @@ jobs:
           cd ../..
           chmod +x ./.ci/end.sh
           ./.ci/end.sh
-        if: github.ref == 'refs/heads/master'
         env:
-          ANDROID_KEYSTORE_FILE: ks.jks
+          ANDROID_KEYSTORE_FILE: ${{ env.KEYSTORE_PATH }}
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
