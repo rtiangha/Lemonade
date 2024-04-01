@@ -121,10 +121,10 @@ public:
     Memory::MemorySystem& memory;
 };
 
-ARM_Dynarmic::ARM_Dynarmic(Core::System& system_, u32 core_id_,
+ARM_Dynarmic::ARM_Dynarmic(Core::System& system_, Memory::MemorySystem& memory_, u32 core_id_,
                            std::shared_ptr<Core::Timing::Timer> timer_,
                            Core::ExclusiveMonitor& exclusive_monitor_)
-    : ARM_Interface(core_id_, timer_), system(system_), memory(system.Memory()),
+    : ARM_Interface(core_id_, timer_), system(system_), memory(memory_),
       cb(std::make_unique<DynarmicUserCallbacks>(*this)),
       exclusive_monitor{dynamic_cast<Core::DynarmicExclusiveMonitor&>(exclusive_monitor_)} {
     SetPageTable(memory.GetCurrentPageTable());

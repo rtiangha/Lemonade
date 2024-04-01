@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "core/core_timing.h"
-
 struct ARMul_State;
 
-unsigned InterpreterMainLoop(ARMul_State* state, Core::Timing::Timer* timer);
+unsigned InterpreterMainLoop(ARMul_State* state);
