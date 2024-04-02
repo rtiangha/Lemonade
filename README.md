@@ -11,9 +11,9 @@
   What is Lemonade?
   </h1>
 
-**Lemonade is an open source and experimental emulator that emulates the functionality of a Nintendo 3ds system on operating systems such as Windows, Linux and Android.**
+**Lemonade is an open source and experimental emulator, that emulates the functionality of a Nintendo 3DS system on operating systems such as Windows, Linux and Android.**
 
-It was started after the _base_, a previous Nintendo 3ds emulator, was discontinued. The Lemonade Project was created to continue the work of _base_, fixing its issues and improving its performance and compatibility.
+It was started after the _base_, a previous Nintendo 3DS emulator, was discontinued. The Lemonade Project was created to continue the work of _base_, fixing its issues and improving its performance and compatibility.
 
 <h1 align="center">
   How to download Lemonade?
@@ -51,7 +51,7 @@ Or you can get latest nightly builds: **⚠️ May be completely broken (Not rec
   How to build Lemonade
   </h1>
 
-**For building instructions go [here](https://github.com/Lemonade-emu/Lemonade/blob/master/BUILDING.md). If you face any issues feel free to contact us on our Discord server , we still are looking for more devs so any help is appeceated**
+**For building instructions go [here](https://github.com/Lemonade-emu/Lemonade/blob/master/BUILDING.md). If you face any issues feel free to contact us on our Discord server, we still are looking for more devs so any help is appreciated**
 
 <h1 align="center">
   Contributors 🙌
@@ -59,4 +59,4 @@ Or you can get latest nightly builds: **⚠️ May be completely broken (Not rec
 
 | Owner | Owner | Owner | Contributor |
 | :---: | :---: | :---: | :---: |
-| <img src="https://github.com/Gamer64ytb.png?size=115" width=115><br><sub>@Gaymer64</sub> <br><br>  | <img src="https://github.com/kleidiss.png?size=250" width=115><br><sub>@kleidiss</sub> <br><br> | <img src="https://github.com/Ishan09811.png?size=115" width=115><br><sub>@Isham09811</sub> <br><br> | <img src="https://github.com/dnmodder.png?size=115" width=115><br><sub>@dnmodder</sub> <br><br> |
+| <img src="https://github.com/Gamer64ytb.png?size=115" width=115><br><sub>@Gaymer64</sub> <br><br>  | <img src="https://github.com/kleidiss.png?size=250" width=115><br><sub>@kleidiss</sub> <br><br> | <img src="https://github.com/Ishan09811.png?size=115" width=115><br><sub>@Ishan09811</sub> <br><br> | <img src="https://github.com/dnmodder.png?size=115" width=115><br><sub>@dnmodder</sub> <br><br> |
