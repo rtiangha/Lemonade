@@ -33,11 +33,10 @@ public:
         oboe::AudioStreamBuilder builder;
         auto result = builder.setSharingMode(oboe::SharingMode::Exclusive)
                 ->setPerformanceMode(oboe::PerformanceMode::LowLatency) // set Oboe to Performance mode
-                ->setFormat(oboe::AudioFormat::Float) // Use Float Audio Format for low latency
+                ->setFormat(oboe::AudioFormat::I16) // Use Float Audio Format for low latency
                 ->setSampleRate(mSampleRate)
                 ->setChannelCount(2)
                 ->setCallback(this)
-                ->setBufferCapacityInFrames(156) // may decrease latency 
                 ->openManagedStream(mStream);
         if (result != oboe::Result::OK) {
             LOG_CRITICAL(Audio_Sink, "Error creating playback stream: %s", oboe::convertToText(result));
