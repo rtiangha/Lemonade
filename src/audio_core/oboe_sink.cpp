@@ -37,7 +37,7 @@ public:
                 ->setSampleRate(mSampleRate)
                 ->setChannelCount(2)
                 ->setCallback(this)
-                ->openStream(&mStream.get());
+                ->openStream(mStream);
         if (result != oboe::Result::OK) {
             LOG_CRITICAL(Audio_Sink, "Error creating playback stream: %s", oboe::convertToText(result));
             return false;
