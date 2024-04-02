@@ -1,6 +1,6 @@
 #include "oboe_sink.h"
 
-#include <oboe/Oboe.h>
+#include <oboe/include/oboe/Oboe.h>
 
 #include "audio_core/audio_types.h"
 #include "common/logging/log.h"
