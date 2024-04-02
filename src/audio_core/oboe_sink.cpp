@@ -60,7 +60,7 @@ public:
     }
 
 private:
-    oboe::ManagedStream mStream;
+    std::shared_ptr<oboe::AudioStream> mStream;
     std::function<void(s16*, std::size_t)> mCallback;
     int32_t mSampleRate = native_sample_rate;
 };
