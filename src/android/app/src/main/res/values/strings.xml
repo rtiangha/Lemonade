@@ -58,7 +58,7 @@
     <string name="licenses">Licenses</string>
     <string name="support_link">https://discord.gg/NVTYcV4v2Q</string>
     <string name="website_link">https://lemonade-emu.github.io/</string>
-    <string name="github_link">W</string>
+    <string name="github_link">https://github.com/Lemonade-emu/Lemonade/</string>
 
     <!-- Setup strings -->
     <string name="welcome">Welcome!</string>
