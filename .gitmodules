@@ -95,3 +95,6 @@
 [submodule "externals/oboe"]
 	path = externals/oboe
 	url = https://github.com/google/oboe.git
+[submodule "externals/teakra-old"]
+	path = externals/teakra-old
+	url = https://github.com/rtiangha/teakra
