@@ -1,6 +1,6 @@
 [submodule "boost"]
 	path = externals/boost
-	url = https://github.com/blitzingeagle/ext-boost.git
+	url = https://github.com/rtiangha/ext-boost.git
 [submodule "nihstro"]
 	path = externals/nihstro
 	url = https://github.com/neobrain/nihstro.git
@@ -12,7 +12,7 @@
 	url = https://codeberg.org/soundtouch/soundtouch.git
 [submodule "dynarmic"]
 	path = externals/dynarmic
-	url = https://github.com/blitzingeagle/dynarmic.git
+	url = https://github.com/rtiangha/dynarmic.git
 [submodule "xbyak"]
 	path = externals/xbyak
 	url = https://github.com/herumi/xbyak.git
@@ -24,7 +24,7 @@
 	url = https://github.com/benhoyt/inih.git
 [submodule "libressl"]
 	path = externals/libressl
-	url = https://github.com/blitzingeagle/ext-libressl-portable.git
+	url = https://github.com/rtiangha/ext-libressl-portable.git
 [submodule "libusb"]
 	path = externals/libusb/libusb
 	url = https://github.com/libusb/libusb.git
@@ -39,7 +39,7 @@
 	url = https://github.com/arun11299/cpp-jwt.git
 [submodule "teakra"]
 	path = externals/teakra
-	url = https://github.com/wwylele/teakra.git
+	url = https://github.com/rtiangha/teakra.git
 [submodule "lodepng"]
 	path = externals/lodepng/lodepng
 	url = https://github.com/lvandeve/lodepng.git
@@ -69,13 +69,13 @@
 	url = https://github.com/KhronosGroup/Vulkan-Headers
 [submodule "sirit"]
 	path = externals/sirit
-	url = https://github.com/blitzingeagle/sirit
+	url = https://github.com/rtiangha/sirit
 [submodule "faad2"]
 	path = externals/faad2/faad2
 	url = https://github.com/knik0/faad2
 [submodule "library-headers"]
 	path = externals/library-headers
-	url = https://github.com/blitzingeagle/ext-library-headers.git
+	url = https://github.com/rtiangha/ext-library-headers.git
 [submodule "libadrenotools"]
 	path = externals/libadrenotools
 	url = https://github.com/bylaws/libadrenotools
