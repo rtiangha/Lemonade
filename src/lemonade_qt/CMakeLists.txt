@@ -18,6 +18,8 @@ add_executable(lemonade-qt
     applets/swkbd.h
     bootmanager.cpp
     bootmanager.h
+    compatibility_list.cpp
+    compatibility_list.h
     camera/camera_util.cpp
     camera/camera_util.h
     camera/still_image_camera.cpp
@@ -190,7 +192,9 @@ add_executable(lemonade-qt
     util/mica.h
 )
 
-
+file(GLOB COMPAT_LIST
+     ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.qrc
+     ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json)
 file(GLOB_RECURSE ICONS ${PROJECT_SOURCE_DIR}/dist/icons/*)
 file(GLOB_RECURSE THEMES ${PROJECT_SOURCE_DIR}/dist/qt_themes/*)
 

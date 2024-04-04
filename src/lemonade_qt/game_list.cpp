@@ -29,6 +29,7 @@
 #include "lemonade_qt/game_list_worker.h"
 #include "lemonade_qt/main.h"
 #include "lemonade_qt/uisettings.h"
+#include "lemonade_qt/compatibility_list.h"
 #include "common/logging/log.h"
 #include "common/settings.h"
 #include "core/file_sys/archive_extsavedata.h"
@@ -300,7 +301,6 @@ GameList::GameList(GMainWindow* parent) : QWidget{parent} {
     tree_view = new QTreeView;
     search_field = new GameListSearchField(this);
     item_model = new QStandardItemModel(tree_view);
-    item_model->insertColumns(0, 1);
     tree_view->setModel(item_model);
 
     tree_view->setAlternatingRowColors(true);
@@ -316,6 +316,7 @@ GameList::GameList(GMainWindow* parent) : QWidget{parent} {
 
     UpdateColumnVisibility();
 
+    item_model->insertColumns(0, COLUMN_COUNT);
     RetranslateUI();
     item_model->setSortRole(GameListItemPath::SortRole);
 
@@ -491,6 +492,7 @@ void GameList::PopupHeaderContextMenu(const QPoint& menu_location) {
 
     QMenu context_menu;
     static const QMap<QString, Settings::Setting<bool>*> columns{
+        {tr("Compatibility"), &UISettings::values.show_compat_column},
         {tr("Region"), &UISettings::values.show_region_column},
         {tr("File type"), &UISettings::values.show_type_column},
         {tr("Size"), &UISettings::values.show_size_column}};
@@ -511,6 +513,7 @@ void GameList::PopupHeaderContextMenu(const QPoint& menu_location) {
 }
 
 void GameList::UpdateColumnVisibility() {
+    tree_view->setColumnHidden(COLUMN_COMPATIBILITY, !UISettings::values.show_compat_column);
     tree_view->setColumnHidden(COLUMN_REGION, !UISettings::values.show_region_column);
     tree_view->setColumnHidden(COLUMN_FILE_TYPE, !UISettings::values.show_type_column);
     tree_view->setColumnHidden(COLUMN_SIZE, !UISettings::values.show_size_column);
@@ -556,6 +559,7 @@ void GameList::AddGamePopup(QMenu& context_menu, const QString& path, const QStr
     QAction* uninstall_update = uninstall_menu->addAction(tr("Update"));
     QAction* uninstall_dlc = uninstall_menu->addAction(tr("DLC"));
 
+    QAction* navigate_to_gamedb_entry = context_menu.addAction(tr("Navigate to GameDB entry"));
     context_menu.addSeparator();
     QAction* properties = context_menu.addAction(tr("Properties"));
 
@@ -614,6 +618,8 @@ void GameList::AddGamePopup(QMenu& context_menu, const QString& path, const QStr
     uninstall_update->setEnabled(has_update);
     uninstall_dlc->setEnabled(has_dlc);
 
+    auto it = FindMatchingCompatibilityEntry(compatibility_list, program_id);
+    navigate_to_gamedb_entry->setVisible(it != compatibility_list.end());
 
     connect(open_save_location, &QAction::triggered, this, [this, program_id] {
         emit OpenFolderRequested(program_id, GameListOpenTarget::SAVE_DATA);
@@ -661,6 +667,9 @@ void GameList::AddGamePopup(QMenu& context_menu, const QString& path, const QStr
     });
     connect(dump_romfs, &QAction::triggered, this,
             [this, path, program_id] { emit DumpRomFSRequested(path, program_id); });
+    connect(navigate_to_gamedb_entry, &QAction::triggered, this, [this, program_id]() {
+        emit NavigateToGamedbEntryRequested(program_id, compatibility_list);
+    });
     connect(properties, &QAction::triggered, this,
             [this, path]() { emit OpenPerGameGeneralRequested(path); });
     connect(open_shader_cache_location, &QAction::triggered, this, [this, program_id] {
@@ -800,9 +809,8 @@ void GameList::AddPermDirPopup(QMenu& context_menu, QModelIndex selected) {
     });
 }
 
-    void GameList::LoadCompatibilityList() {
+void GameList::LoadCompatibilityList() {
     QFile compat_list{QStringLiteral(":compatibility_list/compatibility_list.json")};
-
 
     if (!compat_list.open(QFile::ReadOnly | QFile::Text)) {
         LOG_ERROR(Frontend, "Unable to open game compatibility list");
@@ -831,12 +839,16 @@ void GameList::AddPermDirPopup(QMenu& context_menu, QModelIndex selected) {
             continue;
         }
 
+        const int compatibility = game[compatibility_key].toInt();
         const QString directory = game[QStringLiteral("directory")].toString();
         const QJsonArray ids = game[QStringLiteral("releases")].toArray();
 
         for (const QJsonValue& id_ref : ids) {
             const QJsonObject id_object = id_ref.toObject();
             const QString id = id_object[QStringLiteral("id")].toString();
+
+            compatibility_list.emplace(id.toUpper().toStdString(),
+                                       std::make_pair(QString::number(compatibility), directory));
         }
     }
 }
@@ -851,6 +863,7 @@ void GameList::changeEvent(QEvent* event) {
 
 void GameList::RetranslateUI() {
     item_model->setHeaderData(COLUMN_NAME, Qt::Horizontal, tr("Name"));
+    item_model->setHeaderData(COLUMN_COMPATIBILITY, Qt::Horizontal, tr("Compatibility"));
     item_model->setHeaderData(COLUMN_REGION, Qt::Horizontal, tr("Region"));
     item_model->setHeaderData(COLUMN_FILE_TYPE, Qt::Horizontal, tr("File type"));
     item_model->setHeaderData(COLUMN_SIZE, Qt::Horizontal, tr("Size"));
@@ -885,7 +898,7 @@ void GameList::PopulateAsync(QVector<UISettings::GameDir>& game_dirs) {
 
     emit ShouldCancelWorker();
 
-    GameListWorker* worker = new GameListWorker(game_dirs);
+    GameListWorker* worker = new GameListWorker(game_dirs, compatibility_list);
 
     connect(worker, &GameListWorker::EntryReady, this, &GameList::AddEntry, Qt::QueuedConnection);
     connect(worker, &GameListWorker::DirEntryReady, this, &GameList::AddDirEntry,

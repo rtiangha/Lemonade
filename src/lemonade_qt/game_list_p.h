@@ -245,6 +245,52 @@ public:
     }
 };
 
+class GameListItemCompat : public GameListItem {
+    Q_DECLARE_TR_FUNCTIONS(GameListItemCompat)
+public:
+    static constexpr int CompatNumberRole = SortRole;
+    GameListItemCompat() = default;
+    explicit GameListItemCompat(const QString& compatibility) {
+        setData(type(), TypeRole);
+
+        struct CompatStatus {
+            QString color;
+            const char* text;
+            const char* tooltip;
+        };
+        // clang-format off
+        static const std::map<QString, CompatStatus> status_data = {
+        {QStringLiteral("0"),  {QStringLiteral("#5c93ed"), QT_TR_NOOP("Perfect"),    QT_TR_NOOP("Game functions flawless with no audio or graphical glitches, all tested functionality works as intended without\nany workarounds needed.")}},
+        {QStringLiteral("1"),  {QStringLiteral("#47d35c"), QT_TR_NOOP("Great"),      QT_TR_NOOP("Game functions with minor graphical or audio glitches and is playable from start to finish. May require some\nworkarounds.")}},
+        {QStringLiteral("2"),  {QStringLiteral("#94b242"), QT_TR_NOOP("Okay"),       QT_TR_NOOP("Game functions with major graphical or audio glitches, but game is playable from start to finish with\nworkarounds.")}},
+        {QStringLiteral("3"),  {QStringLiteral("#f2d624"), QT_TR_NOOP("Bad"),        QT_TR_NOOP("Game functions, but with major graphical or audio glitches. Unable to progress in specific areas due to glitches\neven with workarounds.")}},
+        {QStringLiteral("4"),  {QStringLiteral("#ff0000"), QT_TR_NOOP("Intro/Menu"), QT_TR_NOOP("Game is completely unplayable due to major graphical or audio glitches. Unable to progress past the Start\nScreen.")}},
+        {QStringLiteral("5"),  {QStringLiteral("#828282"), QT_TR_NOOP("Won't Boot"), QT_TR_NOOP("The game crashes when attempting to startup.")}},
+        {QStringLiteral("99"), {QStringLiteral("#000000"), QT_TR_NOOP("Not Tested"), QT_TR_NOOP("The game has not yet been tested.")}}};
+        // clang-format on
+
+        auto iterator = status_data.find(compatibility);
+        if (iterator == status_data.end()) {
+            LOG_WARNING(Frontend, "Invalid compatibility number {}", compatibility.toStdString());
+            return;
+        }
+        const CompatStatus& status = iterator->second;
+        setData(compatibility, CompatNumberRole);
+        setText(tr(status.text));
+        setToolTip(tr(status.tooltip));
+        setData(CreateCirclePixmapFromColor(status.color), Qt::DecorationRole);
+    }
+
+    int type() const override {
+        return static_cast<int>(GameListItemType::Game);
+    }
+
+    bool operator<(const QStandardItem& other) const override {
+        return data(CompatNumberRole).value<QString>() <
+               other.data(CompatNumberRole).value<QString>();
+    }
+};
+
 class GameListItemRegion : public GameListItem {
 public:
     GameListItemRegion() = default;

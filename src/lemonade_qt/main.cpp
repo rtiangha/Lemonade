@@ -68,6 +68,7 @@
 #include "lemonade_qt/util/mica.h"
 #include "lemonade_qt/util/clickable_label.h"
 #include "lemonade_qt/util/graphics_device_info.h"
+#include "lemonade_qt/compatibility_list.h"
 #include "common/arch.h"
 #include "common/common_paths.h"
 #include "common/detached_tasks.h"
@@ -862,6 +863,8 @@ void GMainWindow::ConnectWidgetEvents() {
     connect(game_list, &GameList::GameChosen, this, &GMainWindow::OnGameListLoadFile);
     connect(game_list, &GameList::OpenDirectory, this, &GMainWindow::OnGameListOpenDirectory);
     connect(game_list, &GameList::OpenFolderRequested, this, &GMainWindow::OnGameListOpenFolder);
+    connect(game_list, &GameList::NavigateToGamedbEntryRequested, this,
+            &GMainWindow::OnGameListNavigateToGamedbEntry);
     connect(game_list, &GameList::DumpRomFSRequested, this, &GMainWindow::OnGameListDumpRomFS);
     connect(game_list, &GameList::AddDirectory, this, &GMainWindow::OnGameListAddDirectory);
     connect(game_list_placeholder, &GameListPlaceholder::AddDirectory, this,
@@ -915,6 +918,7 @@ void GMainWindow::ConnectMenuEvents() {
     connect_menu(ui->action_Pause, &GMainWindow::OnPauseContinueGame);
     connect_menu(ui->action_Stop, &GMainWindow::OnStopGame);
     connect_menu(ui->action_Restart, [this] { BootGame(QString(game_path)); });
+    connect_menu(ui->action_Report_Compatibility, &GMainWindow::OnMenuReportCompatibility);
     connect_menu(ui->action_Configure, &GMainWindow::OnConfigure);
     connect_menu(ui->action_Configure_Current_Game, &GMainWindow::OnConfigurePerGame);
 
@@ -1659,6 +1663,16 @@ void GMainWindow::OnGameListOpenFolder(u64 data_id, GameListOpenTarget target) {
     QDesktopServices::openUrl(QUrl::fromLocalFile(qpath));
 }
 
+void GMainWindow::OnGameListNavigateToGamedbEntry(u64 program_id,
+                                                  const CompatibilityList& compatibility_list) {
+    auto it = FindMatchingCompatibilityEntry(compatibility_list, program_id);
+
+    QString directory;
+    if (it != compatibility_list.end())
+        directory = it->second.second;
+
+    QDesktopServices::openUrl(QUrl(QStringLiteral("https://citra-emu.org/game/") + directory));
+}
 
 void GMainWindow::OnGameListDumpRomFS(QString game_path, u64 program_id) {
     auto* dialog = new QProgressDialog(tr("Dumping..."), tr("Cancel"), 0, 0, this);

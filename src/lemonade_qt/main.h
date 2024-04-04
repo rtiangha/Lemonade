@@ -13,6 +13,7 @@
 #include <QTimer>
 #include <QTranslator>
 #include "lemonade_qt/hotkeys.h"
+#include "lemonade_qt/compatibility_list.h"
 #include "core/core.h"
 #include "core/savestate.h"
 
@@ -206,6 +207,8 @@ private slots:
     /// Called whenever a user selects a game in the game list widget.
     void OnGameListLoadFile(QString game_path);
     void OnGameListOpenFolder(u64 program_id, GameListOpenTarget target);
+    void OnGameListNavigateToGamedbEntry(u64 program_id,
+                                         const CompatibilityList& compatibility_list);
     void OnGameListDumpRomFS(QString game_path, u64 program_id);
     void OnGameListOpenDirectory(const QString& directory);
     void OnGameListAddDirectory();

@@ -98,7 +98,8 @@ struct Values {
     Settings::Setting<bool> game_list_hide_no_icon{false, "hideNoIcon"};
     Settings::Setting<bool> game_list_single_line_mode{false, "singleLineMode"};
 
-
+    // Compatibility List
+    Settings::Setting<bool> show_compat_column{true, "show_compat_column"};
     Settings::Setting<bool> show_region_column{true, "show_region_column"};
     Settings::Setting<bool> show_type_column{true, "show_type_column"};
     Settings::Setting<bool> show_size_column{true, "show_size_column"};
