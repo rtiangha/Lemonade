@@ -83,7 +83,7 @@
     <string name="permission_denied">Permission denied</string>
     <string name="add_games_warning">Skip selecting games folder?</string>
     <string name="add_games_warning_description">Games won\'t be displayed in the Games list if a folder isn\'t selected.</string>
-    <string name="add_games_warning_help">https://Lemonade-emu.org/wiki/dumping-game-cartridges/</string>
+    <string name="add_games_warning_help">https://lemonade-emu.github.io/pages/dumping-game-cartridges/</string>
     <string name="warning_help">Help</string>
     <string name="warning_skip">Skip</string>
     <string name="warning_cancel">Cancel</string>
@@ -279,7 +279,7 @@
     <string name="learn_more">Learn More</string>
     <string name="close">Close</string>
     <string name="reset_to_default">Reset to Default</string>
-    <string name="redump_games"><![CDATA[Please follow the guides to redump your <a href="https://Lemonade-emu.org/wiki/dumping-game-cartridges/">game cartidges</a> or <a href="https://Lemonade-emu.org/wiki/dumping-installed-titles/">installed titles</a>.]]></string>
+    <string name="redump_games"><![CDATA[Please follow the guides to redump your <a href="https://lemonade-emu.github.io/pages/dumping-game-cartridges/">game cartidges</a> or <a href="https://lemonade-emu.github.io/pages/dumping-installed-titles/">installed titles</a>.]]></string>
     <string name="option_default">Default</string>
     <string name="none">None</string>
     <string name="auto">Auto</string>
