@@ -12,6 +12,7 @@
 #include "lemonade_qt/game_list_p.h"
 #include "lemonade_qt/game_list_worker.h"
 #include "lemonade_qt/uisettings.h"
+#include "lemonade_qt/compatibility_list.h"
 #include "common/common_paths.h"
 #include "common/file_util.h"
 #include "core/hle/service/am/am.h"
@@ -25,8 +26,9 @@ bool HasSupportedFileExtension(const std::string& file_name) {
 }
 } // Anonymous namespace
 
-GameListWorker::GameListWorker(QVector<UISettings::GameDir>& game_dirs)
-    : game_dirs(game_dirs) {}
+GameListWorker::GameListWorker(QVector<UISettings::GameDir>& game_dirs,
+                               const CompatibilityList& compatibility_list)
+    : game_dirs(game_dirs), compatibility_list(compatibility_list) {}
 
 GameListWorker::~GameListWorker() = default;
 
@@ -94,11 +96,18 @@ void GameListWorker::AddFstEntriesToGameList(const std::string& dir_path, unsign
                 return true;
             }
 
+            auto it = FindMatchingCompatibilityEntry(compatibility_list, program_id);
+
+            // The game list uses this as compatibility number for untested games
+            QString compatibility(QStringLiteral("99"));
+            if (it != compatibility_list.end())
+                compatibility = it->second.first;
 
             emit EntryReady(
                 {
                     new GameListItemPath(QString::fromStdString(physical_name), smdh, program_id,
                                          extdata_id, media_type),
+                    new GameListItemCompat(compatibility),
                     new GameListItemRegion(smdh),
                     new GameListItem(
                         QString::fromStdString(Loader::GetFileTypeString(loader->GetFileType()))),

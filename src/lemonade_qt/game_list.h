@@ -8,6 +8,7 @@
 #include <QString>
 #include <QVector>
 #include <QWidget>
+#include "lemonade_qt/compatibility_list.h"
 #include "common/common_types.h"
 #include "uisettings.h"
 
@@ -85,6 +86,8 @@ signals:
     void GameChosen(const QString& game_path);
     void ShouldCancelWorker();
     void OpenFolderRequested(u64 program_id, GameListOpenTarget target);
+    void NavigateToGamedbEntryRequested(u64 program_id,
+                                        const CompatibilityList& compatibility_list);
     void OpenPerGameGeneralRequested(const QString file);
     void DumpRomFSRequested(QString game_path, u64 program_id);
     void OpenDirectory(const QString& directory);
@@ -124,6 +127,7 @@ private:
     QStandardItemModel* item_model = nullptr;
     GameListWorker* current_worker = nullptr;
     QFileSystemWatcher* watcher = nullptr;
+    CompatibilityList compatibility_list;
 
     friend class GameListSearchField;
 };
