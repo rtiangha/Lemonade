@@ -76,7 +76,7 @@ android {
 
     defaultConfig {
         // TODO If this is ever modified, change application_id in strings.xml
-        applicationId = "org.gamerytb.lemonade"
+        applicationId = "org.lemonade.lemonade_emu"
         minSdk = 28
         targetSdk = 34
         versionCode = getVersionCode()
