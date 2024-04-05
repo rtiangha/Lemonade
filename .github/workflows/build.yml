@@ -6,6 +6,20 @@ on:
       - master
 
 jobs:
+    source:
+      if: ${{ !github.head_ref }}
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            submodules: recursive
+        - name: Pack
+          run: ./.ci/source.sh
+        - name: Upload
+          uses: actions/upload-artifact@v4
+          with:
+            name: source
+            path: artifacts/
     windows:
         runs-on: windows-latest
         strategy:
