@@ -12,6 +12,7 @@
 #include <QRunnable>
 #include <QString>
 #include <QVector>
+#include "lemonade_qt/compatibility_list.h"
 #include "common/common_types.h"
 
 namespace Service::FS {
@@ -28,7 +29,8 @@ class GameListWorker : public QObject, public QRunnable {
     Q_OBJECT
 
 public:
-    GameListWorker(QVector<UISettings::GameDir>& game_dirs);
+    GameListWorker(QVector<UISettings::GameDir>& game_dirs,
+                   const CompatibilityList& compatibility_list);
     ~GameListWorker() override;
 
     /// Starts the processing of directory tree information.
@@ -57,6 +59,7 @@ private:
                                  GameListDir* parent_dir, Service::FS::MediaType media_type);
 
     QVector<UISettings::GameDir>& game_dirs;
+    const CompatibilityList& compatibility_list;
 
     QStringList watch_list;
     std::atomic_bool stop_processing;
