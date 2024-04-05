@@ -2,7 +2,7 @@
 
 GITDATE="`git show -s --date=short --format='%ad' | sed 's/-//g'`"
 GITREV="`git show -s --format='%h'`"
-REV_NAME="lemonade-unified-source-${GITDATE}-${GITREV}"
+REV_NAME="lemonade-unified-source"
 
 COMPAT_LIST='dist/compatibility_list/compatibility_list.json'
 
@@ -19,3 +19,4 @@ cd artifacts/
 xz -T0 -9 "${REV_NAME}.tar"
 sha256sum "${REV_NAME}.tar.xz" > "${REV_NAME}.tar.xz.sha256sum"
 cd ..
+sha256sum "${REV_NAME}.tar.xz" > sha256.txt
