@@ -27,6 +27,9 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.NavHostFragment
 import androidx.preference.PreferenceManager
+import android.os.Build
+import android.util.Rational
+import android.app.PictureInPictureParams
 import org.citra.citra_emu.CitraApplication
 import org.citra.citra_emu.NativeLibrary
 import org.citra.citra_emu.R
@@ -112,6 +115,16 @@ class EmulationActivity : AppCompatActivity() {
         window.attributes = attributes
 
         enableFullscreenImmersive()
+    }
+
+    override fun onUserLeaveHint() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (BooleanSetting.PIP_SUPPORT.boolean) {
+                val builder = PictureInPictureParams.Builder()
+                builder.setAspectRatio(null)
+                enterPictureInPictureMode(builder.build())
+            }
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

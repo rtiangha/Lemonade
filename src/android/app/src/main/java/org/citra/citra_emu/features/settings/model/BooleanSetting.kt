@@ -15,7 +15,8 @@ enum class BooleanSetting(
     CORE_DOWNCOUNT_HACK("core_downcount_hack", Settings.SECTION_RENDERER, false),
     PLUGIN_LOADER("plugin_loader", Settings.SECTION_SYSTEM, false),
     ALLOW_PLUGIN_LOADER("allow_plugin_loader", Settings.SECTION_SYSTEM, true),
-    SWAP_SCREEN("swap_screen", Settings.SECTION_LAYOUT, false);
+    SWAP_SCREEN("swap_screen", Settings.SECTION_LAYOUT, false),
+    PIP_SUPPORT("pip_support", Settings.SECTION_CORE, false);
 
     override var boolean: Boolean = defaultValue
 
