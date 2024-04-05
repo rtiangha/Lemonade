@@ -285,6 +285,7 @@ elseif(WIN32)
     # compile as a win32 gui application instead of a console application
     target_link_libraries(lemonade-qt PRIVATE Qt6::EntryPointImplementation)
     set_target_properties(lemonade-qt PROPERTIES OUTPUT_NAME "lemonade-qt")
+    target_link_libraries(lemonade-qt PRIVATE dwmapi)
     if(MSVC)
         set_target_properties(lemonade-qt PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
     elseif(MINGW)
