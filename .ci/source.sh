@@ -17,6 +17,6 @@ git archive-all --include "${COMPAT_LIST}" --include GIT-COMMIT --include GIT-TA
 
 cd artifacts/
 xz -T0 -9 "${REV_NAME}.tar"
-sha256sum "${REV_NAME}.tar.xz" > "${REV_NAME}.tar.xz.sha256sum"
+sha256sum "${REV_NAME}.tar.xz" > "sha256.txt"
+mv sha256.txt "${GITHUB_WORKSPACE}/"
 cd ..
-sha256sum "${REV_NAME}.tar.xz" > sha256.txt
