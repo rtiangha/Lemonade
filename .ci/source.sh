@@ -20,4 +20,4 @@ xz -T0 -9 "${REV_NAME}.tar"
 sha256sum "${REV_NAME}.tar.xz" > "sha256.txt"
 mv sha256.txt "${GITHUB_WORKSPACE}/"
 cd ..
-sed -i '/lemonade-unified-source.tar.xz/d' sha256.txt
+grep -v "lemonade-unified-source.tar.xz" sha256.txt > temp.txt && rm sha256.txt && mv temp.txt sha256.txt
