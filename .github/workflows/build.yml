@@ -26,7 +26,7 @@ jobs:
         runs-on: windows-latest
         strategy:
           matrix:
-            target: ["msvc", "msys2"]
+            target: ["msvc", "msys2", "mingw"]
         defaults:
           run:
             shell: ${{ (matrix.target == 'msys2' && 'msys2') || 'bash' }} {0}
@@ -58,6 +58,16 @@ jobs:
             if: ${{ matrix.target == 'msys2' }}
             with:
               msystem: clang64
+              update: true
+              install: git make p7zip
+              pacboy: >-
+                toolchain:p ccache:p cmake:p ninja:p
+                qt6-base:p qt6-multimedia:p qt6-multimedia-wmf:p qt6-tools:p qt6-translations:p
+          - name: Set up MINGW
+            uses: msys2/setup-msys2@v2
+            if: ${{ matrix.target == 'mingw' }}
+            with:
+              msystem: mingw64
               update: true
               install: git make p7zip
               pacboy: >-
