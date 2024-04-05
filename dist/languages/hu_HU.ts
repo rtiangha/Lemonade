@@ -3583,7 +3583,6 @@ Drag points to change position, or double-click table cells to edit values.</sou
     </message>
 </context>
 <context>
-<context>
     <name>DirectConnect</name>
     <message>
         <location filename="../../src/lemonade_qt/multiplayer/direct_connect.ui" line="14"/>
