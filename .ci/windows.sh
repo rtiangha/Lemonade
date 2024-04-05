@@ -12,6 +12,7 @@ cmake .. -G Ninja \
     -DALLOW_EXTERNAL_SPIRV_TOOLS=ON
 ninja
 ninja bundle
+strip -s bundle/*.exe
 
 ccache -s -v
 
