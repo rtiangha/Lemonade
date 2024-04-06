@@ -204,6 +204,15 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     IntSetting.FRAME_LIMIT.defaultValue.toFloat()
                 )
             )
+            add(
+                SwitchSetting(
+                    BooleanSetting.PIP_SUPPORT,
+                    R.string.pip_support,
+                    R.string.pip_support_desc,
+                    BooleanSetting.PIP_SUPPORT.key,
+                    BooleanSetting.PIP_SUPPORT.defaultValue
+                )
+            )
         }
     }
 

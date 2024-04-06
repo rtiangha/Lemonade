@@ -6,6 +6,22 @@ on:
       - master
 
 jobs:
+    source:
+      if: ${{ !github.head_ref }}
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            submodules: recursive
+        - name: Pack
+          run: |
+            chmod +x ./.ci/source.sh
+            ./.ci/source.sh
+        - name: Upload
+          uses: actions/upload-artifact@v4
+          with:
+            name: source
+            path: artifacts/
     windows:
         runs-on: windows-latest
         strategy:
@@ -89,11 +105,11 @@ jobs:
             restore-keys: |
               ${{ runner.os }}-${{ matrix.target }}-
         - name: Build
-          run: | 
+          run: |
             chmod +x ./.ci/linux.sh
             ./.ci/linux.sh
         - name: Pack
-          run: | 
+          run: |
              chmod +x ./.ci/pack.sh
              ./.ci/pack.sh
           if: ${{ matrix.target == 'appimage' }}
@@ -222,7 +238,7 @@ jobs:
 
         env:
            SEGMENT_DOWNLOAD_TIMEOUT_MINS: '1'
-           
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -240,7 +256,7 @@ jobs:
         run: |
           chmod +x ./.ci/export.sh
           ./.ci/export.sh
-          
+
           # Build the Android app with Gradle
           cd src/android
           ./gradlew assemble${{ env.BUILD_TYPE }}
