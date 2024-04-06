@@ -1,5 +1,5 @@
 <h1 align="center">
-    <b href="https://github.com/Lemonade-emu/Lemonade/blob/master/"><img src="https://github.com/Lemonade-emu/Lemonade/blob/master/assets/Lemonade.png" alt="Lemonade" height="60%" width="60%"></b>
+    <b href="https://github.com/Lemonade-emu/Lemonade/blob/master/"><img src="https://github.com/Lemonade-emu/Lemonade/blob/master/assets/Lemonade.png" alt="Lemonade" height="20%" width="20%"></b>
   <br>
 
 ![GitHub all releases](https://img.shields.io/github/downloads/Gamer64ytb/Lemonade/total)
