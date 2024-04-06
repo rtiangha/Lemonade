@@ -1,7 +1,7 @@
 <h1 align="center">
-    <b href="https://github.com/Lemonade-emu/Lemonade/blob/master/"><img src="https://github.com/Lemonade-emu/Lemonade/blob/master/assets/Lemonade_banner.png" alt="Lemonade" height="60%" width="60%"></b>
+    <b href="https://github.com/Lemonade-emu/Lemonade/blob/master/"><img src="https://github.com/Lemonade-emu/Lemonade/blob/master/assets/Lemonade.png" alt="Lemonade" height="60%" width="60%"></b>
   <br>
-  
+
 ![GitHub all releases](https://img.shields.io/github/downloads/Gamer64ytb/Lemonade/total)
 [![](https://dcbadge.vercel.app/api/server/NVTYcV4v2Q)](https://discord.gg/NVTYcV4v2Q)
 [![Lemonade - Website](https://img.shields.io/badge/Lemonade-Website-2ea44f?logo=nintendo3ds&logoColor=yellow)](https://lemonade-emu.github.io/)
@@ -36,7 +36,7 @@ Or you can get latest nightly builds: **⚠️ May be completely broken (Not rec
 <h1 align="center">
   Bug Reports?
   </h1>
-     
+
 **Please, before you make a bug report confirm that the issues only happens on Lemonade**
 
 - We will try to fix __base__ bugs too, but we need to know if the issues were caused by us or was in the __base__ itself
