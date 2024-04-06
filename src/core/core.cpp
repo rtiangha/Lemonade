@@ -77,7 +77,55 @@ System::System() : movie{*this}, cheat_engine{*this} {}
 System::~System() = default;
 
 System::ResultStatus System::RunLoop() {
-    return cpu_cores.size() > 1 ? RunLoopMultiCores() : RunLoopOneCore();
+    Signal signal{Signal::None};
+    u32 param{};
+    {
+        std::scoped_lock lock{signal_mutex};
+        if (current_signal != Signal::None) {
+            signal = current_signal;
+            param = signal_param;
+            current_signal = Signal::None;
+        }
+    }
+    switch (signal) {
+    case Signal::Reset:
+        Reset();
+        return ResultStatus::Success;
+    case Signal::Shutdown:
+        return ResultStatus::ShutdownRequested;
+    case Signal::Load: {
+        const u32 slot = param;
+        LOG_INFO(Core, "Begin load of slot {}", slot);
+        try {
+            System::LoadState(slot);
+            LOG_INFO(Core, "Load completed");
+        } catch (const std::exception& e) {
+            LOG_ERROR(Core, "Error loading: {}", e.what());
+            status_details = e.what();
+            return ResultStatus::ErrorSavestate;
+        }
+        frame_limiter.WaitOnce();
+        return ResultStatus::Success;
+    }
+    case Signal::Save: {
+        const u32 slot = param;
+        LOG_INFO(Core, "Begin save to slot {}", slot);
+        try {
+            System::SaveState(slot);
+            LOG_INFO(Core, "Save completed");
+        } catch (const std::exception& e) {
+            LOG_ERROR(Core, "Error saving: {}", e.what());
+            status_details = e.what();
+            return ResultStatus::ErrorSavestate;
+        }
+        frame_limiter.WaitOnce();
+        return ResultStatus::Success;
+    }
+    default:
+        break;
+    }
+
+    return Settings::values.is_new_3ds ? RunLoopMultiCores() : RunLoopSingleCore();
 }
 
 System::ResultStatus System::RunLoopMultiCores() {
@@ -89,8 +137,7 @@ System::ResultStatus System::RunLoopMultiCores() {
     for (auto& cpu_core : cpu_cores) {
         s64 delay = timing->GetGlobalTicks() - cpu_core->GetTimer().GetTicks();
         if (delay > 0) {
-            running_core = cpu_core.get();
-            kernel->SetRunningCPU(running_core);
+            kernel->SetRunningCPU(cpu_core.get());
             cpu_core->GetTimer().Advance();
             cpu_core->PrepareReschedule();
             kernel->GetThreadManager(cpu_core->GetID()).Reschedule();
@@ -107,14 +154,13 @@ System::ResultStatus System::RunLoopMultiCores() {
     // performance. Thus we don't sync delays below min_delay
     static constexpr s64 min_delay = 100;
     if (max_delay > min_delay) {
-        if (running_core != current_core_to_execute) {
-            running_core = current_core_to_execute;
-            kernel->SetRunningCPU(running_core);
+        if (cpu_cores[0].get() != current_core_to_execute) {
+            kernel->SetRunningCPU(current_core_to_execute);
         }
         if (kernel->GetCurrentThreadManager().GetCurrentThread() == nullptr) {
             LOG_TRACE(Core_ARM11, "Core {} idling", current_core_to_execute->GetID());
             current_core_to_execute->GetTimer().Idle();
-            PrepareReschedule();
+            kernel->PrepareReschedule();
         } else {
             current_core_to_execute->Run();
         }
@@ -124,8 +170,7 @@ System::ResultStatus System::RunLoopMultiCores() {
         // TODO: Make special check for idle since we can easily revert the time of idle cores
         s64 max_slice = Timing::MAX_SLICE_LENGTH;
         for (const auto& cpu_core : cpu_cores) {
-            running_core = cpu_core.get();
-            kernel->SetRunningCPU(running_core);
+            kernel->SetRunningCPU(cpu_core.get());
             cpu_core->GetTimer().Advance();
             cpu_core->PrepareReschedule();
             kernel->GetThreadManager(cpu_core->GetID()).Reschedule();
@@ -134,14 +179,13 @@ System::ResultStatus System::RunLoopMultiCores() {
         for (auto& cpu_core : cpu_cores) {
             cpu_core->GetTimer().SetNextSlice(max_slice);
             auto start_ticks = cpu_core->GetTimer().GetTicks();
-            running_core = cpu_core.get();
-            kernel->SetRunningCPU(running_core);
+            kernel->SetRunningCPU(cpu_core.get());
             // If we don't have a currently active thread then don't execute instructions,
             // instead advance to the next event and try to yield to the next thread
             if (kernel->GetCurrentThreadManager().GetCurrentThread() == nullptr) {
                 LOG_TRACE(Core_ARM11, "Core {} idling", cpu_core->GetID());
                 cpu_core->GetTimer().Idle();
-                PrepareReschedule();
+                kernel->PrepareReschedule();
             } else {
                 cpu_core->Run();
             }
@@ -149,120 +193,24 @@ System::ResultStatus System::RunLoopMultiCores() {
         }
     }
 
-    Reschedule();
-
-    Signal signal{Signal::None};
-    u32 param{};
-    {
-        std::scoped_lock lock{signal_mutex};
-        if (current_signal != Signal::None) {
-            signal = current_signal;
-            param = signal_param;
-            current_signal = Signal::None;
-        }
-    }
-    switch (signal) {
-    case Signal::Reset:
-        Reset();
-        return ResultStatus::Success;
-    case Signal::Shutdown:
-        return ResultStatus::ShutdownRequested;
-    case Signal::Load: {
-        const u32 slot = param;
-        LOG_INFO(Core, "Begin load of slot {}", slot);
-        try {
-            System::LoadState(slot);
-            LOG_INFO(Core, "Load completed");
-        } catch (const std::exception& e) {
-            LOG_ERROR(Core, "Error loading: {}", e.what());
-            status_details = e.what();
-            return ResultStatus::ErrorSavestate;
-        }
-        frame_limiter.WaitOnce();
-        return ResultStatus::Success;
-    }
-    case Signal::Save: {
-        const u32 slot = param;
-        LOG_INFO(Core, "Begin save to slot {}", slot);
-        try {
-            System::SaveState(slot);
-            LOG_INFO(Core, "Save completed");
-        } catch (const std::exception& e) {
-            LOG_ERROR(Core, "Error saving: {}", e.what());
-            status_details = e.what();
-            return ResultStatus::ErrorSavestate;
-        }
-        frame_limiter.WaitOnce();
-        return ResultStatus::Success;
-    }
-    default:
-        break;
-    }
+    kernel->RescheduleMultiCores();
 
     return status;
 }
 
-System::ResultStatus System::RunLoopOneCore() {
+System::ResultStatus System::RunLoopSingleCore() {
     // If we don't have a currently active thread then don't execute instructions,
     // instead advance to the next event and try to yield to the next thread
     if (kernel->GetCurrentThreadManager().GetCurrentThread() == nullptr) {
-        running_core->GetTimer().Idle();
-        running_core->GetTimer().Advance();
-        PrepareReschedule();
+        cpu_cores[0]->GetTimer().Idle();
+        cpu_cores[0]->GetTimer().Advance();
+        kernel->PrepareReschedule();
     } else {
-        running_core->GetTimer().Advance();
-        running_core->Run();
+        cpu_cores[0]->GetTimer().Advance();
+        cpu_cores[0]->Run();
     }
     
-    Reschedule();
-
-    Signal signal{Signal::None};
-    u32 param{};
-    {
-        std::scoped_lock lock{signal_mutex};
-        if (current_signal != Signal::None) {
-            signal = current_signal;
-            param = signal_param;
-            current_signal = Signal::None;
-        }
-    }
-    switch (signal) {
-    case Signal::Reset:
-        Reset();
-        return ResultStatus::Success;
-    case Signal::Shutdown:
-        return ResultStatus::ShutdownRequested;
-    case Signal::Load: {
-        const u32 slot = param;
-        LOG_INFO(Core, "Begin load of slot {}", slot);
-        try {
-            System::LoadState(slot);
-            LOG_INFO(Core, "Load completed");
-        } catch (const std::exception& e) {
-            LOG_ERROR(Core, "Error loading: {}", e.what());
-            status_details = e.what();
-            return ResultStatus::ErrorSavestate;
-        }
-        frame_limiter.WaitOnce();
-        return ResultStatus::Success;
-    }
-    case Signal::Save: {
-        const u32 slot = param;
-        LOG_INFO(Core, "Begin save to slot {}", slot);
-        try {
-            System::SaveState(slot);
-            LOG_INFO(Core, "Save completed");
-        } catch (const std::exception& e) {
-            LOG_ERROR(Core, "Error saving: {}", e.what());
-            status_details = e.what();
-            return ResultStatus::ErrorSavestate;
-        }
-        frame_limiter.WaitOnce();
-        return ResultStatus::Success;
-    }
-    default:
-        break;
-    }
+    kernel->RescheduleSingleCore();
 
     return status;
 }
@@ -608,11 +556,6 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
     return status;
 }
 
-void System::PrepareReschedule() {
-    running_core->PrepareReschedule();
-    reschedule_pending = true;
-}
-
 PerfStats::Results System::GetAndResetPerfStats() {
     return (perf_stats && timing) ? perf_stats->GetAndResetStats(timing->GetGlobalTimeUs())
                                   : PerfStats::Results{};
@@ -620,18 +563,6 @@ PerfStats::Results System::GetAndResetPerfStats() {
 
 PerfStats::Results System::GetLastPerfStats() {
     return perf_stats ? perf_stats->GetLastStats() : PerfStats::Results{};
-}
-
-void System::Reschedule() {
-    if (!reschedule_pending) {
-        return;
-    }
-
-    reschedule_pending = false;
-    for (const auto& core : cpu_cores) {
-        LOG_TRACE(Core_ARM11, "Reschedule core {}", core->GetID());
-        kernel->GetThreadManager(core->GetID()).Reschedule();
-    }
 }
 
 System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
@@ -651,35 +582,34 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
                                       movie.GetOverrideBaseTicks());
 
     kernel = std::make_unique<Kernel::KernelSystem>(
-        *memory, *timing, [this] { PrepareReschedule(); }, memory_mode, num_cores, n3ds_hw_caps,
+        *memory, *timing, memory_mode, n3ds_hw_caps,
         movie.GetOverrideInitTime());
 
     exclusive_monitor = MakeExclusiveMonitor(*memory, num_cores);
-    cpu_cores.reserve(num_cores);
     if (Settings::values.use_cpu_jit) {
 #if CITRA_ARCH(x86_64) || CITRA_ARCH(arm64)
         for (u32 i = 0; i < num_cores; ++i) {
-            cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(
-                *this, *memory, i, timing->GetTimer(i), *exclusive_monitor));
+            cpu_cores[i] = std::make_shared<ARM_Dynarmic>(
+                *this, i, timing->GetTimer(i), *exclusive_monitor);
+            kernel->GetThreadManager(i).SetCPU(cpu_cores[i].get());
         }
 #else
         for (u32 i = 0; i < num_cores; ++i) {
-            cpu_cores.push_back(
-                std::make_shared<ARM_DynCom>(this, *memory, USER32MODE, i, timing->GetTimer(i)));
+            cpu_cores[i] = 
+                std::make_shared<ARM_DynCom>(this, i, timing->GetTimer(i));
+            kernel->GetThreadManager(i).SetCPU(cpu_cores[i].get());
         }
         LOG_WARNING(Core, "CPU JIT requested, but Dynarmic not available");
 #endif
     } else {
         for (u32 i = 0; i < num_cores; ++i) {
-            cpu_cores.push_back(
-                std::make_shared<ARM_DynCom>(*this, *memory, USER32MODE, i, timing->GetTimer(i)));
+            cpu_cores[i] = 
+                std::make_shared<ARM_DynCom>(*this, i, timing->GetTimer(i));
+            kernel->GetThreadManager(i).SetCPU(cpu_cores[i].get());
         }
     }
-    running_core = cpu_cores[0].get();
 
-    kernel->SetCPUs(cpu_cores);
     kernel->SetRunningCPU(cpu_cores[0].get());
-
     if (Settings::values.core_downcount_hack) {
         SetCpuUsageLimit(true, num_cores);
     }
@@ -866,16 +796,13 @@ void System::Shutdown(bool is_deserializing) {
     service_manager.reset();
     dsp_core.reset();
     kernel.reset();
-    cpu_cores.clear();
+    cpu_cores = {};
     exclusive_monitor.reset();
     timing.reset();
 
     if (video_dumper && video_dumper->IsDumping()) {
         video_dumper->StopDumping();
     }
-
-    running_core = nullptr;
-    reschedule_pending = false;
 
     if (auto room_member = Network::GetRoomMember().lock()) {
         Network::GameInfo game_info{};
