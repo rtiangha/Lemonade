@@ -3867,7 +3867,7 @@ SWI_INST : {
     if (inst_base->cond == ConditionCode::AL || CondPassed(cpu, inst_base->cond)) {
         swi_inst* const inst_cream = (swi_inst*)inst_base->component;
         num_instrs = std::max(num_instrs, Settings::values.core_ticks_hack);
-        cpu->system.GetRunningCore().GetTimer().AddTicks(num_instrs);
+        cpu->system.Kernel().GetRunningCore().GetTimer().AddTicks(num_instrs);
         cpu->NumInstrsToExecute =
             num_instrs >= cpu->NumInstrsToExecute ? 0 : cpu->NumInstrsToExecute - num_instrs;
         num_instrs = 0;

@@ -9,6 +9,8 @@ jobs:
     source:
       if: ${{ !github.head_ref }}
       runs-on: ubuntu-latest
+      env:
+        SHA256_PATH: ${{ github.workspace }}/sha256.txt
       steps:
         - uses: actions/checkout@v4
           with:
@@ -22,6 +24,11 @@ jobs:
           with:
             name: source
             path: artifacts/
+        - name: upload sha256 txt
+          uses: actions/upload-artifact@v4
+          with:
+            name: sha256
+            path: ${{ env.SHA256_PATH }}
     windows:
         runs-on: windows-latest
         strategy:

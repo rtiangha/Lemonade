@@ -1,7 +1,7 @@
 <h1 align="center">
-    <b href="https://github.com/Lemonade-emu/Lemonade/blob/master/"><img src="https://github.com/Lemonade-emu/Lemonade/blob/master/assets/Lemonade_banner.png" alt="Lemonade" height="60%" width="60%"></b>
+    <b href="https://github.com/Lemonade-emu/Lemonade/blob/master/"><img src="https://github.com/Lemonade-emu/Lemonade/blob/master/assets/Lemonade.png" alt="Lemonade" height="20%" width="20%"></b>
   <br>
-  
+
 ![GitHub all releases](https://img.shields.io/github/downloads/Gamer64ytb/Lemonade/total)
 [![](https://dcbadge.vercel.app/api/server/NVTYcV4v2Q)](https://discord.gg/NVTYcV4v2Q)
 [![Lemonade - Website](https://img.shields.io/badge/Lemonade-Website-2ea44f?logo=nintendo3ds&logoColor=yellow)](https://lemonade-emu.github.io/)
@@ -36,7 +36,7 @@ Or you can get latest nightly builds: **⚠️ May be completely broken (Not rec
 <h1 align="center">
   Bug Reports?
   </h1>
-     
+
 **Please, before you make a bug report confirm that the issues only happens on Lemonade**
 
 - We will try to fix __base__ bugs too, but we need to know if the issues were caused by us or was in the __base__ itself
@@ -54,9 +54,17 @@ Or you can get latest nightly builds: **⚠️ May be completely broken (Not rec
 **For building instructions go [here](https://github.com/Lemonade-emu/Lemonade/blob/master/BUILDING.md). If you face any issues feel free to contact us on our Discord server, we still are looking for more devs so any help is appreciated**
 
 <h1 align="center">
-  Contributors 🙌
+  Team 🙌
   </h1>
 
-| Owner | Owner | Owner | Contributor |
-| :---: | :---: | :---: | :---: |
-| <img src="https://github.com/Gamer64ytb.png?size=115" width=115><br><sub>@Gaymer64</sub> <br><br>  | <img src="https://github.com/kleidiss.png?size=250" width=115><br><sub>@kleidiss</sub> <br><br> | <img src="https://github.com/Ishan09811.png?size=115" width=115><br><sub>@Ishan09811</sub> <br><br> | <img src="https://github.com/dnmodder.png?size=115" width=115><br><sub>@dnmodder</sub> <br><br> |
+| Main Dev | Manager/Dev | Android Dev |
+| :---: | :---: | :---: |
+| <img src="https://github.com/Gamer64ytb.png?size=115" width=115><br><sub>@Gamer64</sub> <br><br>  | <img src="https://github.com/kleidiss.png?size=250" width=115><br><sub>@kleidiss</sub> <br><br> | <img src="https://github.com/Ishan09811.png?size=115" width=115><br><sub>@Ishan09811</sub> <br><br> |
+
+<h1 align="center">
+  Regular Contributors
+</h1>
+
+| Logo Creator | Contributor | Contributor |
+| :---: | :---: | :---: |
+| <img src="https://github.com/N0Y0U2114.png?size=115" width=115><br><sub>@N0Y0U2114</sub> <br><br> | <img src="https://github.com/cybereality.png?size=115" width=115><br><sub>@cybereality</sub> <br><br>  | <img src="https://github.com/dnmodder.png?size=115" width=115><br><sub>@dnmodder</sub> <br><br> |

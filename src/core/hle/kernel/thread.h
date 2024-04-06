@@ -118,8 +118,8 @@ public:
      */
     std::span<const std::shared_ptr<Thread>> GetThreadList();
 
-    void SetCPU(Core::ARM_Interface& cpu_) {
-        cpu = &cpu_;
+    void SetCPU(Core::ARM_Interface* cpu_) {
+        cpu = cpu_;
     }
 
 private:
@@ -128,12 +128,6 @@ private:
      * @param new_thread The thread to switch to
      */
     void SwitchContext(Thread* new_thread);
-
-    /**
-     * Pops and returns the next thread from the thread queue
-     * @return A pointer to the next ready thread
-     */
-    Thread* PopNextReadyThread();
 
     /**
      * Callback that will wake up the thread it was scheduled for
