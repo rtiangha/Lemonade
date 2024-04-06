@@ -25,7 +25,13 @@ jobs:
 
       - name: Download Mac OS Artifact
         run: |
-          curl -L -o macos-universal.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/macos-universal.zip   
+          curl -L -o macos-universal.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/macos-universal.zip
+
+      - name: Download Source Artifact
+        run: curl -L -o source.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/source.zip
+
+      - name: Extract ZIP File
+        run: unzip source.zip
 
       - name: Create Release
         id: create_release
@@ -79,4 +85,14 @@ jobs:
           asset_path: ./macos-universal.zip
           asset_name: macos-universal.zip
           asset_content_type: application/zip   
+
+      - name: upload source artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./lemonade-unified-source.tar.xz
+          asset_name: lemonade-unified-source.tar.xz
+          asset_content_type: application/xz   
           
