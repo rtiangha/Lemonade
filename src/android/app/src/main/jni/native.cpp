@@ -286,13 +286,12 @@ void Java_org_citra_citra_1emu_NativeLibrary_surfaceChanged(JNIEnv* env,
                                                             jobject surf) {
     s_surf = ANativeWindow_fromSurface(env, surf);
 
-    bool notify = false;
     if (window) {
-        notify = window->OnSurfaceChanged(s_surf);
+        window->OnSurfaceChanged(s_surf);
     }
 
     auto& system = Core::System::GetInstance();
-    if (notify && system.IsPoweredOn()) {
+    if (system.IsPoweredOn()) {
         system.GPU().Renderer().NotifySurfaceChanged();
     }
 

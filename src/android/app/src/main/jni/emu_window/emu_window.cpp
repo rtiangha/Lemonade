@@ -27,18 +27,14 @@ static void UpdateLandscapeScreenLayout() {
             IDCache::GetNativeLibraryClass(), IDCache::GetLandscapeScreenLayout()));
 }
 
-bool EmuWindow_Android::OnSurfaceChanged(ANativeWindow* surface) {
-    if (render_window == surface) {
-        return false;
-    }
-
+void EmuWindow_Android::OnSurfaceChanged(ANativeWindow* surface) {
     render_window = surface;
+
     window_info.type = Frontend::WindowSystemType::Android;
     window_info.render_surface = surface;
 
     StopPresenting();
     OnFramebufferSizeChanged();
-    return true;
 }
 
 bool EmuWindow_Android::OnTouchEvent(int x, int y, bool pressed) {
