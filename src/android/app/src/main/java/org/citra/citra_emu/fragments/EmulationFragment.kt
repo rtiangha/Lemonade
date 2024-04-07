@@ -455,6 +455,14 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
             setupCitraDirectoriesThenStartEmulation()
         }
     }
+    
+    override fun onPause() {
+        if (NativeLibrary.isRunning()) {
+            emulationState.pause()
+        }
+        Choreographer.getInstance().removeFrameCallback(this)
+        super.onPause()
+    }
 
     override fun onDetach() {
         NativeLibrary.clearEmulationActivity()
