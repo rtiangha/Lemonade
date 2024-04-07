@@ -76,7 +76,7 @@ class InputOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(contex
         overlayJoysticks.forEach { it.draw(canvas) }
     }
 
-    private fun swapScreen() {
+    private fun swapScreensHotkey() {
         val is_swap_screens_enabled = !EmulationMenuSettings.swapScreens
         EmulationMenuSettings.swapScreens = is_swap_screens_enabled
         NativeLibrary.swapScreens(
@@ -97,7 +97,7 @@ class InputOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(contex
 
             if (button.id == NativeLibrary.ButtonType.BUTTON_SWAP_SCREENS &&
                 button.status == NativeLibrary.ButtonState.PRESSED) {
-                swapScreen()
+                swapScreensHotkey()
             }
 
             NativeLibrary.onGamePadEvent(NativeLibrary.TouchScreenDevice, button.id, button.status)
