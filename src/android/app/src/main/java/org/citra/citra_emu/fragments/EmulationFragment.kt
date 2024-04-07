@@ -457,9 +457,11 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
     }
     
     override fun onPause() {
+    if (!BooleanSetting.PIP_SUPPORT.boolean) {
         if (NativeLibrary.isRunning()) {
             emulationState.pause()
         }
+    }
         Choreographer.getInstance().removeFrameCallback(this)
         super.onPause()
     }
