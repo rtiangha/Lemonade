@@ -245,11 +245,7 @@ static void LoadOverrides(u64 title_id) {
         Settings::values.y2r_perform_hack = true;
     } else if (title_id == 0x0004000000068B00 || title_id == 0x0004000000061300 ||
         title_id == 0x000400000004A700 || title_id == 0x000400000005D700) {
-        // hack for Tales of the Abyss / Pac Man Party 3D
-        Settings::values.display_transfer_hack = true;
-        // crash on `g_state.geometry_pipeline.Reconfigure();`
-        // state.regs.pipeline.gs_unit_exclusive_configuration = 0
-        // state.regs.gs.max_input_attribute_index = 0
+        // Tales of the Abyss / Pac Man Party 3D
         Settings::values.skip_slow_draw = true;
     } else if (title_id == 0x000400000015CB00) {
         // New Atelier Rorona
