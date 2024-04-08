@@ -19,7 +19,7 @@ It was started after the _base_, a previous Nintendo 3DS emulator, was discontin
   How to download Lemonade?
   </h1>
 
-**It is reccomended to use release builds**
+**It is recommended to use release builds**
 
 [![Download - Latest Release](https://img.shields.io/badge/Download-Latest_Release-2ea44f?logo=github&logoColor=e)](https://github.com/Lemonade-emu/Lemonade/releases/latest)
 
