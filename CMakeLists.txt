@@ -20,6 +20,9 @@ if(result)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
+# Set position independent code
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # Enable O2 optimizations for msvc
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     add_compile_options(/O2)
