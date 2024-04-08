@@ -20,6 +20,11 @@ endif()
 # Set position independent code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Workaround for gcc on msys2
+if (GNU)
+    add_link_options(-rdynamic)
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/externals/cmake-modules")
 include(DownloadExternals)
