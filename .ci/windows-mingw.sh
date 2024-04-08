@@ -10,7 +10,6 @@ cmake .. -G Ninja \
     -DENABLE_COMPATIBILITY_LIST_DOWNLOAD=OFF \
     -DUSE_DISCORD_PRESENCE=ON \
     -DLEMONADE_USE_PRECOMPILED_HEADERS=OFF \
-    -DCMAKE_CXX_FLAGS="-fno-discard-sec-directives" \
     -DALLOW_EXTERNAL_SPIRV_TOOLS=ON
 ninja
 ninja bundle
