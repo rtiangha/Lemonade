@@ -15,6 +15,10 @@ jobs:
         run: |
           curl -L -o windows-msvc.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msvc.zip
 
+      - name: Download Windows MSVC Artifact
+        run: |
+          curl -L -o windows-msys2.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msys2.zip
+
       - name: Download Linux AppImage Artifact
         run: |
           curl -L -o linux-appimage.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/linux-appimage.zip
@@ -28,7 +32,8 @@ jobs:
           curl -L -o macos-universal.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/macos-universal.zip
 
       - name: Download Source Artifact
-        run: curl -L -o source.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/source.zip
+        run: |
+          curl -L -o source.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/source.zip
 
       - name: Extract ZIP File
         run: unzip source.zip
@@ -66,7 +71,7 @@ jobs:
           asset_name: linux-appimage.zip
           asset_content_type: application/zip
           
-      - name: upload windows artifact
+      - name: upload windows-msvc artifact
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
@@ -74,6 +79,16 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./windows-msvc.zip
           asset_name: windows-msvc.zip
+          asset_content_type: application/zip
+
+      - name: upload windows-msys2 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./windows-msys2.zip
+          asset_name: windows-msys2.zip
           asset_content_type: application/zip
 
       - name: upload mac-os artifact
