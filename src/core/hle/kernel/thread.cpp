@@ -165,39 +165,6 @@ void ThreadManager::SwitchContext(Thread* new_thread) {
     }
 }
 
-Thread* ThreadManager::PopNextReadyThread() {
-    Thread* next = nullptr;
-    Thread* thread = GetCurrentThread();
-
-    if (thread && thread->status == ThreadStatus::Running) {
-        do {
-            // We have to do better than the current thread.
-            // This call returns null when that's not possible.
-            next = ready_queue.pop_first_better(thread->current_priority);
-            if (!next) {
-                // Otherwise just keep going with the current thread
-                next = thread;
-                break;
-            } else if (!next->can_schedule)
-                unscheduled_ready_queue.push_back(next);
-        } while (!next->can_schedule);
-    } else {
-        do {
-            next = ready_queue.pop_first();
-            if (next && !next->can_schedule)
-                unscheduled_ready_queue.push_back(next);
-        } while (next && !next->can_schedule);
-    }
-
-    while (!unscheduled_ready_queue.empty()) {
-        auto t = std::move(unscheduled_ready_queue.back());
-        ready_queue.push_back(t->current_priority, t);
-        unscheduled_ready_queue.pop_back();
-    }
-
-    return next;
-}
-
 void ThreadManager::WaitCurrentThread_Sleep() {
     Thread* thread = GetCurrentThread();
     thread->status = ThreadStatus::WaitSleep;

@@ -59,6 +59,7 @@ import org.citra.citra_emu.display.ScreenLayout
 import org.citra.citra_emu.features.settings.model.SettingsViewModel
 import org.citra.citra_emu.features.settings.ui.SettingsActivity
 import org.citra.citra_emu.features.settings.utils.SettingsFile
+import org.citra.citra_emu.features.settings.model.BooleanSetting
 import org.citra.citra_emu.model.Game
 import org.citra.citra_emu.utils.DirectoryInitialization
 import org.citra.citra_emu.utils.DirectoryInitialization.DirectoryInitializationState
@@ -455,6 +456,16 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
             setupCitraDirectoriesThenStartEmulation()
         }
     }
+    
+    override fun onPause() {
+    if (!BooleanSetting.PIP_SUPPORT.boolean) {
+        if (NativeLibrary.isRunning()) {
+            emulationState.pause()
+        }
+    }
+        Choreographer.getInstance().removeFrameCallback(this)
+        super.onPause()
+    }
 
     override fun onDetach() {
         NativeLibrary.clearEmulationActivity()
@@ -756,12 +767,12 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
 
     private fun showToggleControlsDialog() {
         val editor = preferences.edit()
-        val enabledButtons = BooleanArray(14)
+        val enabledButtons = BooleanArray(15)
         enabledButtons.forEachIndexed { i: Int, _: Boolean ->
             // Buttons that are disabled by default
             var defaultValue = true
             when (i) {
-                6, 7, 12, 13 -> defaultValue = false
+                6, 7, 12, 13, 14 -> defaultValue = false
             }
             enabledButtons[i] = preferences.getBoolean("buttonToggle$i", defaultValue)
         }
@@ -873,10 +884,10 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
             .apply()
 
         val editor = preferences.edit()
-        for (i in 0 until 14) {
+        for (i in 0 until 15) {
             var defaultValue = true
             when (i) {
-                6, 7, 12, 13 -> defaultValue = false
+                6, 7, 12, 13, 14 -> defaultValue = false
             }
             editor.putBoolean("buttonToggle$i", defaultValue)
         }
