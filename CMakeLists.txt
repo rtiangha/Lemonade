@@ -23,9 +23,11 @@ endif()
 # Set position independent code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Enable O2 optimizations for msvc
-if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+# Enable O2 compiler optimizations
+if (MSVC)
     add_compile_options(/O2)
+else()
+    add_compile_options(-O2)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
