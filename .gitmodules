@@ -81,7 +81,7 @@
 	url = https://github.com/bylaws/libadrenotools
 [submodule "oaknut"]
 	path = externals/oaknut
-	url = https://github.com/merryhime/oaknut.git
+	url = https://github.com/rtiangha/oaknut.git
 [submodule "dds-ktx"]
 	path = externals/dds-ktx
 	url = https://github.com/septag/dds-ktx
