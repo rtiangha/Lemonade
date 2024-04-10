@@ -35,7 +35,7 @@ jobs:
           curl -L -o Android-APK.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/Android-APK.zip
           unzip Android-APK.zip -d ./AndroidAPK
 
-      - name: Download/Unzip Mac OS Artifact
+      - name: Download/Unzips Mac OS Artifact
         run: |
           curl -L -o macos-universal.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/macos-universal.zip
           unzip macos-universal.zip -d ./macos-universal
@@ -91,6 +91,16 @@ jobs:
           asset_name: windows-msvc.zip
           asset_content_type: application/zip
 
+      - name: upload windows-msys2 artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./windows-msys2.zip
+          asset_name: windows-msys2.zip
+          asset_content_type: application/zip
+
       - name: upload mac-os artifact
         uses: actions/upload-release-asset@v1
         env:
@@ -100,16 +110,6 @@ jobs:
           asset_path: ./macos-universal.7z
           asset_name: macos-universal.7z
           asset_content_type: application/x-7z-compressed
-
-      - name: upload mac-os artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos-universal.zip
-          asset_name: macos-universal.zip
-          asset_content_type: application/zip
 
       - name: upload source artifact
         uses: actions/upload-release-asset@v1
