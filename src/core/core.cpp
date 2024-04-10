@@ -55,7 +55,7 @@
 
 namespace Core {
 
-/*static*/ System System::s_instance;
+System System::s_instance;
 
 template <>
 Core::System& Global() {
