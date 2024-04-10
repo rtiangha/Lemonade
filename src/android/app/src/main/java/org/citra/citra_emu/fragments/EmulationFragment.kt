@@ -59,6 +59,7 @@ import org.citra.citra_emu.display.ScreenLayout
 import org.citra.citra_emu.features.settings.model.SettingsViewModel
 import org.citra.citra_emu.features.settings.ui.SettingsActivity
 import org.citra.citra_emu.features.settings.utils.SettingsFile
+import org.citra.citra_emu.features.settings.model.BooleanSetting
 import org.citra.citra_emu.model.Game
 import org.citra.citra_emu.utils.DirectoryInitialization
 import org.citra.citra_emu.utils.DirectoryInitialization.DirectoryInitializationState
@@ -148,6 +149,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
         screenAdjustmentUtil = ScreenAdjustmentUtil(emulationActivity.windowManager, settingsViewModel.settings)
         EmulationLifecycleUtil.addShutdownHook(hook = { emulationState.stop() })
         EmulationLifecycleUtil.addPauseResumeHook(hook = { togglePause() })
+
     }
 
     override fun onCreateView(
@@ -192,10 +194,12 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
             }
 
             override fun onDrawerOpened(drawerView: View) {
+                NativeLibrary.pauseEmulation()
                 binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
             }
 
             override fun onDrawerClosed(drawerView: View) {
+                NativeLibrary.unPauseEmulation()
                 binding.drawerLayout.setDrawerLockMode(EmulationMenuSettings.drawerLockMode)
             }
 
@@ -227,26 +231,12 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
             game.title
         binding.inGameMenu.setNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.menu_emulation_pause -> {
-                    if (emulationState.isPaused) {
-                        emulationState.unpause()
-                        it.title = resources.getString(R.string.pause_emulation)
-                        it.icon = ResourcesCompat.getDrawable(
-                            resources,
-                            R.drawable.ic_pause,
-                            requireContext().theme
-                        )
-                    } else {
-                        emulationState.pause()
-                        it.title = resources.getString(R.string.resume_emulation)
-                        it.icon = ResourcesCompat.getDrawable(
-                            resources,
-                            R.drawable.ic_play,
-                            requireContext().theme
-                        )
+                R.id.menu_emulation_resume -> {
+                        if (binding.drawerLayout.isOpen) {
+                            binding.drawerLayout.close()
+                        }
+                       true
                     }
-                    true
-                }
 
                 R.id.menu_emulation_savestates -> {
                     showSavestateMenu()
@@ -444,9 +434,11 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
     override fun onResume() {
         super.onResume()
         Choreographer.getInstance().postFrameCallback(this)
-        if (NativeLibrary.isRunning()) {
-            NativeLibrary.unPauseEmulation()
-            return
+        if (!binding.drawerLayout.isOpen) {
+            if (NativeLibrary.isRunning()) {
+                NativeLibrary.unPauseEmulation()
+                return
+            }
         }
 
         if (DirectoryInitialization.areCitraDirectoriesReady()) {
@@ -454,6 +446,18 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
         } else {
             setupCitraDirectoriesThenStartEmulation()
         }
+    }
+    
+    override fun onPause() {
+    if (!BooleanSetting.PIP_SUPPORT.boolean) {
+        if (!binding.drawerLayout.isOpen) {
+            if (NativeLibrary.isRunning()) {
+                emulationState.pause()
+            }
+        }
+    }
+        Choreographer.getInstance().removeFrameCallback(this)
+        super.onPause()
     }
 
     override fun onDetach() {
@@ -756,12 +760,12 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
 
     private fun showToggleControlsDialog() {
         val editor = preferences.edit()
-        val enabledButtons = BooleanArray(14)
+        val enabledButtons = BooleanArray(15)
         enabledButtons.forEachIndexed { i: Int, _: Boolean ->
             // Buttons that are disabled by default
             var defaultValue = true
             when (i) {
-                6, 7, 12, 13 -> defaultValue = false
+                6, 7, 12, 13, 14 -> defaultValue = false
             }
             enabledButtons[i] = preferences.getBoolean("buttonToggle$i", defaultValue)
         }
@@ -873,10 +877,10 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
             .apply()
 
         val editor = preferences.edit()
-        for (i in 0 until 14) {
+        for (i in 0 until 15) {
             var defaultValue = true
             when (i) {
-                6, 7, 12, 13 -> defaultValue = false
+                6, 7, 12, 13, 14 -> defaultValue = false
             }
             editor.putBoolean("buttonToggle$i", defaultValue)
         }

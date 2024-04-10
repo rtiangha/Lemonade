@@ -19,13 +19,13 @@ It was started after the _base_, a previous Nintendo 3DS emulator, was discontin
   How to download Lemonade?
   </h1>
 
-**It is reccomended to use release builds**
+**It is recommended to use release builds**
 
 [![Download - Latest Release](https://img.shields.io/badge/Download-Latest_Release-2ea44f?logo=github&logoColor=e)](https://github.com/Lemonade-emu/Lemonade/releases/latest)
 
 **For Windows there is also an installer which you can get [here](https://github.com/Lemonade-emu/Lemonade-installer)**
 
-Or you can get latest nightly builds: **⚠️ May be completely broken (Not reccomended for daily use)**
+Or you can get latest nightly builds: **⚠️ May be completely broken (Not recommended for daily use)**
 |Platform|Status|Download|
 |--------|------------|--------|
 |Windows build|[![Qt Build](https://github.com/Lemonade-emu/Lemonade/actions/workflows/build.yml/badge.svg)](https://github.com/Lemonade-emu/Lemonade/actions/workflows/Qt_Build.yml)|[Windows MSVC](https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msvc.zip)|
@@ -57,7 +57,7 @@ Or you can get latest nightly builds: **⚠️ May be completely broken (Not rec
   Team 🙌
   </h1>
 
-| Main Dev | Manager/Dev | Android Dev |
+| Main Dev | Manager | Android Dev |
 | :---: | :---: | :---: |
 | <img src="https://github.com/Gamer64ytb.png?size=115" width=115><br><sub>@Gamer64</sub> <br><br>  | <img src="https://github.com/kleidiss.png?size=250" width=115><br><sub>@kleidiss</sub> <br><br> | <img src="https://github.com/Ishan09811.png?size=115" width=115><br><sub>@Ishan09811</sub> <br><br> |
 
