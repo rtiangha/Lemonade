@@ -305,6 +305,13 @@ target_link_libraries(lemonade-qt PRIVATE audio_core lemonade_common lemonade_co
 target_link_libraries(lemonade-qt PRIVATE Boost::boost nihstro-headers Qt6::Widgets Qt6::Multimedia Qt6::Concurrent)
 target_link_libraries(lemonade-qt PRIVATE ${PLATFORM_LIBRARIES} Threads::Threads)
 
+if (WIN32 OR (UNIX AND NOT APPLE AND NOT ANDROID))
+    find_package(OpenMP)
+    if(OpenMP_CXX_FOUND)
+        target_link_libraries(lemonade-qt PRIVATE OpenMP::OpenMP_CXX)
+    endif()
+endif()
+
 if (ENABLE_OPENGL)
     target_link_libraries(lemonade-qt PRIVATE glad)
 endif()
