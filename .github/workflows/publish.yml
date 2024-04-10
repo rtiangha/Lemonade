@@ -11,19 +11,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download Windows MSVC Artifact
+      - name: Download/Unzip Windows MSVC Artifact
         run: |
           curl -L -o windows-msvc.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msvc.zip
+          unzip windows-msvc.zip -d ./windows-msvc
+          mv ./windows-msvc/lemonade-windows-msvc-*-commit.zip ./windows-msvc.zip
 
-      - name: Download Windows MSYS2 Artifact
+      - name: Download/Unzip Windows MSYS2 Artifact
         run: |
           curl -L -o windows-msys2.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msys2.zip
+          unzip windows-msys2.zip -d ./windows-msys2
+          mv ./windows-msys2/lemonade-windows-msys2-*-commit.zip ./windows-msys2.zip
 
       - name: Download Linux AppImage Artifact
         run: |
           curl -L -o linux-appimage.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/linux-appimage.zip
 
-      - name: Download Android APK Artifact
+      - name: Download/Unzip Android APK Artifact
         run: |
           curl -L -o Android-APK.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/Android-APK.zip
           unzip Android-APK.zip -d ./AndroidAPK
