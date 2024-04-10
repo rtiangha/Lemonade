@@ -26,6 +26,7 @@ jobs:
       - name: Download Android APK Artifact
         run: |
           curl -L -o Android-APK.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/Android-APK.zip
+          unzip Android-APK.zip -d ./AndroidAPK
 
       - name: Download Mac OS Artifact
         run: |
@@ -55,13 +56,13 @@ jobs:
       - name: upload Android artifact
         uses: actions/upload-release-asset@v1
         env:
-         GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
+          GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Android-APK.zip
-          asset_name: Android-APK.zip
-          asset_content_type: application/zip
-          
+          asset_path: ./AndroidAPK/app-canary-release.apk
+          asset_name: app-canary-release.apk
+          asset_content_type: application/vnd.android.package-archive
+
       - name: upload linux-appimage artifact
         uses: actions/upload-release-asset@v1
         env:
@@ -71,7 +72,7 @@ jobs:
           asset_path: ./linux-appimage.zip
           asset_name: linux-appimage.zip
           asset_content_type: application/zip
-          
+
       - name: upload windows-msvc artifact
         uses: actions/upload-release-asset@v1
         env:
@@ -100,7 +101,7 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./macos-universal.zip
           asset_name: macos-universal.zip
-          asset_content_type: application/zip   
+          asset_content_type: application/zip
 
       - name: upload source artifact
         uses: actions/upload-release-asset@v1
@@ -110,7 +111,7 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./lemonade-unified-source.tar.xz
           asset_name: lemonade-unified-source.tar.xz
-          asset_content_type: application/xz 
+          asset_content_type: application/xz
 
       - name: upload sha256 artifact
         uses: actions/upload-release-asset@v1
@@ -121,4 +122,4 @@ jobs:
           asset_path: ./sha256.zip
           asset_name: sha256.zip
           asset_content_type: application/zip
-          
+
