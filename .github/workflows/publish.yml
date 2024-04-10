@@ -11,32 +11,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download Windows MSVC Artifact
+      - name: Download/Unzip Windows MSVC Artifact
         run: |
           curl -L -o windows-msvc.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msvc.zip
+          unzip windows-msvc.zip -d ./windows-msvc
+          mv ./windows-msvc/lemonade-windows-msvc-*.zip ./windows-msvc.zip
 
-      - name: Download Windows MSYS2 Artifact
+
+      - name: Download/Unzip Windows MSYS2 Artifact
         run: |
           curl -L -o windows-msys2.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msys2.zip
+          unzip windows-msys2.zip -d ./windows-msys2
+          mv ./windows-msys2/lemonade-windows-msys2-*.zip ./windows-msys2.zip
 
-      - name: Download Linux AppImage Artifact
+      - name: Download/Unzip Linux AppImage Artifact
         run: |
           curl -L -o linux-appimage.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/linux-appimage.zip
+          unzip linux-appimage.zip -d ./linux-appimage
+          mv ./linux-appimage/lemonade-linux-appimage-*.7z ./linux-appimage.7z
 
-      - name: Download Android APK Artifact
+      - name: Download/Unzip Android APK Artifact
         run: |
           curl -L -o Android-APK.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/Android-APK.zip
+          unzip Android-APK.zip -d ./AndroidAPK
 
-      - name: Download Mac OS Artifact
+      - name: Download/Unzips Mac OS Artifact
         run: |
           curl -L -o macos-universal.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/macos-universal.zip
+          unzip macos-universal.zip -d ./macos-universal
+          mv ./macos-universal/lemonade-macos-universal-*.7z ./macos-universal.7z
 
       - name: Download Source Artifact
         run: |
           curl -L -o source.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/source.zip
-          curl -L -o sha256.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/sha256.zip
 
-      - name: Extract ZIP File
+      - name: Extract Source File
         run: unzip source.zip
 
       - name: Create Release
@@ -55,23 +64,23 @@ jobs:
       - name: upload Android artifact
         uses: actions/upload-release-asset@v1
         env:
-         GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
+          GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Android-APK.zip
-          asset_name: Android-APK.zip
-          asset_content_type: application/zip
-          
+          asset_path: ./AndroidAPK/app-canary-release.apk
+          asset_name: app-canary-release.apk
+          asset_content_type: application/vnd.android.package-archive
+
       - name: upload linux-appimage artifact
         uses: actions/upload-release-asset@v1
         env:
-         GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
+          GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./linux-appimage.zip
-          asset_name: linux-appimage.zip
-          asset_content_type: application/zip
-          
+          asset_path: ./linux-appimage.7z
+          asset_name: linux-appimage.7z
+          asset_content_type: application/x-7z-compressed
+
       - name: upload windows-msvc artifact
         uses: actions/upload-release-asset@v1
         env:
@@ -98,9 +107,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos-universal.zip
-          asset_name: macos-universal.zip
-          asset_content_type: application/zip   
+          asset_path: ./macos-universal.7z
+          asset_name: macos-universal.7z
+          asset_content_type: application/x-7z-compressed
 
       - name: upload source artifact
         uses: actions/upload-release-asset@v1
@@ -110,15 +119,4 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./lemonade-unified-source.tar.xz
           asset_name: lemonade-unified-source.tar.xz
-          asset_content_type: application/xz 
-
-      - name: upload sha256 artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.LEMONADEACTION }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./sha256.zip
-          asset_name: sha256.zip
-          asset_content_type: application/zip
-          
+          asset_content_type: application/xz
