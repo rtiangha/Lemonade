@@ -434,9 +434,11 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
     override fun onResume() {
         super.onResume()
         Choreographer.getInstance().postFrameCallback(this)
-        if (NativeLibrary.isRunning()) {
-            NativeLibrary.unPauseEmulation()
-            return
+        if (!binding.drawerLayout.isOpen) {
+            if (NativeLibrary.isRunning()) {
+                NativeLibrary.unPauseEmulation()
+                return
+            }
         }
 
         if (DirectoryInitialization.areCitraDirectoriesReady()) {
@@ -448,8 +450,10 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
     
     override fun onPause() {
     if (!BooleanSetting.PIP_SUPPORT.boolean) {
-        if (NativeLibrary.isRunning()) {
-            emulationState.pause()
+        if (!binding.drawerLayout.isOpen) {
+            if (NativeLibrary.isRunning()) {
+                emulationState.pause()
+            }
         }
     }
         Choreographer.getInstance().removeFrameCallback(this)
