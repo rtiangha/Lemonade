@@ -15,13 +15,14 @@ jobs:
         run: |
           curl -L -o windows-msvc.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msvc.zip
           unzip windows-msvc.zip -d ./windows-msvc
-          mv ./windows-msvc/lemonade-windows-msvc-*-commit.zip ./windows-msvc.zip
+          mv ./windows-msvc/lemonade-windows-msvc-*.zip ./windows-msvc.zip
+
 
       - name: Download/Unzip Windows MSYS2 Artifact
         run: |
           curl -L -o windows-msys2.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msys2.zip
           unzip windows-msys2.zip -d ./windows-msys2
-          mv ./windows-msys2/lemonade-windows-msys2-*-commit.zip ./windows-msys2.zip
+          mv ./windows-msys2/lemonade-windows-msys2-*.zip ./windows-msys2.zip
 
       - name: Download Linux AppImage Artifact
         run: |
