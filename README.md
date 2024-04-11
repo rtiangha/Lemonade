@@ -58,7 +58,7 @@ Or you can get latest nightly builds: **⚠️ May be completely broken (Not rec
   </h1>
 
 | Main Dev | Android Dev |
-| :---: | :---: | :---: |
+| :---: | :---: |
 | <img src="https://github.com/Gamer64ytb.png?size=115" width=115><br><sub>@Gamer64</sub> <br><br>  | <img src="https://github.com/Ishan09811.png?size=115" width=115><br><sub>@Ishan09811</sub> <br><br> |
 
 <h1 align="center">
@@ -66,5 +66,5 @@ Or you can get latest nightly builds: **⚠️ May be completely broken (Not rec
 </h1>
 
 | Logo Creator | Contributor | Contributor |
-| :---: | :---: |
+| :---: | :---: | :---: |
 | <img src="https://github.com/N0Y0U2114.png?size=115" width=115><br><sub>@N0Y0U2114</sub> <br><br> | <img src="https://github.com/cybereality.png?size=115" width=115><br><sub>@cybereality</sub> <br><br>  | <img src="https://github.com/dnmodder.png?size=115" width=115><br><sub>@dnmodder</sub> <br><br> |
