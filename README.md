@@ -11,6 +11,12 @@
   What is Lemonade?
   </h1>
 
+**Warning**
+
+Actually, the emulator is having GPL issues, so we won't continue it's development until we fix all issues related with GPL. We never wanted any problem with another devs (specifically, [@PabloMK7](https://github.com/PabloMK7)).
+
+Pls, these people that are hating into us because this, stop making our project looking bad. We already talked with PabloMK7 and we will fix the unexpected issues as well.
+
 **Lemonade is an open source and experimental emulator, that emulates the functionality of a Nintendo 3DS system on operating systems such as Windows, Linux and Android.**
 
 It was started after the _base_, a previous Nintendo 3DS emulator, was discontinued. The Lemonade Project was created to continue the work of _base_, fixing its issues and improving its performance and compatibility.
@@ -57,9 +63,9 @@ Or you can get latest nightly builds: **⚠️ May be completely broken (Not rec
   Team 🙌
   </h1>
 
-| Main Dev | Manager | Android Dev |
-| :---: | :---: | :---: |
-| <img src="https://github.com/Gamer64ytb.png?size=115" width=115><br><sub>@Gamer64</sub> <br><br>  | <img src="https://github.com/kleidiss.png?size=250" width=115><br><sub>@kleidiss</sub> <br><br> | <img src="https://github.com/Ishan09811.png?size=115" width=115><br><sub>@Ishan09811</sub> <br><br> |
+| Main Dev | Android Dev |
+| :---: | :---: |
+| <img src="https://github.com/Gamer64ytb.png?size=115" width=115><br><sub>@Gamer64</sub> <br><br>  | <img src="https://github.com/Ishan09811.png?size=115" width=115><br><sub>@Ishan09811</sub> <br><br> |
 
 <h1 align="center">
   Regular Contributors
