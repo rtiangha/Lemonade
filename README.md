@@ -13,7 +13,7 @@
 
 **Warning**
 
-Actually, the emulator is having GPL issues, so we won't continue it's development until we fix all issues related with GPL. We never wanted any problem with another devs (specifically, @PabloMK7).
+Actually, the emulator is having GPL issues, so we won't continue it's development until we fix all issues related with GPL. We never wanted any problem with another devs (specifically, [@PabloMK7](https://github.com/PabloMK7)).
 
 Pls, reditors on twitter people, stop making our project looking bad. We already talked with PabloMK7 and we will fix the unexpected issues as well.
 
