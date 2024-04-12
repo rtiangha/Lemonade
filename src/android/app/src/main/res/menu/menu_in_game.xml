@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/menu_emulation_pause"
-        android:icon="@drawable/ic_pause"
-        android:title="@string/pause_emulation" />
+        android:id="@+id/menu_emulation_resume"
+        android:icon="@drawable/ic_play"
+        android:title="@string/resume_emulation" />
 
     <item
         android:id="@+id/menu_emulation_savestates"
@@ -16,6 +16,11 @@
         android:id="@+id/menu_overlay_options"
         android:icon="@drawable/ic_controller"
         android:title="@string/emulation_overlay_options" />
+
+    <item
+        android:id="@+id/menu_emulation_rotate_screen"
+        android:icon="@drawable/ic_fit_screen"
+        android:title="@string/emulation_rotate_screen" />
 
     <item
         android:id="@+id/menu_amiibo"
@@ -41,6 +46,11 @@
         android:id="@+id/menu_cheats"
         android:icon="@drawable/ic_code"
         android:title="@string/cheats" />
+
+    <item
+        android:id="@+id/menu_lemotweaks"
+        android:icon="@drawable/ic_settings"
+        android:title="@string/lemontweaks_title" />
 
     <item
         android:id="@+id/menu_settings"

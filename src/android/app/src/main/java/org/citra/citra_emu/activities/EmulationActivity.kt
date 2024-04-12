@@ -23,8 +23,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.NavHostFragment
 import androidx.preference.PreferenceManager
+import android.os.Build
+import android.util.Rational
+import android.app.PictureInPictureParams
 import org.citra.citra_emu.CitraApplication
 import org.citra.citra_emu.NativeLibrary
 import org.citra.citra_emu.R
@@ -33,6 +38,7 @@ import org.citra.citra_emu.contracts.OpenFileResultContract
 import org.citra.citra_emu.databinding.ActivityEmulationBinding
 import org.citra.citra_emu.display.ScreenAdjustmentUtil
 import org.citra.citra_emu.features.hotkeys.HotkeyUtility
+import org.citra.citra_emu.features.settings.model.BooleanSetting
 import org.citra.citra_emu.features.settings.model.SettingsViewModel
 import org.citra.citra_emu.features.settings.model.view.InputBindingSetting
 import org.citra.citra_emu.fragments.MessageDialogFragment
@@ -100,6 +106,16 @@ class EmulationActivity : AppCompatActivity() {
         enableFullscreenImmersive()
     }
 
+    override fun onUserLeaveHint() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (BooleanSetting.PIP_SUPPORT.boolean) {
+                val builder = PictureInPictureParams.Builder()
+                builder.setAspectRatio(null)
+                enterPictureInPictureMode(builder.build())
+            }
+        }
+    }
+
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         enableFullscreenImmersive()
@@ -161,6 +177,29 @@ class EmulationActivity : AppCompatActivity() {
             getString(R.string.emulation_menu_help),
             Toast.LENGTH_LONG
         ).show()
+    }
+
+    private fun DialogFragment.showWithAnimations(
+            manager: FragmentManager,
+            tag: String?,
+            enterAnim: Int,
+            exitAnim: Int
+    ) {
+        manager.beginTransaction().apply {
+            setCustomAnimations(enterAnim, exitAnim)
+            add(this@showWithAnimations, tag)
+            commitAllowingStateLoss()
+        }
+    }
+
+    fun displayLemontweaks() {
+        LemontweaksDialog.newInstance().showWithAnimations(
+                supportFragmentManager,
+                "LemontweaksDialog",
+                // TODO: anim need to be changed
+                R.anim.nav_default_pop_enter_anim,
+                R.anim.nav_default_pop_exit_anim
+        )
     }
 
     private fun enableFullscreenImmersive() {

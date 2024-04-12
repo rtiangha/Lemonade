@@ -75,9 +75,9 @@ static std::array<GLfloat, 3 * 2> MakeOrthographicMatrix(const float width, cons
 RendererOpenGL::RendererOpenGL(Core::System& system, Pica::PicaCore& pica_,
                                Frontend::EmuWindow& window, Frontend::EmuWindow* secondary_window)
     : VideoCore::RendererBase{system, window, secondary_window}, pica{pica_},
-      rasterizer{system.Memory(), pica, system.CustomTexManager(), *this, driver}, frame_dumper{
-                                                                                       system,
-                                                                                       window} {
+      driver{system.TelemetrySession()}, rasterizer{system.Memory(), pica,
+                                                    system.CustomTexManager(), *this, driver},
+      frame_dumper{system, window} {
     const bool has_debug_tool = driver.HasDebugTool();
     window.mailbox = std::make_unique<OGLTextureMailbox>(has_debug_tool);
     if (secondary_window) {
@@ -370,7 +370,7 @@ void RendererOpenGL::ReloadShader() {
     // Link shaders and get variable locations
     std::string shader_data = fragment_shader_precision_OES;
     if (Settings::values.render_3d.GetValue() == Settings::StereoRenderOption::Anaglyph) {
-        if (Settings::values.anaglyph_shader_name.GetValue() == "dubois (builtin)") {
+        if (Settings::values.anaglyph_shader_name.GetValue() == "rendepth (builtin)") {
             shader_data += HostShaders::OPENGL_PRESENT_ANAGLYPH_FRAG;
         } else {
             std::string shader_text = OpenGL::GetPostProcessingShaderCode(
@@ -854,8 +854,6 @@ void RendererOpenGL::TryPresent(int timeout_ms, bool is_secondary) {
     /* insert fence for the main thread to block on */
     frame->present_fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     glFlush();
-
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 }
 
 void RendererOpenGL::PrepareVideoDumping() {

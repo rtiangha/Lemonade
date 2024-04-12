@@ -38,6 +38,7 @@
 #include "core/hle/service/nfc/nfc.h"
 #include "core/loader/loader.h"
 #include "core/savestate.h"
+#include "core/telemetry_session.h"
 #include "jni/android_common/android_common.h"
 #include "jni/applets/mii_selector.h"
 #include "jni/applets/swkbd.h"
@@ -50,7 +51,6 @@
 #ifdef ENABLE_VULKAN
 #include "jni/emu_window/emu_window_vk.h"
 #endif
-#include "jni/game_settings.h"
 #include "jni/id_cache.h"
 #include "jni/input_manager.h"
 #include "jni/ndk_motion.h"
@@ -178,7 +178,6 @@ static Core::System::ResultStatus RunCitra(const std::string& filepath) {
     auto app_loader = Loader::GetLoader(filepath);
     if (app_loader) {
         app_loader->ReadProgramId(program_id);
-        GameSettings::LoadOverrides(program_id);
     }
     system.ApplySettings();
     Settings::LogSettings();
@@ -205,6 +204,9 @@ static Core::System::ResultStatus RunCitra(const std::string& filepath) {
     if (load_result != Core::System::ResultStatus::Success) {
         return load_result;
     }
+
+    auto& telemetry_session = system.TelemetrySession();
+    telemetry_session.AddField(Common::Telemetry::FieldType::App, "Frontend", "Android");
 
     stop_run = false;
     pause_emulation = false;
@@ -288,12 +290,13 @@ void Java_org_citra_citra_1emu_NativeLibrary_surfaceChanged(JNIEnv* env,
                                                             jobject surf) {
     s_surf = ANativeWindow_fromSurface(env, surf);
 
+    bool notify = false;
     if (window) {
-        window->OnSurfaceChanged(s_surf);
+        notify = window->OnSurfaceChanged(s_surf);
     }
 
     auto& system = Core::System::GetInstance();
-    if (system.IsPoweredOn()) {
+    if (notify && system.IsPoweredOn()) {
         system.GPU().Renderer().NotifySurfaceChanged();
     }
 
@@ -347,6 +350,47 @@ void Java_org_citra_citra_1emu_NativeLibrary_swapScreens([[maybe_unused]] JNIEnv
     }
     InputManager::screen_rotation = rotation;
     Camera::NDK::g_rotation = rotation;
+}
+
+jintArray Java_org_citra_citra_1emu_NativeLibrary_getLemontweaks([[maybe_unused]] JNIEnv* env,
+                                                                     [[maybe_unused]] jobject obj) {
+    int i = 0;
+    int settings[3];
+
+    // get settings
+    settings[i++] = Settings::values.core_ticks_hack > 0;
+    settings[i++] = Settings::values.skip_slow_draw;
+    settings[i++] = Settings::values.skip_texture_copy;
+
+    jintArray array = env->NewIntArray(i);
+    env->SetIntArrayRegion(array, 0, i, settings);
+    return array;
+}
+
+void Java_org_citra_citra_1emu_NativeLibrary_setLemontweaks(JNIEnv* env,
+                                                                [[maybe_unused]] jobject obj,
+                                                                jintArray array) {
+    int i = 0;
+    jint* settings = env->GetIntArrayElements(array, nullptr);
+
+    // FMV Hack
+    u64 title_id{};
+    Core::System::GetInstance().GetAppLoader().ReadProgramId(title_id);
+    // luigi mansion 2 ids
+    if (title_id == 0x00040000000D0000 || title_id == 0x0004000000076400 ||
+        title_id == 0x0004000000055F00 || title_id == 0x0004000000076500) {
+        Settings::SetFMVHack(settings[i++] > 0, true);
+    } else {
+        Settings::SetFMVHack(settings[i++] > 0, false);
+    }
+
+    // Skip Slow Draw
+    Settings::values.skip_slow_draw = settings[i++] > 0;
+
+    // Skip Texture Copy
+    Settings::values.skip_texture_copy = settings[i++] > 0;
+
+    env->ReleaseIntArrayElements(array, settings, 0);
 }
 
 jboolean Java_org_citra_citra_1emu_NativeLibrary_areKeysAvailable([[maybe_unused]] JNIEnv* env,
@@ -598,7 +642,6 @@ void Java_org_citra_citra_1emu_NativeLibrary_reloadSettings([[maybe_unused]] JNI
     if (system.IsPoweredOn()) {
         u64 program_id{};
         system.GetAppLoader().ReadProgramId(program_id);
-        GameSettings::LoadOverrides(program_id);
     }
 
     system.ApplySettings();

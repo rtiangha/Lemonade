@@ -116,7 +116,7 @@ if ("x86_64" IN_LIST ARCHITECTURE OR "arm64" IN_LIST ARCHITECTURE)
     else()
         set(DYNARMIC_TESTS OFF CACHE BOOL "")
         set(DYNARMIC_FRONTENDS "A32" CACHE STRING "")
-        set(DYNARMIC_USE_PRECOMPILED_HEADERS ${CITRA_USE_PRECOMPILED_HEADERS} CACHE BOOL "")
+        set(DYNARMIC_USE_PRECOMPILED_HEADERS ${LEMONADE_USE_PRECOMPILED_HEADERS} CACHE BOOL "")
         add_subdirectory(dynarmic EXCLUDE_FROM_ALL)
     endif()
 endif()
@@ -124,6 +124,11 @@ endif()
 # getopt
 if (MSVC)
     add_subdirectory(getopt)
+endif()
+
+# oboe
+if (ANDROID)
+    add_subdirectory(oboe)
 endif()
 
 # inih

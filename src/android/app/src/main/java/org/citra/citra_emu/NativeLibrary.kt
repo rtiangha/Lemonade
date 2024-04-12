@@ -44,7 +44,7 @@ object NativeLibrary {
 
     init {
         try {
-            System.loadLibrary("citra-android")
+            System.loadLibrary("lemonade-android")
         } catch (ex: UnsatisfiedLinkError) {
             Log.error("[NativeLibrary] $ex")
         }
@@ -164,6 +164,10 @@ object NativeLibrary {
      * Swaps the top and bottom screens.
      */
     external fun swapScreens(swapScreens: Boolean, rotation: Int)
+
+    external fun getLemontweaks(): IntArray
+
+    external fun setLemontweaks(settings: IntArray)
 
     external fun initializeGpuDriver(
         hookLibDir: String?,
@@ -708,6 +712,7 @@ object NativeLibrary {
         const val DPAD = 780
         const val BUTTON_DEBUG = 781
         const val BUTTON_GPIO14 = 782
+        const val BUTTON_SWAP_SCREENS = 783
     }
 
     /**

@@ -43,7 +43,7 @@ add_library(audio_core STATIC
 
 create_target_directory_groups(audio_core)
 
-target_link_libraries(audio_core PUBLIC citra_common citra_core)
+target_link_libraries(audio_core PUBLIC lemonade_common lemonade_core)
 target_link_libraries(audio_core PRIVATE faad2 SoundTouch teakra)
 
 if(ENABLE_SDL2)
@@ -62,6 +62,14 @@ if(ENABLE_OPENAL)
     add_definitions(-DAL_LIBTYPE_STATIC)
 endif()
 
-if (CITRA_USE_PRECOMPILED_HEADERS)
+if(ANDROID)
+    target_sources(audio_core PRIVATE
+        oboe_sink.cpp
+        oboe_sink.h
+    )
+    target_link_libraries(audio_core PRIVATE oboe)
+endif()
+
+if (LEMONADE_USE_PRECOMPILED_HEADERS)
     target_precompile_headers(audio_core PRIVATE precompiled_headers.h)
 endif()

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Lemonade
+Comment=Multiplayer room host for Lemonade
+Icon=lemonade
+TryExec=lemonade-room
+Exec=lemonade-room %f
+Categories=Game;Emulator;
+Keywords=3DS;Nintendo

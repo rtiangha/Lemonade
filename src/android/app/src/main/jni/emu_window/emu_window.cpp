@@ -27,14 +27,18 @@ static void UpdateLandscapeScreenLayout() {
             IDCache::GetNativeLibraryClass(), IDCache::GetLandscapeScreenLayout()));
 }
 
-void EmuWindow_Android::OnSurfaceChanged(ANativeWindow* surface) {
-    render_window = surface;
+bool EmuWindow_Android::OnSurfaceChanged(ANativeWindow* surface) {
+    if (render_window == surface) {
+        return false;
+    }
 
+    render_window = surface;
     window_info.type = Frontend::WindowSystemType::Android;
     window_info.render_surface = surface;
 
     StopPresenting();
     OnFramebufferSizeChanged();
+    return true;
 }
 
 bool EmuWindow_Android::OnTouchEvent(int x, int y, bool pressed) {
@@ -83,7 +87,11 @@ EmuWindow_Android::~EmuWindow_Android() {
 }
 
 void EmuWindow_Android::MakeCurrent() {
-    core_context->MakeCurrent();
+    try {
+        core_context->MakeCurrent();
+    } catch (const std::exception& e) {
+        LOG_DEBUG(Frontend, "Exception caught in MakeCurrent: {}", e.what());
+    }
 }
 
 void EmuWindow_Android::DoneCurrent() {

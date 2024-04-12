@@ -1,0 +1,64 @@
+name: Bug Report
+description: File a bug report but keep in mind we are just some starter developers so please be patient with us.
+body:
+  - type: markdown
+    attributes:
+      value: Tech support does not belong here. You should only file an issue here if you think you have experienced an actual bug with Lemonade.
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+      - label: I have searched the existing issues
+        required: true
+  - type: input
+    attributes:
+      label: Affected Build(s)
+      description: List the affected build(s) that this issue applies to.
+      placeholder: Alpha/action builds
+    validations:
+      required: true
+  - type: textarea
+    id: issue-desc
+    attributes:
+      label: Description of Issue
+      description: A brief description of the issue encountered along with any images and/or videos.
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: A brief description of how it is expected to work along with any images and/or videos.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Reproduction Steps
+      description: A brief explanation of how to reproduce this issue. If possible, provide a save file to aid in reproducing the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log File
+      description: A log file will help our developers to better diagnose and fix the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: system-config
+    attributes:
+      label: System Configuration
+      placeholder: |
+        CPU: Snapdragon 8 gen 1/Intel core i3
+        GPU/Driver: Isn't required if you are using an android device.
+        RAM: 4GB/8GB
+        OS: Android 11/Windows 11
+      value: |
+        CPU:
+        GPU/Driver:
+        RAM:
+        OS:
+    validations:
+      required: true

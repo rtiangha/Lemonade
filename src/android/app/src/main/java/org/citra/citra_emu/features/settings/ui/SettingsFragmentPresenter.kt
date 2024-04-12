@@ -173,6 +173,16 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
     private fun addGeneralSettings(sl: ArrayList<SettingsItem>) {
         settingsActivity.setToolbarTitle(settingsActivity.getString(R.string.preferences_general))
         sl.apply {
+            // TODO: Needs to be fixed
+            /*add(
+                SwitchSetting(
+                    BooleanSetting.DISPLAY_CUTOUT_EXPAND,
+                    R.string.expand_to_cutout_area,
+                    R.string.expand_to_cutout_area_description,
+                    BooleanSetting.DISPLAY_CUTOUT_EXPAND.key,
+                    BooleanSetting.DISPLAY_CUTOUT_EXPAND.defaultValue
+                )
+            )*/
             add(
                 SwitchSetting(
                     IntSetting.USE_FRAME_LIMIT,
@@ -188,10 +198,19 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     R.string.frame_limit_slider,
                     R.string.frame_limit_slider_description,
                     1,
-                    200,
+                    400,
                     "%",
                     IntSetting.FRAME_LIMIT.key,
                     IntSetting.FRAME_LIMIT.defaultValue.toFloat()
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.PIP_SUPPORT,
+                    R.string.pip_support,
+                    R.string.pip_support_desc,
+                    BooleanSetting.PIP_SUPPORT.key,
+                    BooleanSetting.PIP_SUPPORT.defaultValue
                 )
             )
         }
@@ -209,14 +228,14 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                 override val section = null
                 override val isRuntimeEditable = false
                 override val valueAsString get() = string
-                override val defaultValue = "CITRA"
+                override val defaultValue = "LEMONADE"
             }
             add(
                 StringInputSetting(
                     usernameSetting,
                     R.string.username,
                     0,
-                    "CITRA",
+                    "LEMONADE",
                     10
                 )
             )
@@ -953,6 +972,15 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     R.string.vsync_description,
                     IntSetting.VSYNC.key,
                     IntSetting.VSYNC.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.CORE_DOWNCOUNT_HACK,
+                    R.string.core_downcount_hack,
+                    R.string.core_downcount_hack_description,
+                    BooleanSetting.CORE_DOWNCOUNT_HACK.key,
+                    BooleanSetting.CORE_DOWNCOUNT_HACK.defaultValue
                 )
             )
             add(

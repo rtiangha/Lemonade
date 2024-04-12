@@ -4,6 +4,7 @@
 
 import android.databinding.tool.ext.capitalizeUS
 import de.undercouch.gradle.tasks.download.Download
+import java.io.ByteArrayOutputStream
 
 plugins {
     id("com.android.application")
@@ -19,8 +20,22 @@ plugins {
  * This lets us upload a new build at most every 10 seconds for the
  * next 680 years.
  */
-val autoVersion = (((System.currentTimeMillis() / 1000) - 1451606400) / 10).toInt()
-val abiFilter = listOf("arm64-v8a", "x86_64")
+val getVersionCode: () -> Int = {
+    try {
+        val output = ByteArrayOutputStream()
+        exec {
+            commandLine("git", "describe", "--tags", "--abbrev=0")
+            standardOutput = output
+        }
+        val tag = output.toString().trim()
+        val majorVersion = tag.split('.')[0].filter { it.isDigit() }
+        majorVersion.toIntOrNull() ?: 1
+    } catch (e: Exception) {
+        1 // Use 1 as the default version code
+    }
+}
+
+val abiFilter = listOf("arm64-v8a")
 
 val downloadedJniLibsPath = "${buildDir}/downloadedJniLibs"
 
@@ -61,10 +76,10 @@ android {
 
     defaultConfig {
         // TODO If this is ever modified, change application_id in strings.xml
-        applicationId = "org.citra.citra_emu"
+        applicationId = "org.lemonade.lemonade_emu"
         minSdk = 28
         targetSdk = 34
-        versionCode = autoVersion
+        versionCode = getVersionCode()
         versionName = getGitVersion()
 
         ndk {
@@ -77,7 +92,8 @@ android {
                 arguments(
                     "-DENABLE_QT=0", // Don't use QT
                     "-DENABLE_SDL2=0", // Don't use SDL
-                    "-DANDROID_ARM_NEON=true" // cryptopp requires Neon to work
+                    "-DANDROID_ARM_NEON=true", // cryptopp requires Neon to work
+                    "-DALLOW_EXTERNAL_SPIRV_TOOLS=ON" // Enable SPIRV Optimisations
                 )
             }
         }
@@ -96,6 +112,8 @@ android {
                 keyPassword = System.getenv("ANDROID_KEYSTORE_PASS")
             }
         }
+    } else {
+        println("Keystore information not provided. App will not be signed for release.")
     }
 
     // Define build types, which are orthogonal to product flavors.
@@ -149,10 +167,6 @@ android {
         create("canary") {
             dimension = "version"
             applicationIdSuffix = ".canary"
-        }
-
-        create("nightly") {
-            dimension = "version"
         }
     }
 

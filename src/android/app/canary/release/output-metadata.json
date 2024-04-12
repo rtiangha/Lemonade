@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "org.gamerytb.lemonade.canary",
+  "variantName": "canaryRelease",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 25919046,
+      "versionName": "0e5e93403",
+      "outputFile": "app-canary-release.apk"
+    }
+  ],
+  "elementType": "File"
+}

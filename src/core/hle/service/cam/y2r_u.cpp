@@ -8,6 +8,7 @@
 #include "common/common_funcs.h"
 #include "common/logging/log.h"
 #include "common/scope_exit.h"
+#include "common/settings.h"
 #include "core/core.h"
 #include "core/hle/ipc_helpers.h"
 #include "core/hle/kernel/event.h"
@@ -521,15 +522,14 @@ void Y2R_U::StartConversion(Kernel::HLERequestContext& ctx) {
     system.Memory().RasterizerFlushVirtualRegion(conversion.dst.address, total_output_size,
                                                  Memory::FlushMode::FlushAndInvalidate);
 
-    HW::Y2R::PerformConversion(system.Memory(), conversion);
+    if (!Settings::values.y2r_perform_hack || completion_event->ShouldWait(nullptr)) {
+        HW::Y2R::PerformConversion(system.Memory(), conversion);
+    }
 
     if (is_busy_conversion) {
         system.CoreTiming().RemoveEvent(completion_signal_event);
     }
 
-    // This value has been estimated as the minimum amount of cycles to resolve a race condition
-    // in the intro cutscene of the FIFA series of games.
-    // TODO: Measure the cycle count more accurately based on hardware.
     static constexpr s64 MinY2RDelay = 50000;
     system.CoreTiming().ScheduleEvent(MinY2RDelay, completion_signal_event);
     is_busy_conversion = true;

@@ -20,6 +20,7 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
+import android.content.res.Configuration;
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
@@ -36,6 +37,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import android.content.pm.ActivityInfo
+import android.graphics.Color
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.preference.PreferenceManager
@@ -56,6 +59,7 @@ import org.citra.citra_emu.display.ScreenLayout
 import org.citra.citra_emu.features.settings.model.SettingsViewModel
 import org.citra.citra_emu.features.settings.ui.SettingsActivity
 import org.citra.citra_emu.features.settings.utils.SettingsFile
+import org.citra.citra_emu.features.settings.model.BooleanSetting
 import org.citra.citra_emu.model.Game
 import org.citra.citra_emu.utils.DirectoryInitialization
 import org.citra.citra_emu.utils.DirectoryInitialization.DirectoryInitializationState
@@ -145,6 +149,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
         screenAdjustmentUtil = ScreenAdjustmentUtil(emulationActivity.windowManager, settingsViewModel.settings)
         EmulationLifecycleUtil.addShutdownHook(hook = { emulationState.stop() })
         EmulationLifecycleUtil.addPauseResumeHook(hook = { togglePause() })
+
     }
 
     override fun onCreateView(
@@ -189,10 +194,12 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
             }
 
             override fun onDrawerOpened(drawerView: View) {
+                NativeLibrary.pauseEmulation()
                 binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
             }
 
             override fun onDrawerClosed(drawerView: View) {
+                NativeLibrary.unPauseEmulation()
                 binding.drawerLayout.setDrawerLockMode(EmulationMenuSettings.drawerLockMode)
             }
 
@@ -224,26 +231,12 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
             game.title
         binding.inGameMenu.setNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.menu_emulation_pause -> {
-                    if (emulationState.isPaused) {
-                        emulationState.unpause()
-                        it.title = resources.getString(R.string.pause_emulation)
-                        it.icon = ResourcesCompat.getDrawable(
-                            resources,
-                            R.drawable.ic_pause,
-                            requireContext().theme
-                        )
-                    } else {
-                        emulationState.pause()
-                        it.title = resources.getString(R.string.resume_emulation)
-                        it.icon = ResourcesCompat.getDrawable(
-                            resources,
-                            R.drawable.ic_play,
-                            requireContext().theme
-                        )
+                R.id.menu_emulation_resume -> {
+                        if (binding.drawerLayout.isOpen) {
+                            binding.drawerLayout.close()
+                        }
+                       true
                     }
-                    true
-                }
 
                 R.id.menu_emulation_savestates -> {
                     showSavestateMenu()
@@ -252,6 +245,11 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
 
                 R.id.menu_overlay_options -> {
                     showOverlayMenu()
+                    true
+                }
+
+                R.id.menu_emulation_rotate_screen -> {
+                    rotateScreen()
                     true
                 }
 
@@ -300,6 +298,11 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
                     val action = EmulationNavigationDirections
                         .actionGlobalCheatsActivity(NativeLibrary.getRunningTitleId())
                     binding.root.findNavController().navigate(action)
+                    true
+                }
+
+                R.id.menu_lemotweaks -> {
+                    emulationActivity.displayLemontweaks()
                     true
                 }
 
@@ -412,6 +415,14 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
         setInsets()
     }
 
+    private fun rotateScreen() {
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            (context as? EmulationActivity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        } else {
+            (context as? EmulationActivity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+    }
+
     private fun togglePause() {
         if(emulationState.isPaused) {
             emulationState.unpause()
@@ -423,9 +434,11 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
     override fun onResume() {
         super.onResume()
         Choreographer.getInstance().postFrameCallback(this)
-        if (NativeLibrary.isRunning()) {
-            NativeLibrary.unPauseEmulation()
-            return
+        if (!binding.drawerLayout.isOpen) {
+            if (NativeLibrary.isRunning()) {
+                NativeLibrary.unPauseEmulation()
+                return
+            }
         }
 
         if (DirectoryInitialization.areCitraDirectoriesReady()) {
@@ -434,11 +447,15 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
             setupCitraDirectoriesThenStartEmulation()
         }
     }
-
+    
     override fun onPause() {
-        if (NativeLibrary.isRunning()) {
-            emulationState.pause()
+    if (!BooleanSetting.PIP_SUPPORT.boolean) {
+        if (!binding.drawerLayout.isOpen) {
+            if (NativeLibrary.isRunning()) {
+                emulationState.pause()
+            }
         }
+    }
         Choreographer.getInstance().removeFrameCallback(this)
         super.onPause()
     }
@@ -617,6 +634,11 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
                     true
                 }
 
+                R.id.menu_emulation_adjust_opacity -> {
+                    showAdjustOpacityDialog()
+                    true
+                }
+
                 R.id.menu_emulation_joystick_rel_center -> {
                     EmulationMenuSettings.joystickRelCenter =
                         !EmulationMenuSettings.joystickRelCenter
@@ -738,12 +760,12 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
 
     private fun showToggleControlsDialog() {
         val editor = preferences.edit()
-        val enabledButtons = BooleanArray(14)
+        val enabledButtons = BooleanArray(15)
         enabledButtons.forEachIndexed { i: Int, _: Boolean ->
             // Buttons that are disabled by default
             var defaultValue = true
             when (i) {
-                6, 7, 12, 13 -> defaultValue = false
+                6, 7, 12, 13, 14 -> defaultValue = false
             }
             enabledButtons[i] = preferences.getBoolean("buttonToggle$i", defaultValue)
         }
@@ -793,9 +815,47 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
             .show()
     }
 
+    private fun showAdjustOpacityDialog() {
+        val sliderBinding = DialogSliderBinding.inflate(layoutInflater)
+
+        sliderBinding.apply {
+            slider.valueTo = 100f
+            slider.value = preferences.getInt("controlOpacity", 100).toFloat()
+            slider.addOnChangeListener(
+                Slider.OnChangeListener { slider: Slider, progress: Float, _: Boolean ->
+                    textValue.text = (progress.toInt()).toString()
+                    setControlOpacity(slider.value.toInt())
+                })
+            textValue.text = (sliderBinding.slider.value.toInt()).toString()
+            textUnits.text = "%"
+        }
+        val previousProgress = sliderBinding.slider.value.toInt()
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.emulation_control_opacity)
+            .setView(sliderBinding.root)
+            .setNegativeButton(android.R.string.cancel) { _: DialogInterface?, _: Int ->
+                setControlOpacity(previousProgress)
+            }
+            .setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int ->
+                setControlOpacity(sliderBinding.slider.value.toInt())
+            }
+            .setNeutralButton(R.string.slider_default) { _: DialogInterface?, _: Int ->
+                setControlOpacity(100)
+            }
+            .show()
+    }
+
     private fun setControlScale(scale: Int) {
         preferences.edit()
             .putInt("controlScale", scale)
+            .apply()
+        binding.surfaceInputOverlay.refreshControls()
+    }
+
+    private fun setControlOpacity(opacity: Int) {
+        preferences.edit()
+            .putInt("controlOpacity", opacity)
             .apply()
         binding.surfaceInputOverlay.refreshControls()
     }
@@ -813,13 +873,14 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
     private fun resetInputOverlay() {
         preferences.edit()
             .putInt("controlScale", 50)
+            .putInt("controlOpacity", 100)
             .apply()
 
         val editor = preferences.edit()
-        for (i in 0 until 14) {
+        for (i in 0 until 15) {
             var defaultValue = true
             when (i) {
-                6, 7, 12, 13 -> defaultValue = false
+                6, 7, 12, 13, 14 -> defaultValue = false
             }
             editor.putBoolean("buttonToggle$i", defaultValue)
         }
@@ -838,7 +899,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
                 val perfStats = NativeLibrary.getPerfStats()
                 if (perfStats[FPS] > 0) {
                     binding.showFpsText.text = String.format(
-                        "FPS: %d Speed: %d%%",
+                        "LEMONADE | FPS: %d - SPD: %d%%",
                         (perfStats[FPS] + 0.5).toInt(),
                         (perfStats[SPEED] * 100.0 + 0.5).toInt()
                     )
@@ -846,6 +907,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback, Choreographer.Fram
                 perfStatsUpdateHandler.postDelayed(perfStatsUpdater!!, 3000)
             }
             perfStatsUpdateHandler.post(perfStatsUpdater!!)
+            binding.showFpsText.setShadowLayer(1.6f, 1.5f, 1.3f, Color.BLACK)
             binding.showFpsText.visibility = View.VISIBLE
         } else {
             if (perfStatsUpdater != null) {

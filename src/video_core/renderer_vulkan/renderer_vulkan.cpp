@@ -53,9 +53,9 @@ constexpr static std::array<vk::DescriptorSetLayoutBinding, 1> PRESENT_BINDINGS 
 RendererVulkan::RendererVulkan(Core::System& system, Pica::PicaCore& pica_,
                                Frontend::EmuWindow& window, Frontend::EmuWindow* secondary_window)
     : RendererBase{system, window, secondary_window}, memory{system.Memory()}, pica{pica_},
-      instance{window, Settings::values.physical_device.GetValue()}, scheduler{instance},
-      renderpass_cache{instance, scheduler}, pool{instance}, main_window{window, instance,
-                                                                         scheduler},
+      instance{system.TelemetrySession(), window, Settings::values.physical_device.GetValue()},
+      scheduler{instance}, renderpass_cache{instance, scheduler}, pool{instance},
+      main_window{window, instance, scheduler},
       vertex_buffer{instance, scheduler, vk::BufferUsageFlagBits::eVertexBuffer,
                     VERTEX_BUFFER_SIZE},
       rasterizer{memory,
@@ -72,6 +72,7 @@ RendererVulkan::RendererVulkan(Core::System& system, Pica::PicaCore& pica_,
     CompileShaders();
     BuildLayouts();
     BuildPipelines();
+    ReloadPipeline();
     if (secondary_window) {
         second_window = std::make_unique<PresentWindow>(*secondary_window, instance, scheduler);
     }

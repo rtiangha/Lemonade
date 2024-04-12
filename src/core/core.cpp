@@ -47,6 +47,7 @@
 #ifdef ENABLE_SCRIPTING
 #include "core/rpc/server.h"
 #endif
+#include "core/telemetry_session.h"
 #include "network/network.h"
 #include "video_core/custom_textures/custom_tex_manager.h"
 #include "video_core/gpu.h"
@@ -75,30 +76,7 @@ System::System() : movie{*this}, cheat_engine{*this} {}
 
 System::~System() = default;
 
-System::ResultStatus System::RunLoop(bool tight_loop) {
-    status = ResultStatus::Success;
-    if (!IsPoweredOn()) {
-        return ResultStatus::ErrorNotInitialized;
-    }
-
-    if (GDBStub::IsServerEnabled()) {
-        Kernel::Thread* thread = kernel->GetCurrentThreadManager().GetCurrentThread();
-        if (thread && running_core) {
-            running_core->SaveContext(thread->context);
-        }
-        GDBStub::HandlePacket(*this);
-
-        // If the loop is halted and we want to step, use a tiny (1) number of instructions to
-        // execute. Otherwise, get out of the loop function.
-        if (GDBStub::GetCpuHaltFlag()) {
-            if (GDBStub::GetCpuStepFlag()) {
-                tight_loop = false;
-            } else {
-                return ResultStatus::Success;
-            }
-        }
-    }
-
+System::ResultStatus System::RunLoop() {
     Signal signal{Signal::None};
     u32 param{};
     {
@@ -147,17 +125,19 @@ System::ResultStatus System::RunLoop(bool tight_loop) {
         break;
     }
 
+    return Settings::values.is_new_3ds ? RunLoopMultiCores() : RunLoopSingleCore();
+}
+
+System::ResultStatus System::RunLoopMultiCores() {
     // All cores should have executed the same amount of ticks. If this is not the case an event was
     // scheduled with a cycles_into_future smaller then the current downcount.
     // So we have to get those cores to the same global time first
-    u64 global_ticks = timing->GetGlobalTicks();
     s64 max_delay = 0;
     ARM_Interface* current_core_to_execute = nullptr;
     for (auto& cpu_core : cpu_cores) {
-        if (cpu_core->GetTimer().GetTicks() < global_ticks) {
-            s64 delay = global_ticks - cpu_core->GetTimer().GetTicks();
-            running_core = cpu_core.get();
-            kernel->SetRunningCPU(running_core);
+        s64 delay = timing->GetGlobalTicks() - cpu_core->GetTimer().GetTicks();
+        if (delay > 0) {
+            kernel->SetRunningCPU(cpu_core.get());
             cpu_core->GetTimer().Advance();
             cpu_core->PrepareReschedule();
             kernel->GetThreadManager(cpu_core->GetID()).Reschedule();
@@ -174,23 +154,15 @@ System::ResultStatus System::RunLoop(bool tight_loop) {
     // performance. Thus we don't sync delays below min_delay
     static constexpr s64 min_delay = 100;
     if (max_delay > min_delay) {
-        LOG_TRACE(Core_ARM11, "Core {} running (delayed) for {} ticks",
-                  current_core_to_execute->GetID(),
-                  current_core_to_execute->GetTimer().GetDowncount());
-        if (running_core != current_core_to_execute) {
-            running_core = current_core_to_execute;
-            kernel->SetRunningCPU(running_core);
+        if (cpu_cores[0].get() != current_core_to_execute) {
+            kernel->SetRunningCPU(current_core_to_execute);
         }
         if (kernel->GetCurrentThreadManager().GetCurrentThread() == nullptr) {
             LOG_TRACE(Core_ARM11, "Core {} idling", current_core_to_execute->GetID());
             current_core_to_execute->GetTimer().Idle();
-            PrepareReschedule();
+            kernel->PrepareReschedule();
         } else {
-            if (tight_loop) {
-                current_core_to_execute->Run();
-            } else {
-                current_core_to_execute->Step();
-            }
+            current_core_to_execute->Run();
         }
     } else {
         // Now all cores are at the same global time. So we will run them one after the other
@@ -198,8 +170,7 @@ System::ResultStatus System::RunLoop(bool tight_loop) {
         // TODO: Make special check for idle since we can easily revert the time of idle cores
         s64 max_slice = Timing::MAX_SLICE_LENGTH;
         for (const auto& cpu_core : cpu_cores) {
-            running_core = cpu_core.get();
-            kernel->SetRunningCPU(running_core);
+            kernel->SetRunningCPU(cpu_core.get());
             cpu_core->GetTimer().Advance();
             cpu_core->PrepareReschedule();
             kernel->GetThreadManager(cpu_core->GetID()).Reschedule();
@@ -208,32 +179,38 @@ System::ResultStatus System::RunLoop(bool tight_loop) {
         for (auto& cpu_core : cpu_cores) {
             cpu_core->GetTimer().SetNextSlice(max_slice);
             auto start_ticks = cpu_core->GetTimer().GetTicks();
-            LOG_TRACE(Core_ARM11, "Core {} running for {} ticks", cpu_core->GetID(),
-                      cpu_core->GetTimer().GetDowncount());
-            running_core = cpu_core.get();
-            kernel->SetRunningCPU(running_core);
+            kernel->SetRunningCPU(cpu_core.get());
             // If we don't have a currently active thread then don't execute instructions,
             // instead advance to the next event and try to yield to the next thread
             if (kernel->GetCurrentThreadManager().GetCurrentThread() == nullptr) {
                 LOG_TRACE(Core_ARM11, "Core {} idling", cpu_core->GetID());
                 cpu_core->GetTimer().Idle();
-                PrepareReschedule();
+                kernel->PrepareReschedule();
             } else {
-                if (tight_loop) {
-                    cpu_core->Run();
-                } else {
-                    cpu_core->Step();
-                }
+                cpu_core->Run();
             }
             max_slice = cpu_core->GetTimer().GetTicks() - start_ticks;
         }
     }
 
-    if (GDBStub::IsServerEnabled()) {
-        GDBStub::SetCpuStepFlag(false);
-    }
+    kernel->RescheduleMultiCores();
 
-    Reschedule();
+    return status;
+}
+
+System::ResultStatus System::RunLoopSingleCore() {
+    // If we don't have a currently active thread then don't execute instructions,
+    // instead advance to the next event and try to yield to the next thread
+    if (kernel->GetCurrentThreadManager().GetCurrentThread() == nullptr) {
+        cpu_cores[0]->GetTimer().Idle();
+        cpu_cores[0]->GetTimer().Advance();
+        kernel->PrepareReschedule();
+    } else {
+        cpu_cores[0]->GetTimer().Advance();
+        cpu_cores[0]->Run();
+    }
+    
+    kernel->RescheduleSingleCore();
 
     return status;
 }
@@ -250,7 +227,194 @@ bool System::SendSignal(System::Signal signal, u32 param) {
 }
 
 System::ResultStatus System::SingleStep() {
-    return RunLoop(false);
+    return status;
+}
+
+static void LoadOverrides(u64 title_id) {
+    if (title_id == 0x000400000008B400 || title_id == 0x0004000000030600 ||
+        title_id == 0x0004000000030800 || title_id == 0x0004000000030700) {
+        // Mario Kart 7
+        Settings::values.skip_texture_copy = true;
+    } else if (title_id == 0x00040000000D0000 || title_id == 0x0004000000076400 ||
+        title_id == 0x0004000000055F00 || title_id == 0x0004000000076500) {
+        // Luigi Mansion 2
+        Settings::values.core_downcount_hack = true;
+        Settings::SetFMVHack(!Settings::values.core_downcount_hack, true);
+    } else if (title_id == 0x00040000000DCA00 || title_id == 0x00040000000F4000) {
+        // Danball Senki W Chou Custom, Danball Senki WARS
+        Settings::values.y2r_perform_hack = true;
+    } else if (title_id == 0x0004000000068B00 || title_id == 0x0004000000061300 ||
+        title_id == 0x000400000004A700 || title_id == 0x000400000005D700) {
+        // Tales of the Abyss / Pac Man Party 3D
+        Settings::values.skip_slow_draw = true;
+    } else if (title_id == 0x000400000015CB00) {
+        // New Atelier Rorona
+        Settings::values.skip_slow_draw = true;
+    } else if (title_id == 0x000400000018E900) {
+        // My Hero Academia
+        Settings::values.skip_slow_draw = true;
+    } else if (title_id == 0x000400000016AD00) {
+        // Dragon Quest Monsters Joker 3
+        Settings::values.skip_slow_draw = true;
+    } else if (title_id == 0x00040000001ACB00) {
+        // Dragon Quest Monsters Joker 3 Professional
+        Settings::values.skip_slow_draw = true;
+    } else if (title_id == 0x000400000019E700 || title_id == 0x00040000001A5600) {
+        // Armed Blue Gunvolt
+        Settings::values.stream_buffer_hack = false;
+    } else if (title_id == 0x000400000019B200 || title_id == 0x0004000000196A00 ||
+               title_id == 0x00040000001A6E00) {
+        // Armed Blue Gunvolt 2
+        Settings::values.stream_buffer_hack = false;
+    } else if (title_id == 0x0004000000149100) {
+        // Gravity Falls - Legend of the Gnome Gemulets
+        Settings::values.stream_buffer_hack = false;
+    } else if (title_id == 0x0004000000196900 || title_id == 0x0004000000119A00 ||
+               title_id == 0x000400000017C900 || title_id == 0x000400000017E100) {
+        // Shovel Knight
+        Settings::values.stream_buffer_hack = false;
+    } else if (title_id == 0x000400000008FE00) {
+        // 1001 Spikes
+        Settings::values.stream_buffer_hack = false;
+        Settings::SetFMVHack(!Settings::values.core_downcount_hack, false);
+    }
+
+    const std::array<u64, 14> core_ticks_hack_ids = {
+        0x0004000000030500, // Super Street Fighter IV: 3D Edition
+        0x0004000000032D00, // Super Street Fighter IV: 3D Edition
+        0x0004000000033C00, // Super Street Fighter IV: 3D Edition
+        0x0004000000060200, // Resident Evil: Revelations
+        0x000400000005EE00, // Resident Evil: Revelations
+        0x0004000000035900, // Resident Evil: The Mercenaries 3D
+        0x0004000000038B00, // Resident Evil: The Mercenaries 3D
+        0x00040000000C8100, // Paper Mario: Sticker Star
+        0x00040000000A5E00, // Paper Mario: Sticker Star
+        0x00040000000A5F00, // Paper Mario: Sticker Star
+        0x00040000001CCD00, // The Alliance Alive
+        0x00040000001B4500, // The Alliance Alive
+        0x0004000000120900, // Lord of Magna: Maiden Heaven
+        0x0004000000164300, // Lord of Magna: Maiden Heaven
+    };
+    for (auto id : core_ticks_hack_ids) {
+        if (title_id == id) {
+            Settings::SetFMVHack(!Settings::values.core_downcount_hack, false);
+            break;
+        }
+    }
+
+    const std::array<u64, 50> accurate_mul_ids = {
+        0x0004000000134500, // Attack on Titan
+        0x00040000000DF800, // Attack on Titan
+        0x0004000000152000, // Attack on Titan
+        0x00040000001AA200, // Attack on Titan
+        0x0004000000054000, // Super Mario 3D Land
+        0x0004000000053F00, // Super Mario 3D Land
+        0x0004000000054100, // Super Mario 3D Land
+        0x0004000000089F00, // Super Mario 3D Land
+        0x0004000000089E00, // Super Mario 3D Land
+        0x0004000000033400, // The Legend of Zelda: Ocarina of Time 3D
+        0x0004000000033500, // The Legend of Zelda: Ocarina of Time 3D
+        0x0004000000033600, // The Legend of Zelda: Ocarina of Time 3D
+        0x000400000008F800, // The Legend of Zelda: Ocarina of Time 3D
+        0x000400000008F900, // The Legend of Zelda: Ocarina of Time 3D
+        0x0004000000132700, // Mario & Luigi: Paper Jam
+        0x0004000000132600, // Mario & Luigi: Paper Jam
+        0x0004000000132800, // Mario & Luigi: Paper Jam
+        0x00040000001D1400, // Mario & Luigi: Bowsers Inside Story + Bowser Jrs Journey
+        0x00040000001D1500, // Mario & Luigi: Bowsers Inside Story + Bowser Jrs Journey
+        0x00040000001CA900, // Mario & Luigi: Bowsers Inside Story + Bowser Jrs Journey
+        0x00040000001B8F00, // Mario & Luigi: Superstar Saga + Bowsers Minions
+        0x00040000001B9000, // Mario & Luigi: Superstar Saga + Bowsers Minions
+        0x0004000000194B00, // Mario & Luigi: Superstar Saga + Bowsers Minions
+        0x00040000001CB000, // Captain Toad: Treasure Tracker
+        0x00040000001CB200, // Captain Toad: Treasure Tracker
+        0x00040000001CB100, // Captain Toad: Treasure Tracker
+        0x00040000000EC200, // The Legend of Zelda: A Link Between Worlds
+        0x00040000000EC300, // The Legend of Zelda: A Link Between Worlds
+        0x00040000000EC400, // The Legend of Zelda: A Link Between Worlds
+        0x000400000007AD00, // New Super Mario Bros. 2
+        0x00040000000B8A00, // New Super Mario Bros. 2
+        0x000400000007AE00, // New Super Mario Bros. 2
+        0x000400000007AF00, // New Super Mario Bros. 2
+        0x0004000000079600, // Jett Rocket II
+        0x0004000000112600, // Cut the Rope
+        0x0004000000116700, // Cut the Rope
+        0x00040000000D0000, // Luigi's Mansion: Dark Moon
+        0x0004000000076400, // Luigi's Mansion: Dark Moon
+        0x0004000000055F00, // Luigi's Mansion: Dark Moon
+        0x0004000000076500, // Luigi's Mansion: Dark Moon
+        0x00040000000AFC00, // Digimon World Re:Digitize Decode
+        0x0004000000125600, // The Legend of Zelda: Majoras Mask 3D
+        0x0004000000125500, // The Legend of Zelda: Majoras Mask 3D
+        0x00040000000D6E00, // The Legend of Zelda: Majoras Mask 3D
+        0x0004000000154700, // Lego City Undercover
+        0x00040000000AD600, // Lego City Undercover
+        0x00040000000AD500, // Lego City Undercover
+        0x00040000001D1800, // Luigi's Mansion
+        0x00040000001D1A00, // Luigi's Mansion
+        0x00040000001D1900, // Luigi's Mansion
+    };
+    for (auto id : accurate_mul_ids) {
+        if (title_id == id) {
+            Settings::values.shaders_accurate_mul = true;
+            break;
+        }
+    }
+
+    const std::array<u64, 7> cpu_limit_ids = {
+        0x000400000007C700, // Mario Tennis Open
+        0x000400000007C800, // Mario Tennis Open
+        0x0004000000064D00, // Mario Tennis Open
+        0x00040000000B9100, // Mario Tennis Open
+        0x00040000000DCD00, // Mario Golf: World Tour
+        0x00040000000A5300, // Mario Golf: World Tour
+        0x00040000000DCE00, // Mario Golf: World Tour
+    };
+    for (auto id : cpu_limit_ids) {
+        if (title_id == id) {
+            Settings::values.core_downcount_hack = true;
+            break;
+        }
+    }
+
+    const std::array<u64, 30> new3ds_game_ids = {
+        0x000400000F700000, // Xenoblade Chronicles 3D [JPN]
+        0x000400000F700100, // Xenoblade Chronicles 3D [USA]
+        0x000400000F700200, // Xenoblade Chronicles 3D [EUR]
+        0x000400000F70CC00, // Fire Emblem Warriors [USA]
+        0x000400000F70CD00, // Fire Emblem Warriors [EUR]
+        0x000400000F70C100, // Fire Emblem Warriors [JPN]
+        0x000400000F700800, // The Binding of Isaac: Rebirth [USA]
+        0x000400000F701700, // The Binding of Isaac: Rebirth [JPN]
+        0x000400000F700900, // The Binding of Isaac: Rebirth [EUR]
+        0x00040000000CCE00, // Donkey Kong Country Returns 3D [USA]
+        0x00040000000CC000, // Donkey Kong Country Returns 3D [JPN]
+        0x00040000000CCF00, // Donkey Kong Country Returns 3D [EUR]
+        0x0004000000127500, // Sonic Boom: Shattered Crystal [USA]
+        0x000400000014AE00, // Sonic Boom: Shattered Crystal [JPN]
+        0x000400000012C200, // Sonic Boom: Shattered Crystal [EUR]
+        0x0004000000161300, // Sonic Boom: Fire & Ice [USA]
+        0x0004000000170700, // Sonic Boom: Fire & Ice [JPN]
+        0x0004000000164700, // Sonic Boom: Fire & Ice [EUR]
+        0x00040000000B3500, // Sonic & All-Stars Racing Transformed [USA]
+        0x000400000008FC00, // Sonic & All-Stars Racing Transformed [EUR]
+        0x00040000001B8700, // Minecraft [USA]
+        0x000400000F707F00, // Hyperlight EX [USA]
+        0x000400000008FE00, // 1001 Spikes [USA]
+        0x000400000007C700, // Mario Tennis Open
+        0x000400000007C800, // Mario Tennis Open
+        0x0004000000064D00, // Mario Tennis Open
+        0x00040000000B9100, // Mario Tennis Open
+        0x00040000000DCD00, // Mario Golf: World Tour
+        0x00040000000A5300, // Mario Golf: World Tour
+        0x00040000000DCE00, // Mario Golf: World Tour
+    };
+    for (auto id : new3ds_game_ids) {
+        if (title_id == id) {
+            Settings::values.is_new_3ds = true;
+            break;
+        }
+    }
 }
 
 System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::string& filepath,
@@ -291,15 +455,17 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
         }
     }
 
+    u64 title_id{0};
+    if (app_loader->ReadProgramId(title_id) != Loader::ResultStatus::Success) {
+        LOG_ERROR(Core, "Failed to find title id for ROM");
+    }
+    LoadOverrides(title_id);
+
     ASSERT(memory_mode.first);
     auto n3ds_hw_caps = app_loader->LoadNew3dsHwCapabilities();
     ASSERT(n3ds_hw_caps.first);
-    u32 num_cores = 2;
-    if (Settings::values.is_new_3ds) {
-        num_cores = 4;
-    }
     ResultStatus init_result{
-        Init(emu_window, secondary_window, *memory_mode.first, *n3ds_hw_caps.first, num_cores)};
+        Init(emu_window, secondary_window, *memory_mode.first, *n3ds_hw_caps.first)};
     if (init_result != ResultStatus::Success) {
         LOG_CRITICAL(Core, "Failed to initialize system (Error {})!",
                      static_cast<u32>(init_result));
@@ -321,6 +487,7 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
         restore_plugin_context.reset();
     }
 
+    telemetry_session->AddInitialInfo(*app_loader);
     std::shared_ptr<Kernel::Process> process;
     const Loader::ResultStatus load_result{app_loader->Load(process)};
     if (Loader::ResultStatus::Success != load_result) {
@@ -339,11 +506,6 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
         }
     }
     kernel->SetCurrentProcess(process);
-    title_id = 0;
-    if (app_loader->ReadProgramId(title_id) != Loader::ResultStatus::Success) {
-        LOG_ERROR(Core, "Failed to find title id for ROM (Error {})",
-                  static_cast<u32>(load_result));
-    }
 
     cheat_engine.LoadCheatFile(title_id);
     cheat_engine.Connect();
@@ -369,11 +531,6 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
     return status;
 }
 
-void System::PrepareReschedule() {
-    running_core->PrepareReschedule();
-    reschedule_pending = true;
-}
-
 PerfStats::Results System::GetAndResetPerfStats() {
     return (perf_stats && timing) ? perf_stats->GetAndResetStats(timing->GetGlobalTimeUs())
                                   : PerfStats::Results{};
@@ -383,23 +540,16 @@ PerfStats::Results System::GetLastPerfStats() {
     return perf_stats ? perf_stats->GetLastStats() : PerfStats::Results{};
 }
 
-void System::Reschedule() {
-    if (!reschedule_pending) {
-        return;
-    }
-
-    reschedule_pending = false;
-    for (const auto& core : cpu_cores) {
-        LOG_TRACE(Core_ARM11, "Reschedule core {}", core->GetID());
-        kernel->GetThreadManager(core->GetID()).Reschedule();
-    }
-}
-
 System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
                                   Frontend::EmuWindow* secondary_window,
                                   Kernel::MemoryMode memory_mode,
-                                  const Kernel::New3dsHwCapabilities& n3ds_hw_caps, u32 num_cores) {
+                                  const Kernel::New3dsHwCapabilities& n3ds_hw_caps) {
     LOG_DEBUG(HW_Memory, "initialized OK");
+
+    u32 num_cores = 1;
+    if (Settings::values.is_new_3ds) {
+        num_cores = 4;
+    }
 
     memory = std::make_unique<Memory::MemorySystem>(*this);
 
@@ -407,34 +557,37 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
                                       movie.GetOverrideBaseTicks());
 
     kernel = std::make_unique<Kernel::KernelSystem>(
-        *memory, *timing, [this] { PrepareReschedule(); }, memory_mode, num_cores, n3ds_hw_caps,
+        *memory, *timing, memory_mode, n3ds_hw_caps,
         movie.GetOverrideInitTime());
 
     exclusive_monitor = MakeExclusiveMonitor(*memory, num_cores);
-    cpu_cores.reserve(num_cores);
     if (Settings::values.use_cpu_jit) {
 #if CITRA_ARCH(x86_64) || CITRA_ARCH(arm64)
         for (u32 i = 0; i < num_cores; ++i) {
-            cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(
-                *this, *memory, i, timing->GetTimer(i), *exclusive_monitor));
+            cpu_cores[i] = std::make_shared<ARM_Dynarmic>(
+                *this, i, timing->GetTimer(i), *exclusive_monitor);
+            kernel->GetThreadManager(i).SetCPU(cpu_cores[i].get());
         }
 #else
         for (u32 i = 0; i < num_cores; ++i) {
-            cpu_cores.push_back(
-                std::make_shared<ARM_DynCom>(this, *memory, USER32MODE, i, timing->GetTimer(i)));
+            cpu_cores[i] = 
+                std::make_shared<ARM_DynCom>(this, i, timing->GetTimer(i));
+            kernel->GetThreadManager(i).SetCPU(cpu_cores[i].get());
         }
         LOG_WARNING(Core, "CPU JIT requested, but Dynarmic not available");
 #endif
     } else {
         for (u32 i = 0; i < num_cores; ++i) {
-            cpu_cores.push_back(
-                std::make_shared<ARM_DynCom>(*this, *memory, USER32MODE, i, timing->GetTimer(i)));
+            cpu_cores[i] = 
+                std::make_shared<ARM_DynCom>(*this, i, timing->GetTimer(i));
+            kernel->GetThreadManager(i).SetCPU(cpu_cores[i].get());
         }
     }
-    running_core = cpu_cores[0].get();
 
-    kernel->SetCPUs(cpu_cores);
     kernel->SetRunningCPU(cpu_cores[0].get());
+    if (Settings::values.core_downcount_hack) {
+        SetCpuUsageLimit(true, num_cores);
+    }
 
     const auto audio_emulation = Settings::values.audio_emulation.GetValue();
     if (audio_emulation == Settings::AudioEmulation::HLE) {
@@ -449,6 +602,8 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
     dsp_core->SetSink(Settings::values.output_type.GetValue(),
                       Settings::values.output_device.GetValue());
     dsp_core->EnableStretching(Settings::values.enable_audio_stretching.GetValue());
+
+    telemetry_session = std::make_unique<Core::TelemetrySession>();
 
 #ifdef ENABLE_SCRIPTING
     rpc_server = std::make_unique<RPC::Server>(*this);
@@ -573,7 +728,30 @@ void System::RegisterImageInterface(std::shared_ptr<Frontend::ImageInterface> im
     registered_image_interface = std::move(image_interface);
 }
 
+void System::SetCpuUsageLimit(bool enabled, u32 num_cores) {
+    if (enabled) {
+        u32 hacks[4] = {1, 4, 2, 2};
+        for (u32 i = 0; i < num_cores; ++i) {
+            timing->GetTimer(i)->SetDowncountHack(hacks[i]);
+        }
+    } else {
+        for (u32 i = 0; i < num_cores; ++i) {
+            timing->GetTimer(i)->SetDowncountHack(0);
+        }
+    }
+}
+
 void System::Shutdown(bool is_deserializing) {
+    // Log last frame performance stats
+    const auto perf_results = GetAndResetPerfStats();
+    constexpr auto performance = Common::Telemetry::FieldType::Performance;
+
+    telemetry_session->AddField(performance, "Shutdown_EmulationSpeed",
+                                perf_results.emulation_speed * 100.0);
+    telemetry_session->AddField(performance, "Shutdown_Framerate", perf_results.game_fps);
+    telemetry_session->AddField(performance, "Shutdown_Frametime", perf_results.frametime * 1000.0);
+    telemetry_session->AddField(performance, "Mean_Frametime_MS",
+                                perf_stats ? perf_stats->GetMeanFrametime() : 0);
 
     // Shutdown emulation session
     is_powered_on = false;
@@ -585,6 +763,7 @@ void System::Shutdown(bool is_deserializing) {
         app_loader.reset();
     }
     custom_tex_manager.reset();
+    telemetry_session.reset();
 #ifdef ENABLE_SCRIPTING
     rpc_server.reset();
 #endif
@@ -592,7 +771,7 @@ void System::Shutdown(bool is_deserializing) {
     service_manager.reset();
     dsp_core.reset();
     kernel.reset();
-    cpu_cores.clear();
+    cpu_cores = {};
     exclusive_monitor.reset();
     timing.reset();
 
@@ -709,7 +888,7 @@ void System::serialize(Archive& ar, const unsigned int file_version) {
         auto memory_mode = this->app_loader->LoadKernelMemoryMode();
         auto n3ds_hw_caps = this->app_loader->LoadNew3dsHwCapabilities();
         [[maybe_unused]] const System::ResultStatus result = Init(
-            *m_emu_window, m_secondary_window, *memory_mode.first, *n3ds_hw_caps.first, num_cores);
+            *m_emu_window, m_secondary_window, *memory_mode.first, *n3ds_hw_caps.first);
     }
 
     // Flush on save, don't flush on load

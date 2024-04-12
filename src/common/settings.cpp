@@ -80,12 +80,13 @@ void LogSettings() {
         LOG_INFO(Config, "{}: {}", name, value);
     };
 
-    LOG_INFO(Config, "Citra Configuration:");
+    LOG_INFO(Config, "Lemonade Configuration:");
     log_setting("Core_UseCpuJit", values.use_cpu_jit.GetValue());
     log_setting("Core_CPUClockPercentage", values.cpu_clock_percentage.GetValue());
     log_setting("Renderer_UseGLES", values.use_gles.GetValue());
     log_setting("Renderer_GraphicsAPI", GetGraphicsAPIName(values.graphics_api.GetValue()));
     log_setting("Renderer_AsyncShaders", values.async_shader_compilation.GetValue());
+    log_setting("Renderer_CoreDowncountHack", values.core_downcount_hack.GetValue());
     log_setting("Renderer_AsyncPresentation", values.async_presentation.GetValue());
     log_setting("Renderer_SpirvShaderGen", values.spirv_shader_gen.GetValue());
     log_setting("Renderer_Debug", values.renderer_debug.GetValue());
@@ -147,6 +148,21 @@ void LogSettings() {
     log_setting("Debugging_GdbstubPort", values.gdbstub_port.GetValue());
 }
 
+void SetFMVHack(bool enable, bool is_luigi_mansion) {
+    if (enable) {
+        if (values.use_cpu_jit) {
+            values.core_ticks_hack = 16000;
+        } else if (values.use_cpu_jit && is_luigi_mansion) {
+            // workaround to fix some of bad performance
+            values.core_ticks_hack = 21000;
+        } else {
+            values.core_ticks_hack = 0xFFFF;
+        }
+    } else {
+        values.core_ticks_hack = 0;
+    }
+}
+
 bool IsConfiguringGlobal() {
     return configuring_global;
 }
@@ -183,6 +199,7 @@ void RestoreGlobalState(bool is_powered_on) {
     values.physical_device.SetGlobal(true);
     values.spirv_shader_gen.SetGlobal(true);
     values.async_shader_compilation.SetGlobal(true);
+    values.core_downcount_hack.SetGlobal(true);
     values.async_presentation.SetGlobal(true);
     values.use_hw_shader.SetGlobal(true);
     values.use_disk_shader_cache.SetGlobal(true);

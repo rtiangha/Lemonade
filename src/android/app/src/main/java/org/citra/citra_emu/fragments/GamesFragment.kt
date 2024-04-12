@@ -64,7 +64,7 @@ class GamesFragment : Fragment() {
         binding.gridGames.apply {
             layoutManager = GridLayoutManager(
                 requireContext(),
-                resources.getInteger(R.integer.game_grid_columns)
+                resources.getInteger(R.integer.game_grid_columns_games)
             )
             adapter = GameAdapter(requireActivity() as AppCompatActivity)
         }

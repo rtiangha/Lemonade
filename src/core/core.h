@@ -72,6 +72,7 @@ class AppLoader;
 namespace Core {
 
 class ARM_Interface;
+class TelemetrySession;
 class ExclusiveMonitor;
 class Timing;
 
@@ -116,7 +117,9 @@ public:
      * @param tight_loop If false, the CPU single-steps.
      * @return Result status, indicating whethor or not the operation succeeded.
      */
-    [[nodiscard]] ResultStatus RunLoop(bool tight_loop = true);
+    [[nodiscard]] ResultStatus RunLoop();
+    [[nodiscard]] ResultStatus RunLoopMultiCores();
+    [[nodiscard]] ResultStatus RunLoopSingleCore();
 
     /**
      * Step the CPU one instruction
@@ -164,21 +167,17 @@ public:
         return is_powered_on;
     }
 
-    /// Prepare the core emulation for a reschedule
-    void PrepareReschedule();
+    /**
+     * Returns a reference to the telemetry session for this emulation session.
+     * @returns Reference to the telemetry session.
+     */
+    [[nodiscard]] Core::TelemetrySession& TelemetrySession() const {
+        return *telemetry_session;
+    }
 
     [[nodiscard]] PerfStats::Results GetAndResetPerfStats();
 
     [[nodiscard]] PerfStats::Results GetLastPerfStats();
-
-    /**
-     * Gets a reference to the emulated CPU.
-     * @returns A reference to the emulated CPU.
-     */
-
-    [[nodiscard]] ARM_Interface& GetRunningCore() {
-        return *running_core;
-    };
 
     /**
      * Gets a reference to the emulated CPU.
@@ -343,6 +342,9 @@ public:
         return false;
     }
 
+    /// Core downcount hack
+    void SetCpuUsageLimit(bool enabled, u32 num_cores);
+
     /// Applies any changes to settings to this core instance.
     void ApplySettings();
 
@@ -357,24 +359,19 @@ private:
     [[nodiscard]] ResultStatus Init(Frontend::EmuWindow& emu_window,
                                     Frontend::EmuWindow* secondary_window,
                                     Kernel::MemoryMode memory_mode,
-                                    const Kernel::New3dsHwCapabilities& n3ds_hw_caps,
-                                    u32 num_cores);
-
-    /// Reschedule the core emulation
-    void Reschedule();
+                                    const Kernel::New3dsHwCapabilities& n3ds_hw_caps);
 
     /// AppLoader used to load the current executing application
     std::unique_ptr<Loader::AppLoader> app_loader;
 
     /// ARM11 CPU core
-    std::vector<std::shared_ptr<ARM_Interface>> cpu_cores;
-    ARM_Interface* running_core = nullptr;
+    std::array<std::shared_ptr<ARM_Interface>, 4> cpu_cores;
 
     /// DSP core
     std::unique_ptr<AudioCore::DspInterface> dsp_core;
 
-    /// When true, signals that a reschedule should happen
-    bool reschedule_pending{};
+    /// Telemetry session for this emulation session
+    std::unique_ptr<Core::TelemetrySession> telemetry_session;
 
     std::unique_ptr<VideoCore::GPU> gpu;
 
@@ -418,7 +415,7 @@ private:
 
     std::atomic_bool is_powered_on{};
 
-    ResultStatus status = ResultStatus::Success;
+    ResultStatus status;
     std::string status_details = "";
     /// Saved variables for reset
     Frontend::EmuWindow* m_emu_window;
@@ -444,7 +441,7 @@ private:
 };
 
 [[nodiscard]] inline ARM_Interface& GetRunningCore() {
-    return System::GetInstance().GetRunningCore();
+    return System::GetInstance().Kernel().GetRunningCore();
 }
 
 [[nodiscard]] inline ARM_Interface& GetCore(u32 core_id) {

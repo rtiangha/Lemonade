@@ -15,7 +15,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/externals/cmake-modul
 include(DownloadExternals)
 include(CMakeDependentOption)
 
-project(citra LANGUAGES C CXX ASM)
+project(lemonade-emu LANGUAGES C CXX ASM)
 
 # Some submodules like to pick their own default build type if not specified.
 # Make sure we default to Release build type always, unless the generator has custom types.
@@ -88,12 +88,12 @@ option(USE_DISCORD_PRESENCE "Enables Discord Rich Presence" OFF)
 # Compile options
 CMAKE_DEPENDENT_OPTION(COMPILE_WITH_DWARF "Add DWARF debugging information" ${IS_DEBUG_BUILD} "MINGW" OFF)
 option(ENABLE_LTO "Enable link time optimization" ${DEFAULT_ENABLE_LTO})
-option(CITRA_USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
-option(CITRA_WARNINGS_AS_ERRORS "Enable warnings as errors" ON)
+option(LEMONADE_USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
+option(LEMONADE_WARNINGS_AS_ERRORS "Enable warnings as errors" ON)
 
 include(CitraHandleSystemLibs)
 
-if (CITRA_USE_PRECOMPILED_HEADERS)
+if (LEMONADE_USE_PRECOMPILED_HEADERS)
     message(STATUS "Using Precompiled Headers.")
     set(CMAKE_PCH_INSTANTIATE_TEMPLATES ON)
 
@@ -152,22 +152,6 @@ if (EXISTS "${PROJECT_SOURCE_DIR}/.git/objects")
     check_submodules_present()
 endif()
 
-configure_file(${PROJECT_SOURCE_DIR}/dist/compatibility_list/compatibility_list.qrc
-               ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.qrc
-               COPYONLY)
-if (ENABLE_COMPATIBILITY_LIST_DOWNLOAD AND NOT EXISTS ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json)
-    message(STATUS "Downloading compatibility list for citra...")
-    file(DOWNLOAD
-        https://api.citra-emu.org/gamedb/
-        "${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json" SHOW_PROGRESS)
-endif()
-if (EXISTS ${PROJECT_SOURCE_DIR}/dist/compatibility_list/compatibility_list.json)
-    file(COPY "${PROJECT_SOURCE_DIR}/dist/compatibility_list/compatibility_list.json"
-        DESTINATION "${PROJECT_BINARY_DIR}/dist/compatibility_list/")
-endif()
-if (NOT EXISTS ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json)
-    file(WRITE ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json "")
-endif()
 
 # Detect current compilation architecture and create standard definitions
 # =======================================================================
@@ -446,13 +430,13 @@ endif()
 if (NOT ANDROID AND NOT IOS)
     include(BundleTarget)
     if (ENABLE_SDL2_FRONTEND)
-        bundle_target(citra)
+        bundle_target(lemonade)
     endif()
     if (ENABLE_QT)
-        bundle_target(citra-qt)
+        bundle_target(lemonade-qt)
     endif()
     if (ENABLE_DEDICATED_ROOM)
-        bundle_target(citra-room)
+        bundle_target(lemonade-room)
     endif()
 endif()
 
@@ -464,22 +448,22 @@ endif()
 # http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
 # http://standards.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html
 if(ENABLE_QT AND UNIX AND NOT APPLE)
-    install(FILES "${PROJECT_SOURCE_DIR}/dist/citra-qt.desktop"
+    install(FILES "${PROJECT_SOURCE_DIR}/dist/lemonade-qt.desktop"
             DESTINATION "${CMAKE_INSTALL_PREFIX}/share/applications")
-    install(FILES "${PROJECT_SOURCE_DIR}/dist/citra.svg"
+    install(FILES "${PROJECT_SOURCE_DIR}/dist/lemonade.svg"
             DESTINATION "${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/scalable/apps")
-    install(FILES "${PROJECT_SOURCE_DIR}/dist/citra.xml"
+    install(FILES "${PROJECT_SOURCE_DIR}/dist/lemonade.xml"
             DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mime/packages")
 endif()
 
 if(UNIX)
     if(ENABLE_SDL2)
-        install(FILES "${PROJECT_SOURCE_DIR}/dist/citra.6"
+        install(FILES "${PROJECT_SOURCE_DIR}/dist/lemonade.6"
                 DESTINATION "${CMAKE_INSTALL_PREFIX}/share/man/man6")
     endif()
 
     if (ENABLE_QT)
-        install(FILES "${PROJECT_SOURCE_DIR}/dist/citra-qt.6"
+        install(FILES "${PROJECT_SOURCE_DIR}/dist/lemonade-qt.6"
                 DESTINATION "${CMAKE_INSTALL_PREFIX}/share/man/man6")
     endif()
 endif()

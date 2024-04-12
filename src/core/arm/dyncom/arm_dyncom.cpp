@@ -14,11 +14,10 @@
 
 namespace Core {
 
-ARM_DynCom::ARM_DynCom(Core::System& system_, Memory::MemorySystem& memory,
-                       PrivilegeMode initial_mode, u32 id,
+ARM_DynCom::ARM_DynCom(Core::System& system_, u32 id,
                        std::shared_ptr<Core::Timing::Timer> timer)
     : ARM_Interface(id, timer), system(system_) {
-    state = std::make_unique<ARMul_State>(system, memory, initial_mode);
+    state = std::make_unique<ARMul_State>(system, system.Memory(), USER32MODE);
 }
 
 ARM_DynCom::~ARM_DynCom() {}

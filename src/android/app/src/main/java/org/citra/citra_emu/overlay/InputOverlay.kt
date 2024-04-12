@@ -76,6 +76,15 @@ class InputOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(contex
         overlayJoysticks.forEach { it.draw(canvas) }
     }
 
+    private fun swapScreensHotkey() {
+        val is_swap_screens_enabled = !EmulationMenuSettings.swapScreens
+        EmulationMenuSettings.swapScreens = is_swap_screens_enabled
+        NativeLibrary.swapScreens(
+            is_swap_screens_enabled,
+            (context as Activity).windowManager.defaultDisplay.rotation
+        )
+    }
+
     override fun onTouch(v: View, event: MotionEvent): Boolean {
         if (isInEditMode) {
             return onTouchWhileEditing(event)
@@ -85,6 +94,12 @@ class InputOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(contex
             if (!button.updateStatus(event)) {
                 continue
             }
+
+            if (button.id == NativeLibrary.ButtonType.BUTTON_SWAP_SCREENS &&
+                button.status == NativeLibrary.ButtonState.PRESSED) {
+                swapScreensHotkey()
+            }
+
             NativeLibrary.onGamePadEvent(NativeLibrary.TouchScreenDevice, button.id, button.status)
             shouldUpdateView = true
         }
@@ -437,6 +452,17 @@ class InputOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(contex
                 )
             )
         }
+        if (preferences.getBoolean("buttonToggle14", false)) {
+            overlayButtons.add(
+                initializeOverlayButton(
+                    context,
+                    R.drawable.button_swap_screens,
+                    R.drawable.button_swap_screens_pressed,
+                    NativeLibrary.ButtonType.BUTTON_SWAP_SCREENS,
+                    orientation
+                )
+            )
+        }
     }
 
     fun refreshControls() {
@@ -634,6 +660,15 @@ class InputOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(contex
                 NativeLibrary.ButtonType.STICK_LEFT.toString() + "-Y",
                 resources.getInteger(R.integer.N3DS_STICK_MAIN_Y).toFloat() / 1000 * maxY
             )
+            // swap screens hotkey - landspace
+            .putFloat(
+                NativeLibrary.ButtonType.BUTTON_SWAP_SCREENS.toString() + "-X",
+                resources.getInteger(R.integer.N3DS_BUTTON_SWAP_SCREENS_X).toFloat() / 1000 * maxX
+            )
+            .putFloat(
+                NativeLibrary.ButtonType.BUTTON_SWAP_SCREENS.toString() + "-Y",
+                resources.getInteger(R.integer.N3DS_BUTTON_SWAP_SCREENS_Y).toFloat() / 1000 * maxY
+            )
             .apply()
     }
 
@@ -769,6 +804,15 @@ class InputOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(contex
                 NativeLibrary.ButtonType.STICK_LEFT.toString() + portrait + "-Y",
                 resources.getInteger(R.integer.N3DS_STICK_MAIN_PORTRAIT_Y).toFloat() / 1000 * maxY
             )
+            // swap screens hotkey - portrait
+            .putFloat(
+                NativeLibrary.ButtonType.BUTTON_SWAP_SCREENS.toString() + portrait + "-X",
+                resources.getInteger(R.integer.N3DS_BUTTON_SWAP_SCREENS_PORTRAIT_X).toFloat() / 1000 * maxX
+            )
+            .putFloat(
+                NativeLibrary.ButtonType.BUTTON_SWAP_SCREENS.toString() + portrait + "-Y",
+                resources.getInteger(R.integer.N3DS_BUTTON_SWAP_SCREENS_PORTRAIT_Y).toFloat() / 1000 * maxY
+            )
             .apply()
     }
 
@@ -879,7 +923,8 @@ class InputOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(contex
             var scale: Float = when (buttonId) {
                 NativeLibrary.ButtonType.BUTTON_HOME,
                 NativeLibrary.ButtonType.BUTTON_START,
-                NativeLibrary.ButtonType.BUTTON_SELECT -> 0.08f
+                NativeLibrary.ButtonType.BUTTON_SELECT,
+                NativeLibrary.ButtonType.BUTTON_SWAP_SCREENS -> 0.08f
 
                 NativeLibrary.ButtonType.TRIGGER_L,
                 NativeLibrary.ButtonType.TRIGGER_R,
@@ -888,14 +933,17 @@ class InputOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(contex
 
                 else -> 0.11f
             }
+
             scale *= (preferences.getInt("controlScale", 50) + 50).toFloat()
             scale /= 100f
+            
+            val opacity: Int = preferences.getInt("controlOpacity", 100) * 255 / 100
 
             // Initialize the InputOverlayDrawableButton.
             val defaultStateBitmap = getBitmap(context, defaultResId, scale)
             val pressedStateBitmap = getBitmap(context, pressedResId, scale)
             val overlayDrawable =
-                InputOverlayDrawableButton(res, defaultStateBitmap, pressedStateBitmap, buttonId)
+                InputOverlayDrawableButton(res, defaultStateBitmap, pressedStateBitmap, buttonId, opacity)
 
             // The X and Y coordinates of the InputOverlayDrawableButton on the InputOverlay.
             // These were set in the input overlay configuration menu.
@@ -947,6 +995,8 @@ class InputOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(contex
             scale *= (preferences.getInt("controlScale", 50) + 50).toFloat()
             scale /= 100f
 
+            val opacity: Int = preferences.getInt("controlOpacity", 100) * 255 / 100
+
             // Initialize the InputOverlayDrawableDpad.
             val defaultStateBitmap = getBitmap(context, defaultResId, scale)
             val pressedOneDirectionStateBitmap = getBitmap(context, pressedOneDirectionResId, scale)
@@ -959,7 +1009,8 @@ class InputOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(contex
                 buttonUp,
                 buttonDown,
                 buttonLeft,
-                buttonRight
+                buttonRight,
+                opacity
             )
 
             // The X and Y coordinates of the InputOverlayDrawableDpad on the InputOverlay.
@@ -1004,6 +1055,8 @@ class InputOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(contex
             scale *= (preferences.getInt("controlScale", 50) + 50).toFloat()
             scale /= 100f
 
+            val opacity: Int = preferences.getInt("controlOpacity", 100) * 255 / 100
+
             // Initialize the InputOverlayDrawableJoystick.
             val bitmapOuter = getBitmap(context, resOuter, scale)
             val bitmapInnerDefault = getBitmap(context, defaultResInner, scale)
@@ -1040,7 +1093,8 @@ class InputOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(contex
                 bitmapInnerPressed,
                 outerRect,
                 innerRect,
-                joystick
+                joystick,
+                opacity
             )
 
             // Need to set the image's position

@@ -139,6 +139,7 @@ void Config::ReadValues() {
     ReadSetting("Renderer", Settings::values.graphics_api);
     ReadSetting("Renderer", Settings::values.async_presentation);
     ReadSetting("Renderer", Settings::values.async_shader_compilation);
+    ReadSetting("Renderer", Settings::values.core_downcount_hack);
     ReadSetting("Renderer", Settings::values.spirv_shader_gen);
     ReadSetting("Renderer", Settings::values.use_hw_shader);
     ReadSetting("Renderer", Settings::values.use_shader_jit);
@@ -159,7 +160,7 @@ void Config::ReadValues() {
     ReadSetting("Renderer", Settings::values.factor_3d);
     std::string default_shader = "none (builtin)";
     if (Settings::values.render_3d.GetValue() == Settings::StereoRenderOption::Anaglyph)
-        default_shader = "dubois (builtin)";
+        default_shader = "rendepth (builtin)";
     else if (Settings::values.render_3d.GetValue() == Settings::StereoRenderOption::Interlaced)
         default_shader = "horizontal (builtin)";
     Settings::values.pp_shader_name =
@@ -266,6 +267,8 @@ void Config::ReadValues() {
     }
 
     // Web Service
+    NetSettings::values.enable_telemetry =
+        sdl2_config->GetBoolean("WebService", "enable_telemetry", false);
     NetSettings::values.web_api_url =
         sdl2_config->GetString("WebService", "web_api_url", "https://api.citra-emu.org");
     NetSettings::values.citra_username = sdl2_config->GetString("WebService", "citra_username", "");
