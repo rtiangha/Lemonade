@@ -32,6 +32,13 @@ jobs:
           - name: Set up MSVC
             uses: ilammy/msvc-dev-cmd@v1
             if: ${{ matrix.target == 'msvc' }}
+          - name: Set up Vulkan SDK (MSVC)
+            uses: humbletim/setup-vulkan-sdk@v1.2.0
+            if: ${{ matrix.target == 'msvc' }}
+            with:
+              vulkan-query-version: latest
+              vulkan-components: SPIRV-Tools
+              vulkan-use-cache: true
           - name: Install extra tools (MSVC)
             run: choco install ccache ninja wget
             if: ${{ matrix.target == 'msvc' }}
