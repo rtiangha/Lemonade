@@ -13,37 +13,37 @@ jobs:
     steps:
       - name: Download/Unzip Windows MSVC Artifact
         run: |
-          curl -L -o windows-msvc.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msvc.zip
+          curl -L -o windows-msvc.zip https://nightly.link/rtiangha/Lemonade/actions/runs/8682066682/windows-msvc.zip 
           unzip windows-msvc.zip -d ./windows-msvc
           mv ./windows-msvc/lemonade-windows-msvc-*.zip ./windows-msvc.zip
 
 
       - name: Download/Unzip Windows MSYS2 Artifact
         run: |
-          curl -L -o windows-msys2.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/windows-msys2.zip
+          curl -L -o windows-msys2.zip https://nightly.link/rtiangha/Lemonade/actions/runs/8682066682/windows-msys2.zip
           unzip windows-msys2.zip -d ./windows-msys2
           mv ./windows-msys2/lemonade-windows-msys2-*.zip ./windows-msys2.zip
 
       - name: Download/Unzip Linux AppImage Artifact
         run: |
-          curl -L -o linux-appimage.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/linux-appimage.zip
+          curl -L -o linux-appimage.zip https://nightly.link/rtiangha/Lemonade/actions/runs/8682066682/linux-appimage.zip
           unzip linux-appimage.zip -d ./linux-appimage
           mv ./linux-appimage/lemonade-linux-appimage-*.7z ./linux-appimage.7z
 
       - name: Download/Unzip Android APK Artifact
         run: |
-          curl -L -o Android-APK.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/Android-APK.zip
+          curl -L -o Android-APK.zip https://nightly.link/rtiangha/Lemonade/actions/runs/8682066682/Android-APK.zip
           unzip Android-APK.zip -d ./AndroidAPK
 
       - name: Download/Unzips Mac OS Artifact
         run: |
-          curl -L -o macos-universal.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/macos-universal.zip
+          curl -L -o macos-universal.zip https://nightly.link/rtiangha/Lemonade/actions/runs/8682066682/macos-universal.zip
           unzip macos-universal.zip -d ./macos-universal
           mv ./macos-universal/lemonade-macos-universal-*.7z ./macos-universal.7z
 
       - name: Download Source Artifact
         run: |
-          curl -L -o source.zip https://nightly.link/Lemonade-emu/Lemonade/workflows/build/master/source.zip
+          curl -L -o source.zip https://github.com/rtiangha/Lemonade/archive/refs/tags/v2024.04.14a.zip
 
       - name: Extract Source File
         run: unzip source.zip
